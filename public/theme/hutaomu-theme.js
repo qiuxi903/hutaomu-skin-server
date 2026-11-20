@@ -547,6 +547,62 @@
     }
     bindSwitcher();
 
+    /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
+    /* 详情页 React 侧栏没有隐私开关——注入到 #side 同级, 不干扰 React 渲染 */
+    if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
+      try {
+        var tid = location.pathname.match(/(\d+)/)[1];
+        var extra = (function () {
+          try { return window.blessing && blessing.extra ? blessing.extra : {}; } catch (e) { return {}; }
+        })();
+        fetch('/texture/' + tid, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (info) {
+            var isOwner = extra.currentUid && extra.currentUid === info.uploader;
+            var isAdmin = !!extra.admin;
+            if (!isOwner && !isAdmin) return;
+            var side = document.getElementById('side');
+            if (!side) return;
+            var box = document.createElement('div');
+            box.className = 'ht-privacy-box';
+            function draw() {
+              box.innerHTML = '';
+              var badge = document.createElement('span');
+              badge.className = 'ht-privacy-badge' + (info.public ? ' pub' : ' pri');
+              badge.innerHTML = info.public
+                ? '<i class="fas fa-globe mr-1"></i>公开 · 所有人可见'
+                : '<i class="fas fa-lock mr-1"></i>私密 · 仅' + (isAdmin && !isOwner ? '上传者与管理员' : '自己') + '可见';
+              var t = document.createElement('button');
+              t.className = 'btn btn-sm ht-privacy-toggle-btn';
+              t.type = 'button';
+              t.textContent = info.public ? '设为私密' : '设为公开';
+              t.addEventListener('click', function () {
+                var toPublic = !info.public;
+                if (!window.confirm('确定设为「' + (toPublic ? '公开' : '私密') + '」？切换会按站点规则增减积分。')) return;
+                t.disabled = true;
+                fetch('/texture/' + tid + '/privacy', {
+                  method: 'PUT',
+                  credentials: 'same-origin',
+                  headers: {
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+                    'Accept': 'application/json',
+                  },
+                }).then(function (r) { return r.json(); }).then(function (d) {
+                  if (d.code === 0) { info.public = toPublic; draw(); }
+                  else { window.alert(d.message || '操作失败'); }
+                  t.disabled = false;
+                }).catch(function () { window.alert('网络错误'); t.disabled = false; });
+              });
+              box.appendChild(badge);
+              box.appendChild(t);
+            }
+            draw();
+            side.parentNode.insertBefore(box, side.nextSibling);
+          })
+          .catch(function () { /* 详情信息拉取失败不影响页面 */ });
+      } catch (e) { /* 注入失败不影响站点 */ }
+    }
+
     /* ---------- Bootstrap 弹窗层级修复 ---------- */
     /* 玻璃卡的 backdrop-filter 会成为 fixed 弹窗的包含块+层叠上下文,
        弹窗的 z1050 被困在卡片内部, 画不过 body 级 z1040 的遮罩 →
@@ -573,11 +629,10 @@
       '/user/closet':     { route: 'user/closet',     chunks: [786, 390, 115],  module: 1115, el: '#closet-list' },
       '/user/player':     { route: 'user/player',     chunks: [786, 390, 403],  module: 403,  el: '#players-list' },
       '/user/profile':    { route: 'user/profile',    chunks: [45],             module: 8045, el: null },
-      '/skinlib':         { route: 'skinlib',         chunks: [786, 683],       module: 5683, el: '.content-wrapper' },
       '/skinlib/upload':  { route: 'skinlib/upload',  chunks: [414],            module: 5414, el: '#file-input' }
     };
     /* 纯服务端渲染页: 只换 DOM 不需要重挂载 */
-    var HT_STATIC = ['/user/config', '/user/reports', '/about'];
+    var HT_STATIC = ['/user/config', '/user/reports', '/about', '/skinlib', '/skinlib/upload'];
 
     function htWebpackRequire() {
       if (window.__htWR) return window.__htWR;

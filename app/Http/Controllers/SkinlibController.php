@@ -56,6 +56,81 @@ class SkinlibController extends Controller
         })->only(['show', 'info']);
     }
 
+    /* 皮肤库首页: 服务端渲染 + 完整筛选(类型/关键词/排序/可见性)。
+       可见性: 玩家=公开+自己的(私密仅自己), 管理员=全部并支持 仅公开/仅私密 筛选 */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $isAdmin = $user && $user->isAdmin();
+
+        $type = $request->input('filter', 'all');           // all | skin | steve | alex | cape
+        $keyword = trim((string) $request->input('keyword', ''));
+        $sort = $request->input('sort', 'time');            // time | likes | size
+        $visibility = $request->input('visibility', 'all'); // all | public | private | mine
+
+        $query = Texture::query()
+            ->join('users', 'uid', 'uploader')
+            ->select([
+                'textures.tid', 'textures.name', 'textures.type', 'textures.uploader',
+                'textures.public', 'textures.likes', 'textures.size', 'textures.upload_at',
+                'users.nickname',
+            ]);
+
+        if ($type === 'skin') {
+            $query->whereIn('type', ['steve', 'alex']);
+        } elseif (in_array($type, ['steve', 'alex', 'cape'])) {
+            $query->where('type', $type);
+        }
+
+        if ($keyword !== '') {
+            $query->like('name', $keyword);
+        }
+
+        if (!$user) {
+            $query->where('public', true);
+        } elseif ($isAdmin) {
+            if ($visibility === 'public') {
+                $query->where('public', true);
+            } elseif ($visibility === 'private') {
+                $query->where('public', false);
+            } elseif ($visibility === 'mine') {
+                $query->where('uploader', $user->uid);
+            }
+        } else {
+            // 玩家基线: 公开 ∪ 自己上传的(私密仅自己可见)
+            $query->where(function (Builder $query) use ($user) {
+                $query->where('public', true)->orWhere('uploader', $user->uid);
+            });
+            if ($visibility === 'public') {
+                $query->where('public', true);
+            } elseif ($visibility === 'mine' || $visibility === 'private') {
+                $query->where('uploader', $user->uid);
+                if ($visibility === 'private') {
+                    $query->where('public', false);
+                }
+            }
+        }
+
+        $sortBy = in_array($sort, ['likes', 'size']) ? $sort : 'upload_at';
+        $textures = $query
+            ->orderBy($sortBy, 'desc')
+            ->orderBy('textures.tid', 'desc')
+            ->paginate(20)
+            ->appends($request->query());
+
+        return view('skinlib.custom-index')->with([
+            'textures' => $textures,
+            'query' => $request->query->all(),
+            'filter' => $type,
+            'keyword' => $keyword,
+            'sort' => $sort,
+            'visibility' => $visibility,
+            'is_admin' => $isAdmin,
+            'current_uid' => $user ? $user->uid : 0,
+            'authed' => (bool) $user,
+        ]);
+    }
+
     public function library(Request $request)
     {
         $user = Auth::user();

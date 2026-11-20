@@ -1,0 +1,184 @@
+{% extends 'skinlib.base' %}
+
+{% block title %}{{ trans('general.skinlib') }}{% endblock %}
+
+{% block content %}
+  {# 皮肤库首页: 服务端渲染, 筛选/搜索/排序/可见性全部走 URL 参数(PJAX 友好) #}
+  <div class="content-header d-flex flex-wrap align-items-center">
+    <h1 class="mb-0"><i class="fas fa-archive"></i> {{ trans('general.skinlib') }}</h1>
+    <span class="text-muted ml-3">共 {{ textures.total() }} 个材质</span>
+    {% if authed %}
+      <a class="btn btn-primary btn-sm ml-auto" href="{{ url('skinlib/upload') }}">
+        <i class="fas fa-upload mr-1"></i>上传新皮肤
+      </a>
+    {% endif %}
+  </div>
+
+  {# ── 筛选栏 ─────────────────────────────── #}
+  <div class="card card-primary card-outline sl-filter-card">
+    <div class="card-body p-2">
+      <div class="d-flex flex-wrap align-items-center sl-filter">
+        {# 类型 chips #}
+        <div class="sl-chip-group mr-3 mb-1">
+          {% set typeChips = [
+            {key: 'all',  label: '全部'},
+            {key: 'skin', label: '皮肤'},
+            {key: 'steve', label: 'Steve'},
+            {key: 'alex', label: 'Alex'},
+            {key: 'cape', label: '披风'},
+          ] %}
+          {% for chip in typeChips %}
+            <a class="sl-chip {{ filter == chip.key ? 'active' : '' }}"
+               href="{{ url('skinlib') }}?{{ query|merge({filter: chip.key, page: 1})|url_encode }}">{{ chip.label }}</a>
+          {% endfor %}
+        </div>
+
+        {# 可见性 chips: 管理员三态; 玩家=全部/仅公开/仅我的; 游客无此项 #}
+        {% if authed %}
+          <div class="sl-chip-group mr-3 mb-1">
+            {% if is_admin %}
+              {% set visChips = [
+                {key: 'all', label: '全部'},
+                {key: 'public', label: '仅公开'},
+                {key: 'private', label: '仅私密'},
+                {key: 'mine', label: '我的'},
+              ] %}
+            {% else %}
+              {% set visChips = [
+                {key: 'all', label: '全部'},
+                {key: 'public', label: '仅公开'},
+                {key: 'mine', label: '我的'},
+              ] %}
+            {% endif %}
+            {% for chip in visChips %}
+              <a class="sl-chip sl-chip-vis {{ visibility == chip.key ? 'active' : '' }}"
+                 href="{{ url('skinlib') }}?{{ query|merge({visibility: chip.key, page: 1})|url_encode }}"
+                 title="{{ is_admin ? '管理员可查看全部私密内容' : '' }}">{{ chip.label }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {# 搜索 + 排序 #}
+        <form class="d-flex flex-wrap align-items-center ml-auto mb-1" method="get" action="{{ url('skinlib') }}">
+          <input type="hidden" name="filter" value="{{ filter }}">
+          <input type="hidden" name="visibility" value="{{ visibility }}">
+          <div class="input-group input-group-sm mr-2" style="width: 200px;">
+            <input type="text" name="keyword" class="form-control" placeholder="搜索材质名…"
+                   value="{{ keyword|e }}">
+            <div class="input-group-append">
+              <button class="btn btn-default" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+          </div>
+          <select name="sort" class="form-control form-control-sm mr-2 sl-sort" style="width: auto;">
+            <option value="time" {{ sort == 'time' ? 'selected' : '' }}>最新上传</option>
+            <option value="likes" {{ sort == 'likes' ? 'selected' : '' }}>最多点赞</option>
+            <option value="size" {{ sort == 'size' ? 'selected' : '' }}>体积最大</option>
+          </select>
+          <button class="btn btn-sm btn-primary" type="submit"><i class="fas fa-filter mr-1"></i>应用</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ── 材质网格 ─────────────────────────────── #}
+  {% if textures.isEmpty() %}
+    <div class="card">
+      <div class="card-body text-center text-muted py-5">
+        <i class="fas fa-box-open fa-2x mb-3 d-block"></i>
+        没有符合筛选条件的材质
+      </div>
+    </div>
+  {% else %}
+    <div class="sl-grid">
+      {% for item in textures %}
+        <div class="card sl-card {{ item.public ? '' : 'sl-private' }}">
+          <a class="sl-card-link" href="{{ url('skinlib/show/' ~ item.tid) }}" title="{{ item.name }}">
+            <img class="sl-preview" src="{{ url('preview/' ~ item.tid) }}" alt="{{ item.name }}" loading="lazy">
+            <div class="sl-card-body">
+              <div class="sl-name" title="{{ item.name }}">{{ item.name }}</div>
+              <div class="sl-meta">
+                <span class="text-muted" title="上传者"><i class="fas fa-user-circle"></i> {{ item.nickname }}</span>
+                <span class="text-muted" title="点赞"><i class="fas fa-heart"></i> {{ item.likes }}</span>
+                <span class="text-muted" title="类型">{{ item.type == 'cape' ? '披风' : (item.type == 'alex' ? 'Alex' : 'Steve') }}</span>
+              </div>
+            </div>
+          </a>
+          <div class="sl-badges">
+            {% if not item.public %}
+              <span class="badge badge-pill sl-badge-private"><i class="fas fa-lock"></i> 私密</span>
+            {% endif %}
+            {% if item.uploader == current_uid %}
+              <span class="badge badge-pill sl-badge-mine">我的</span>
+            {% endif %}
+            {% if is_admin and not item.public and item.uploader != current_uid %}
+              <span class="badge badge-pill sl-badge-admin"><i class="fas fa-user-shield"></i> 他人私密</span>
+            {% endif %}
+          </div>
+          {# 快捷私密切换: 自己的材质或管理员可切 #}
+          {% if authed and (item.uploader == current_uid or is_admin) %}
+            <button type="button"
+                    class="btn btn-sm sl-privacy-toggle"
+                    data-tid="{{ item.tid }}"
+                    data-public="{{ item.public ? 1 : 0 }}"
+                    data-base="{{ url('texture') }}"
+                    title="{{ item.public ? '设为私密（仅自己可见）' : '设为公开（所有人可见）' }}">
+              <i class="fas {{ item.public ? 'fa-eye' : 'fa-eye-slash' }}"></i>
+            </button>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {# ── 分页 ─────────────────────────────── #}
+    {% if textures.lastPage() > 1 %}
+      <nav class="sl-pagination">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item {{ textures.currentPage() == 1 ? 'disabled' : '' }}">
+            <a class="page-link" href="{{ url('skinlib') }}?{{ query|merge({page: textures.currentPage() - 1})|url_encode }}"><i class="fas fa-angle-left"></i></a>
+          </li>
+          {% for p in 1..textures.lastPage() %}
+            {% if p == 1 or p == textures.lastPage() or (p >= textures.currentPage() - 2 and p <= textures.currentPage() + 2) %}
+              <li class="page-item {{ p == textures.currentPage() ? 'active' : '' }}">
+                <a class="page-link" href="{{ url('skinlib') }}?{{ query|merge({page: p})|url_encode }}">{{ p }}</a>
+              </li>
+            {% elseif p == textures.currentPage() - 3 or p == textures.currentPage() + 3 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {{ textures.currentPage() == textures.lastPage() ? 'disabled' : '' }}">
+            <a class="page-link" href="{{ url('skinlib') }}?{{ query|merge({page: textures.currentPage() + 1})|url_encode }}"><i class="fas fa-angle-right"></i></a>
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
+  {% endif %}
+
+  <script>
+    (function () {
+      /* 排序下拉变更即提交 */
+      var sort = document.querySelector('.sl-sort');
+      if (sort) sort.addEventListener('change', function () { sort.form.submit(); });
+
+      /* 快捷私密切换: PUT /texture/{tid}/privacy */
+      document.querySelectorAll('.sl-privacy-toggle').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var toPublic = btn.dataset.public !== '1';
+          var word = toPublic ? '公开' : '私密';
+          if (!window.confirm('确定将此材质设为「' + word + '」？切换会按站点规则增减积分。')) return;
+          btn.disabled = true;
+          fetch(btn.dataset.base + '/' + btn.dataset.tid + '/privacy', {
+            method: 'PUT',
+            credentials: 'same-origin',
+            headers: {
+              'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+              'Accept': 'application/json',
+            },
+          }).then(function (r) { return r.json(); }).then(function (d) {
+            if (d.code === 0) { location.reload(); }
+            else { window.alert(d.message || '操作失败'); btn.disabled = false; }
+          }).catch(function () { window.alert('网络错误'); btn.disabled = false; });
+        });
+      });
+    })();
+  </script>
+{% endblock %}
