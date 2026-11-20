@@ -1,0 +1,166 @@
+---
+option-saved: 保存しました。
+homepage:
+  title: ホームページ
+  home_pic_url:
+    title: ホームページの画像 URL
+    hint: ホームページからの相対パスまたは完全な URL。空欄でデフォルト画像を使用します。
+  favicon_url:
+    title: サイトアイコン
+    hint: public/ からの相対パスまたは完全な URL。
+    description: 指定する画像は幅と高さが同じである必要があります（空欄でデフォルトアイコンを使用）。
+  transparent_navbar:
+    title: 透明ナビゲーションバー
+    label: ホームページのナビゲーションバーが透明になります。ページを最下部までスクロールすると通常に戻ります。
+  hide_intro:
+    title: 下部の紹介を非表示
+    label: 有効にするとスクロールバーが無効になります（バージョン 2.x と同様）。
+  fixed_bg:
+    title: 背景の固定
+    label: 背景が固定され、スクロールバーと一緒に動かなくなります。
+rate:
+  title: スコア
+  score_per_storage:
+    title: 保存容量
+    addon: スコア = 1 KB
+  private_score_per_storage:
+    title: 非公開保存容量
+    addon: スコア = 1 KB
+    hint: 非公開テクスチャのアップロードはより多くのスコアを消費します。
+  score_per_closet_item:
+    title: お気に入り
+    addon: スコア = 1 クローゼットアイテム
+  return_score:
+    title: スコア返還
+    label: プレイヤー/テクスチャ/クローゼットアイテムを削除した後、ユーザーにスコアを返還します。
+  score_per_player:
+    title: プレイヤー
+    addon: スコア = 1 プレイヤー
+  user_initial_score: ユーザーの初期スコア
+report:
+  title: テクスチャの報告
+  reporter_score_modification:
+    title: 報告提出時のスコア
+    description: 正の整数を設定すると、新しい報告を提出したユーザーに報奨します。負の値を設定すると報告にスコアが必要となり、報告が解決されると保留されていたスコアが利用可能になります。0 で無効化。
+  reporter_reward_score:
+    title: 報告が解決されたときの報奨スコア
+sign:
+  title: チェックイン
+  sign_score:
+    title: 獲得スコア
+    addon1: スコア ~
+    addon2: スコア
+  sign_gap_time:
+    title: 間隔時間
+    addon: 時間
+  sign_after_zero:
+    title: 時刻
+    label: ユーザーは 0 時を過ぎてからチェックインできます。
+    hint: この項目にチェックを入れると上の設定は無視されます。
+sharing:
+  title: 共有の報奨
+  score_award_per_texture:
+    title: テクスチャをアップロードするごとにアップロード者へ報奨
+  take_back_scores_after_deletion:
+    title: スコア返還
+    label: アップロード者がテクスチャを非公開または削除した場合にスコアを返還します。
+  score_award_per_like:
+    title: テクスチャがいいねされるごとにアップロード者へ報奨
+general:
+  title: 一般設定
+  site_name: サイト名
+  site_description:
+    title: サイトの説明
+    description: サイト名と説明は言語ごとに異なる内容を指定できます。
+  site_url:
+    title: サイト URL
+    hint: http(s):// で始まり、末尾にスラッシュを付けないでください。
+  register_with_player_name:
+    title: プレイヤー名で登録
+    label: 登録時に Minecraft のプレイヤー名を要求します。
+  require_verification:
+    title: アカウント認証
+    label: ユーザーは先にメールアドレスを認証する必要があります。
+  regs_per_ip: 1 IP あたりの最大アカウント数
+  max_upload_file_size:
+    title: 最大アップロードサイズ
+    hint: 'php.ini の制限値: :size'
+  player_name_rule:
+    title: プレイヤー名ルール
+    official: 文字・数字・アンダースコア（Mojang 公式ルール）
+    cjk: 漢字（CJK 統合漢字）を許可
+    utf8: すべての有効な UTF-8 文字を許可（空白を除く）
+    custom: カスタムルールを使用（正規表現）
+  custom_player_name_regexp:
+    title: カスタムプレイヤー名ルール
+    hint: 上の設定が「custom」の場合のみ有効です。空欄で任意の文字を許可します。
+    placeholder: 正規表現
+  player_name_length:
+    title: プレイヤー名の長さ
+    suffix: 文字
+  auto_del_invalid_texture:
+    title: 無効なテクスチャ
+    label: 無効なテクスチャを自動的に削除します。
+    hint: ファイルが存在しなくなったテクスチャの記録をスキンライブラリから削除します。
+  allow_downloading_texture:
+    title: テクスチャのダウンロード
+    label: ユーザーがスキンライブラリの元ファイルを直接ダウンロードできるようにします。
+  status_code_for_private:
+    title: 非公開テクスチャへのアクセスを拒否する HTTP コード
+  texture_name_regexp:
+    title: テクスチャ名ルール
+    hint: アップロードされるテクスチャ名の検証に使う正規表現です。空欄でシングルクォート・ダブルクォート・バックスラッシュ以外の任意の文字を許可します。
+    placeholder: 正規表現
+  content_policy:
+    title: コンテンツポリシー
+    description: テクスチャのアップロードページに表示されます。Markdown 対応。
+announ:
+  title: お知らせ
+  announcement:
+    description: Markdown 対応。
+meta:
+  title: SEO <meta> タグ
+  meta_keywords:
+    title: キーワード
+    hint: カンマ区切り。
+  meta_description:
+    title: 説明
+    hint: 空欄の場合は「一般設定」の説明が使われます。
+  meta_extras:
+    title: その他のカスタム <meta> タグ
+recaptcha:
+  recaptcha_invisible:
+    title: Invisible
+    label: Invisible モードを有効にする
+res-warning: このページは上級者向けです。よくわからない場合は変更しないでください！
+resources:
+  title: リソースファイル
+  hint: サイトで CDN を有効にしている場合は以下を確認してください。
+  force_ssl:
+    title: SSL の強制
+    label: すべてのフロントエンドアセットを HTTPS で読み込みます。
+    hint: 有効にする前に SSL が本当に利用可能か確認してください。
+  auto_detect_asset_url:
+    title: アセット URL
+    label: アセットの URL を自動判定します。
+    description: CDN 環境でアセット URL が正しく生成されない場合は無効にしてください。無効な場合はサイト URL が使われます。
+  cache_expire_time:
+    title: キャッシュ有効期限
+    hint: 秒単位。86400 = 1 日、31536000 = 1 年。
+  cdn_address:
+    title: フロントエンドアセット CDN
+    hint: URL が利用できない場合、フロントエンドファイルは読み込まれません。
+    description: |
+      CDN の URL は <code>/public</code> ディレクトリのミラーを指す必要があります。
+      <b>検証方法:</b> <code>{CDN URL}/app/manifest.json</code> にアクセスできるか確認してください。
+cache:
+  title: キャッシュ設定
+  clear: キャッシュをクリア
+  cleared: キャッシュをクリアしました。
+  driver: 現在のキャッシュドライバーは「:driver」です。
+  enable_avatar_cache:
+    title: アバター
+    label: アバターのキャッシュを有効にする
+  enable_preview_cache:
+    title: テクスチャプレビュー
+    label: テクスチャプレビューのキャッシュを有効にする

@@ -1,0 +1,30 @@
+---
+general:
+  upload-new-skin: スキンをアップロード
+show:
+  title: テクスチャの詳細
+  deleted: 要求されたテクスチャはすでに削除されています。
+  private: 要求されたテクスチャは非公開のため、アップロード者と管理者のみ閲覧できます。
+upload:
+  title: テクスチャをアップロード
+  name-rule: 32文字以内で、特殊文字は使用できません。
+  name-rule-regexp: カスタムの名前ルールが適用されています :regexp
+  private-score-notice: 非公開に設定するとスコアが余分にかかります。1KB の保存ごとに :score スコアが消費されます。
+  invalid-size: 無効な :type ファイルです（幅 :width、高さ :height）
+  invalid-hd-skin: 無効な HD スキンです（幅と高さは 32 で割り切れる必要があります）
+  lack-score: このテクスチャをアップロードするのにスコアが足りません。
+  repeated: そのテクスチャはすでに他のユーザーがアップロードしています。クローゼットに直接追加できます。
+  success: テクスチャ :name をアップロードしました。
+delete:
+  success: テクスチャを削除しました。
+privacy:
+  success: テクスチャの公開設定を :privacy に変更しました。
+rename:
+  success: テクスチャの名前を :name に変更しました。
+model:
+  success: テクスチャのモデルを :model に変更しました。
+no-permission: このテクスチャを管理する権限がありません。
+non-existent: そのようなテクスチャは存在しません。
+report:
+  duplicate: このテクスチャはすでに報告済みです。管理者がすぐに確認します。報告の状況はユーザーセンターで追跡できます。
+  success: 報告ありがとうございます！管理者がすぐに確認します。

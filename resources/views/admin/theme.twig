@@ -1,0 +1,396 @@
+{% extends 'admin.base' %}
+
+{% block title %}{{ trans('general.customize') }}{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="callout callout-info">
+        这是「暖樱白」主题的专属配置，只保留对主题真正有意义的开关；主题本体是源码资产
+        <code>public/theme/</code>，改动保存后刷新页面立即生效，无需清缓存。
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      {{ forms.wallpaper.render()|raw }}
+    </div>
+    <div class="col-md-6">
+      {{ forms.effects.render()|raw }}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      {{ forms.footer.render()|raw }}
+    </div>
+    <div class="col-md-6">
+      <div class="card card-primary">
+        <div class="card-header">
+          <h3 class="card-title">侧边栏自定义</h3>
+        </div>
+        <div class="card-body">
+          <p class="text-muted small mb-2">
+            拖动 ☰ 排序（大项/子项可跨层级拖动：拖到行中间=变成它的子项，拖到边缘=同级插入）；
+            「高级功能」点 ‹ 展开子项；勾「隐藏」前台收起（编辑器里灰显保留，取消勾选即恢复）；
+            自定义链接项可删除；保存后刷新前台生效。
+          </p>
+          <div id="sidebar-tree" class="sidebar-editor"></div>
+          <div class="border-top pt-2 mt-2">
+            <div class="d-flex flex-wrap align-items-center mb-2">
+              <strong class="mr-2">添加自定义链接：</strong>
+              <input type="text" id="sc-new-title" class="form-control form-control-sm mr-1" style="width: 130px;" placeholder="显示名">
+              <input type="text" id="sc-new-link" class="form-control form-control-sm mr-1" style="width: 200px;" placeholder="链接（https:// 或站内路径）">
+              <input type="text" id="sc-new-icon" class="form-control form-control-sm mr-1" style="width: 110px;" placeholder="图标 fa-xxx">
+              <select id="sc-new-group" class="form-control form-control-sm mr-2" style="width: auto;">
+                {% for g in sidebarGroups %}
+                  <option value="{{ g }}">{{ g }}</option>
+                {% endfor %}
+              </select>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="sc-add">添加</button>
+            </div>
+            <button type="button" class="btn btn-primary" id="sidebar-save">保存侧边栏</button>
+            <span class="text-muted small ml-2" id="sidebar-save-tip"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" id="sidebar-tree-data">{{ sidebarTree|raw }}</script>
+  <script>
+    (function () {
+      var data = JSON.parse(document.getElementById('sidebar-tree-data').textContent);
+      var groups = {{ sidebarGroups|json_encode|raw }};
+      var list = document.getElementById('sidebar-tree');
+      var uid = 0;
+
+      function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+      }
+
+      /* 行结构: [☰][展开箭头?][图标][标题输入][分组下拉?][隐藏][+子项?][删除?] */
+      function buildRow(node, depth, listRef) {
+        var wrap = document.createElement('div');
+        wrap.className = 'sidebar-row' + (node.hidden ? ' sc-hidden' : '');
+        wrap.dataset.id = node.id || '';
+        wrap.draggable = true;
+
+        var row = document.createElement('div');
+        row.className = 'd-flex align-items-center flex-wrap';
+        row.style.paddingLeft = (depth * 22) + 'px';
+
+        var handle = document.createElement('span');
+        handle.className = 'text-muted mr-2';
+        handle.textContent = '☰';
+        handle.title = '拖动排序';
+        handle.style.cursor = 'grab';
+        row.appendChild(handle);
+
+        if (node.children) {
+          var chev = document.createElement('span');
+          chev.className = 'sc-chev mr-1';
+          chev.textContent = '‹';
+          chev.title = '展开/收起子项';
+          chev.style.cursor = 'pointer';
+          chev.style.fontWeight = '700';
+          chev.addEventListener('click', function () {
+            node.expanded = !node.expanded;
+            render();
+          });
+          row.appendChild(chev);
+        }
+
+        var icon = document.createElement('i');
+        icon.className = 'fas ' + esc(node.icon || 'fa-link') + ' mr-2';
+        row.appendChild(icon);
+
+        var title = document.createElement('input');
+        title.type = 'text';
+        title.className = 'form-control form-control-sm mr-1';
+        title.style.width = depth > 0 ? '150px' : '170px';
+        title.value = esc(node.title || '');
+        title.placeholder = esc(node.baseTitle || '');
+        title.title = '显示名（留空用默认）';
+        title.addEventListener('input', function () { node.title = title.value.trim(); });
+        row.appendChild(title);
+
+        if (depth === 0) {
+          var group = document.createElement('select');
+          group.className = 'form-control form-control-sm mr-1';
+          group.style.width = 'auto';
+          groups.forEach(function (g) {
+            var opt = document.createElement('option');
+            opt.value = g;
+            opt.textContent = g;
+            if (node.group === g) opt.selected = true;
+            group.appendChild(opt);
+          });
+          group.addEventListener('change', function () { node.group = group.value; });
+          row.appendChild(group);
+        }
+
+        var hideWrap = document.createElement('label');
+        hideWrap.className = 'mb-0 mr-1 text-nowrap';
+        hideWrap.style.cursor = 'pointer';
+        var hide = document.createElement('input');
+        hide.type = 'checkbox';
+        hide.checked = !!node.hidden;
+        hide.addEventListener('change', function () {
+          node.hidden = hide.checked;
+          wrap.classList.toggle('sc-hidden', node.hidden);
+        });
+        hideWrap.appendChild(hide);
+        hideWrap.appendChild(document.createTextNode(' 隐藏'));
+        row.appendChild(hideWrap);
+
+        {
+          var addChild = document.createElement('button');
+          addChild.type = 'button';
+          addChild.className = 'btn btn-sm btn-outline-secondary mr-1';
+          addChild.textContent = '＋子项';
+          addChild.title = '添加自定义子链接（没有子项时会创建）';
+          addChild.addEventListener('click', function () {
+            if (!node.children) node.children = [];
+            node.expanded = true;
+            node.children.push({
+              custom: true, id: 'custom-' + (++uid), title: '新链接', link: 'https://',
+              icon: 'fa-link', hidden: false,
+            });
+            render();
+          });
+          row.appendChild(addChild);
+        }
+
+        if (node.custom) {
+          var del = document.createElement('button');
+          del.type = 'button';
+          del.className = 'btn btn-sm btn-outline-danger';
+          del.textContent = '删除';
+          del.title = '删除此自定义项';
+          del.addEventListener('click', function () {
+            var idx = listRef.nodes.indexOf(node);
+            if (idx !== -1) listRef.nodes.splice(idx, 1);
+            render();
+          });
+          row.appendChild(del);
+        }
+
+        wrap.appendChild(row);
+
+        var childBox = document.createElement('div');
+        childBox.className = 'sc-children';
+        wrap.appendChild(childBox);
+
+        wrap._row = row;
+        wrap._childBox = childBox;
+
+        return wrap;
+      }
+
+      /* 递归渲染: 列表容器 + 数据数组 */
+      var dragEl = null;
+      var dropZone = null;
+      function clearDropHints() {
+        Array.prototype.forEach.call(list.querySelectorAll('.sidebar-row'), function (r) {
+          r.style.borderTop = '';
+          r.style.borderBottom = '';
+          var line = r.firstElementChild;
+          if (line) line.style.background = '';
+        });
+        dropZone = null;
+      }
+      function containsNode(node, target) {
+        if (!node.children) return false;
+        if (node.children.indexOf(target) !== -1) return true;
+        for (var k = 0; k < node.children.length; k++) {
+          if (containsNode(node.children[k], target)) return true;
+        }
+        return false;
+      }
+      function removeFromList(nodes, node) {
+        var i = nodes.indexOf(node);
+        if (i !== -1) {
+          nodes.splice(i, 1);
+          return;
+        }
+        for (var k = 0; k < nodes.length; k++) {
+          if (nodes[k].children && removeFromList(nodes[k].children, node)) return;
+        }
+      }
+      function renderList(listEl, nodes, depth) {
+        listEl.innerHTML = '';
+        nodes.forEach(function (node) {
+          var ref = { nodes: nodes };
+          var wrap = buildRow(node, depth, ref);
+          listEl.appendChild(wrap);
+          var cb = wrap._childBox;
+          if (node.children) {
+            var sub = document.createElement('div');
+            sub.className = 'sc-sublist';
+            sub.style.display = node.expanded ? 'block' : 'none';
+            cb.appendChild(sub);
+            if (node.expanded) renderList(sub, node.children, depth + 1);
+          }
+
+          /* 拖拽: 三区降放 —— 指针在行上缘/下缘 = 同级前后插入; 行中间 = 嵌套为它的子项。
+             支持跨层级: 子项拖出成大项, 大项拖入成子项; 禁止拖进自己的子树 */
+          var line = wrap._row;
+          wrap.addEventListener('dragstart', function (e) {
+            e.stopPropagation(); /* 关键: 阻断冒泡, 否则父行的 dragstart 会覆盖 dragEl(子项拖不出的根因) */
+            dragEl = { wrap: wrap, nodes: nodes, node: node };
+            window.__dragDebug = { dragstartOn: node.id, nodesLen: nodes.length };
+            e.dataTransfer.effectAllowed = 'move';
+            wrap.style.opacity = '0.4';
+          });
+          wrap.addEventListener('dragend', function (e) {
+            e.stopPropagation();
+            wrap.style.opacity = '';
+            clearDropHints();
+          });
+          wrap.addEventListener('dragover', function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (!dragEl) return;
+            if (dragEl.wrap === wrap || wrap.contains(dragEl.wrap)) return;
+            if (node.custom) { /* 自定义链接行不做嵌套, 只允许前后插入 */ } else if (node.children && cb.contains(e.target)) return; /* 指针在子项区: 交给子项行 */
+            var rr = line.getBoundingClientRect();
+            var rel = rr.height ? (e.clientY - rr.top) / rr.height : 0;
+            clearDropHints();
+            if (rel < 0.25) {
+              dropZone = { mode: 'before', list: nodes, ref: node };
+              line.style.borderTop = '3px solid #f088a8';
+              line.style.borderRadius = '0';
+            } else if (rel > 0.75) {
+              dropZone = { mode: 'after', list: nodes, ref: node };
+              line.style.borderBottom = '3px solid #f088a8';
+            } else if (node.custom) {
+              /* 自定义链接不允许被嵌套, 视为 after */
+              dropZone = { mode: 'after', list: nodes, ref: node };
+              line.style.borderBottom = '3px solid #f088a8';
+            } else {
+              dropZone = { mode: 'into', list: null, ref: node };
+              /* 嵌套区明确高亮: 半透明粉底 + 提示文字跟随 */
+              line.style.background = 'rgba(240, 136, 168, 0.35)';
+              line.style.outline = '1.5px dashed #ec9cb8';
+              line.style.outlineOffset = '-3px';
+            }
+          });
+          wrap.addEventListener('dragleave', function (e) {
+            if (cb.contains(e.relatedTarget) || line.contains(e.relatedTarget)) return;
+            clearDropHints();
+          });
+          line.addEventListener('drop', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var z = dropZone;
+            clearDropHints();
+            if (!dragEl || !z || z.ref !== node) return;
+            var dragged = dragEl.node;
+            var fromNodes = dragEl.nodes;
+            if (dragged === z.ref || containsNode(dragged, z.ref)) return;
+            window.__dragDebug = { dropTarget: z.ref.id, dragged: dragged.id, mode: z.mode };
+            removeFromList(fromNodes, dragged);
+            if (z.mode === 'into') {
+              if (!z.ref.children) z.ref.children = [];
+              z.ref.children.push(dragged);
+              z.ref.expanded = true;
+            } else {
+              var ti = z.list.indexOf(z.ref);
+              z.list.splice(z.mode === 'before' ? ti : ti + 1, 0, dragged);
+            }
+            dropZone = null;
+            render();
+          });
+        });
+      }
+
+      function render() {
+        renderList(list, data, 0);
+      }
+
+      /* 添加自定义链接(顶层) */
+      document.getElementById('sc-add').addEventListener('click', function () {
+        var t = document.getElementById('sc-new-title').value.trim();
+        var l = document.getElementById('sc-new-link').value.trim();
+        var ic = document.getElementById('sc-new-icon').value.trim() || 'fa-link';
+        var g = document.getElementById('sc-new-group').value;
+        if (!t || !l) return;
+        data.push({
+          custom: true, id: 'custom-' + (++uid), title: t, link: l, icon: ic,
+          group: g, hidden: false,
+        });
+        document.getElementById('sc-new-title').value = '';
+        document.getElementById('sc-new-link').value = '';
+        render();
+      });
+
+      /* 保存: 序列化整棵树 */
+      document.getElementById('sidebar-save').addEventListener('click', function () {
+        function serialize(nodes) {
+          return nodes.map(function (n) {
+            var o = { id: n.id, group: n.group || '', hidden: !!n.hidden };
+            if (n.custom) {
+              o.custom = true;
+              o.link = n.link;
+              o.icon = n.icon;
+              o.title = n.title || '未命名';
+            } else if (n.title && n.title !== n.baseTitle) {
+              o.title = n.title;
+            }
+            if (n.children) o.children = serialize(n.children);
+            return o;
+          });
+        }
+        var tip = document.getElementById('sidebar-save-tip');
+        tip.textContent = '保存中…';
+        tip.className = 'text-muted small ml-2';
+        fetch('{{ url('admin/theme/sidebar') }}', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+          },
+          body: JSON.stringify({ items: serialize(data) }),
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.code === 0) {
+            tip.textContent = '已保存，正在刷新…';
+            tip.className = 'text-success small ml-2';
+            /* 整页刷新: 侧栏是整页渲染的, PJAX 页间切换不会重绘它——
+               只有整页加载才能看到新结构 */
+            setTimeout(function () { location.reload(); }, 600);
+          } else {
+            tip.textContent = d.message || '保存失败';
+            tip.className = 'text-danger small ml-2';
+          }
+        }).catch(function () {
+          tip.textContent = '网络错误';
+          tip.className = 'text-danger small ml-2';
+        });
+      });
+
+      /* 数据补齐: baseTitle/expanded 等 */
+      (function prep(nodes) {
+        nodes.forEach(function (n) {
+          n.baseTitle = n.baseTitle || n.title;
+          if (n.children) prep(n.children);
+        });
+      })(data);
+
+      render();
+    })();
+  </script>
+  <style>
+    .sidebar-editor .sidebar-row { border-bottom: 1px solid rgba(240, 184, 205, 0.4); }
+    .sidebar-editor .sidebar-row > div:first-child { padding: 6px 4px; }
+    .sidebar-editor .sc-chev { display: inline-block; width: 14px; }
+    .sidebar-editor .sc-children { border-left: 2px dashed rgba(240, 136, 168, 0.45); margin-left: 14px; }
+    .sidebar-editor .sc-hidden > div:first-child { opacity: 0.45; }
+    .sidebar-editor .sc-sublist { padding-bottom: 4px; }
+  </style>
+{% endblock %}

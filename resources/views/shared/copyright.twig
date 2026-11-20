@@ -1,0 +1,8 @@
+{# 页尾: 版权文字与备案号由后台「个性化」的 theme_footer_text / theme_icp 驱动,
+   版权文字支持 {year} 当前年份 / {site_name} 站点名 / {site_url} 站点地址,
+   旧copyright_prefer/copyright_text链路已移除 #}
+<span id="copyright-text">{{ footer_text }}</span>
+{% if icp %}
+  <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener"
+     id="icp-link" class="ml-2">{{ icp }}</a>
+{% endif %}

@@ -1,0 +1,85 @@
+---
+login:
+  title: ログイン
+  message: ログインしてスキンとプレイヤーを管理しましょう
+  success: ログインしました。
+check:
+  anonymous: 不正なアクセスです。先にログインしてください。
+  verified: このページにアクセスするには、先にメールアドレスの認証が必要です。
+  admin: このページは管理者のみアクセスできます。
+  banned: あなたはこのサイトで利用停止されています。管理者にお問い合わせください。
+register:
+  title: 新規登録
+  message: :sitename へようこそ！
+  success: アカウントを登録しました。リダイレクト中…
+  max: :regs 個を超えるアカウントを登録することはできません。
+forgot:
+  title: パスワードをお忘れですか
+  message: 確認用のメールをお送りします。
+  disabled: パスワードの再設定は利用できません。
+  frequent-mail: 送信ボタンのクリックが速すぎます。数分お待ちください。
+  unregistered: そのメールアドレスは登録されていません。
+  success: メールを送信しました。受信箱をご確認ください。リンクの有効期限は 1 時間です。
+  failed: 確認メールの送信に失敗しました。:msg
+  ignore: 当サイトに登録されていない場合は、このメールを無視してください。登録解除などの操作は不要です。
+  reset: パスワードを再設定
+  notice: このメールは自動送信です。返信いただいても応答されません。
+  mail:
+    title: :sitename のパスワードを再設定
+    message: :sitename のアカウントに対してパスワード再設定のリクエストがあったため、このメールをお送りしています。
+    reset: 'パスワードを再設定するには次のリンクにアクセスしてください: <a href=":url">:url</a>'
+    ignore: パスワードの再設定をリクエストしていない場合は、さらに操作を行う必要はありません。
+reset:
+  title: パスワードの再設定
+  button: 再設定
+  invalid: 無効なリンクです。
+  expired: このリンクは期限切れです。
+  message: ':username さん、こちらでパスワードを再設定できます。'
+  success: パスワードを再設定しました。
+bind:
+  title: メールアドレスの連携
+  button: 連携する
+  message: 続行するにはメールアドレスの入力が必要です。
+  introduction: 迷惑メールをお送りすることはありません。
+  registered: そのメールアドレスはすでに使用されています。
+verify:
+  title: メールアドレスの認証
+  invalid: 無効なリンクです。
+  not-matched: メールアドレスが一致しません。
+validation:
+  user: そのようなユーザーは存在しません。
+  password: パスワードが正しくありません。
+logout:
+  success: ログアウトしました。
+oauth:
+  authorization:
+    title: 承認
+    introduction: サードパーティアプリ「:name」がアカウントへのアクセス権限を要求しています。
+    button: 承認する
+    permissions: 権限
+  scope:
+    user:
+      read: ログインしてプロフィールを読み取る
+    notification:
+      read: アプリがあなたの通知を読み取ることを許可します。
+      readwrite: アプリが通知を送信することを許可します。
+    player:
+      read: アプリがあなたのプレイヤーを読み取ることを許可します。
+      readwrite: アプリがあなたのプレイヤーを作成・読み取り・更新・削除することを許可します。
+    closet:
+      read: アプリがクローゼットのアイテムを読み取ることを許可します。
+      readwrite: アプリがクローゼットのアイテムを作成・読み取り・更新・削除することを許可します。
+    users-management:
+      read: アプリがサイトのユーザーを読み取ることを許可します。
+      readwrite: アプリがサイトのユーザーを作成・読み取り・更新・削除することを許可します。
+    players-management:
+      read: アプリがサイトのプレイヤーを読み取ることを許可します。
+      readwrite: アプリがサイトのプレイヤーを作成・読み取り・更新・削除することを許可します。
+    closet-management:
+      read: アプリがユーザーのクローゼットアイテムを読み取ることを許可します。
+      readwrite: アプリがユーザーのクローゼットアイテムを作成・読み取り・更新・削除することを許可します。
+    reports-management:
+      read: アプリがユーザーの報告を読み取ることを許可します。
+      readwrite: アプリがユーザーの報告を読み取り・確認することを許可します。
+email: メールアドレス
+register-link: 新規アカウントを登録

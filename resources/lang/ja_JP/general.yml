@@ -1,0 +1,60 @@
+---
+index: ホーム
+skinlib: スキンライブラリ
+about: このサイトについて
+user-center: ユーザーセンター
+logout: ログアウト
+login: ログイン
+register: 今すぐ登録
+profile: プロフィール
+admin-panel: 管理パネル
+explore: 閲覧
+manage: 管理
+anonymous: ゲスト
+back: 戻る
+dashboard: ダッシュボード
+my-closet: マイクローゼット
+my-reports: 報告履歴
+developer: 開発者向け
+oauth-manage: OAuth2 アプリ
+player-manage: プレイヤー管理
+user-manage: ユーザー管理
+report-manage: 報告管理
+plugin-manage: プラグイン管理
+plugin-market: プラグインマーケット
+plugin-configs: プラグイン設定
+customize: 個人設定
+i18n: 多言語
+options: サイト設定
+score-options: スコア設定
+res-options: リソース設定
+status: 状態
+check-update: 更新を確認
+download-update: 更新をダウンロード
+close: 閉じる
+skin: スキン
+cape: マント
+submit: 送信
+cancel: キャンセル
+yes: true
+no: false
+op-success: 操作が完了しました。
+unknown: 不明
+notice: お知らせ
+illegal-parameters: パラメータが不正です。
+private: 非公開
+public: 公開
+unexistent-user: そのようなユーザーは存在しません。
+player-banned: このプレイヤーの所有者は利用停止されています。
+texture-deleted: 要求されたテクスチャは削除されています。
+user:
+  email: メールアドレス
+  nickname: ニックネーム
+  password: パスワード
+  score: スコア
+  register-at: 登録日時
+player:
+  owner: 所有者
+  player-name: プレイヤー名
+  previews: テクスチャプレビュー
+  last-modified: 最終更新

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}">
+  <head>
+    {{ include('shared.head') }}
+    <title>{{ trans('general.about') }} - {{ site_name }}</title>
+  </head>
+
+  {# 登录用户: 常驻面板骨架(顶部页眉+侧栏); 游客: 保持原顶部导航布局 #}
+  <body class="{{ dark_mode ? 'dark-mode' : '' }} hold-transition {{ auth_check() ? 'sidebar-mini layout-fixed layout-navbar-fixed' : 'layout-top-nav' }}">
+    <div class="wrapper">
+      {% if auth_check() %}
+        {{ include('shared.header') }}
+        {{ include('shared.sidebar', {scope: 'user'}) }}
+      {% else %}
+        <nav class="main-header navbar navbar-expand navbar-{{ navbar_color }} navbar-{{ color_mode }} ml-0">
+          <div class="container">
+            <div class="navbar-header">
+              <a href="{{ url('/') }}" class="navbar-brand">{{ site_name }}</a>
+            </div>
+
+            <div class="navbar-custom-menu">
+              <ul class="nav navbar-nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url('skinlib') }}">{{ trans('general.skinlib') }}</a>
+                </li>
+                {{ include('shared.languages') }}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url('auth/login') }}">
+                    <i class="fas fa-user"></i>
+                    <span class="d-none d-sm-inline">{{ trans('general.anonymous') }}</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      {% endif %}
+
+      <div class="content-wrapper">
+        <div class="container" id="about-page">
+          <div class="content-header">
+            <h1><i class="fas fa-info-circle"></i> {{ trans('general.about') }}</h1>
+          </div>
+
+          <div class="row">
+            <div class="col-md-7">
+              <div class="card card-primary">
+                <div class="card-header">
+                  <h3 class="card-title">关于本站</h3>
+                </div>
+                <div class="card-body">
+                  <p>
+                    {{ site_name }}（胡桃木皮肤站）是一个 Minecraft 皮肤托管服务：
+                    上传、管理、分享你的皮肤与披风，并通过
+                    <strong>Yggdrasil API</strong> 为外置登录（authlib-injector）提供认证。
+                  </p>
+                  <p>
+                    站点基于开源项目 <strong>Blessing Skin Server</strong>（6.x 分支）深度定制：
+                    全站「暖樱白」樱花粉玻璃拟态主题、主题设置面板、服务端多源随机壁纸、
+                    侧边栏可视化自定义、PJAX 无缝导航等（详见下方改动清单）。
+                  </p>
+                  <p class="mb-0">
+                    <i class="fab fa-github mr-1"></i>本站项目开源仓库：
+                    <a href="https://github.com/qiuxi903/hutaomu-skin-server"
+                       target="_blank" rel="noopener">
+                      github.com/qiuxi903/hutaomu-skin-server
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-5">
+              <div class="card card-success card-outline">
+                <div class="card-header">
+                  <h3 class="card-title">我们的服务</h3>
+                </div>
+                <div class="card-body">
+                  <ul class="mb-2 pl-3">
+                    <li><strong>皮肤托管</strong>：上传 / 管理 / 收藏皮肤与披风，皮肤库公开分享</li>
+                    <li><strong>外置登录认证</strong>：Yggdrasil API 兼容 authlib-injector，启动器一键接入</li>
+                    <li><strong>开源</strong>：站点源码与主题资源在 GitHub 开放</li>
+                  </ul>
+                  <p class="mb-1">Yggdrasil API 地址：</p>
+                  <p><code id="about-api-url">{{ url('api/yggdrasil') }}</code></p>
+                  <button
+                    id="about-ygg-dnd"
+                    class="btn btn-primary btn-sm"
+                    draggable="true"
+                    data-clipboard-text="{{ url('api/yggdrasil') }}"
+                    title="拖到启动器窗口即可添加认证服务器；点击复制地址"
+                  >
+                    <i class="fas fa-download mr-1"></i>快捷导入（拖动到启动器）
+                  </button>
+                  <a
+                    class="btn btn-default btn-sm ml-1"
+                    target="_blank"
+                    rel="noopener"
+                    href="https://blessing.netlify.app/yggdrasil-api/authlib-injector.html"
+                  >接入教程</a>
+                  <p class="text-muted small mb-0 mt-2">
+                    支持拖入 authlib-injector 系启动器（HMCL、PCL2 等）快速添加认证服务器；
+                    其他启动器可手动填写上方 API 地址。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">本分支相对主仓库的更改</h3>
+                </div>
+                <div class="card-body">
+                  <ul class="mb-0">
+                    <li>
+                      <strong>「暖樱白」主题</strong>：樱粉主色 + 奶白玻璃卡片 + 站酷快乐体标题，
+                      亮色（暖樱白）/ 暗色（暗夜樱）双模式，主题为站点源码资产（<code>public/theme/</code>）。
+                    </li>
+                    <li>
+                      <strong>主题设置面板</strong>：页眉调色板按钮滑出右侧面板——外观切换（按账号持久化）、
+                      二次元壁纸开关、换一张 / 收藏 / 下载、自动轮换（5/15/30/60 分钟）、我的收藏、
+                      纯享展示模式（控件动画退场，只留壁纸）。
+                    </li>
+                    <li>
+                      <strong>壁纸服务端多源中继</strong>（<code>GET /theme/wallpaper</code>）：后端从后台配置的
+                      图源列表随机抓图并同源返回，绕过浏览器跨域限制，壁纸可本地缓存 / 收藏 / 下载；
+                      前端预取 + 指纹去重，换壁纸毫秒级切换。
+                    </li>
+                    <li>
+                      <strong>侧边栏可视化自定义</strong>（管理面板 → 个性化）：树形拖拽编辑，大项 / 子项可跨层级
+                      互拖、分组调整、显示 / 隐藏、改名、添加自定义链接；「关于」收进「高级功能」折叠组。
+                    </li>
+                    <li>
+                      <strong>PJAX 无缝导航</strong>：站内跳转只替换主内容区，页眉 / 侧栏保持不动，无整页刷新。
+                    </li>
+                    <li>
+                      <strong>皮肤预览跟随主题</strong>：衣柜 / 角色页 WebGL 渲染器底色随明暗模式切换。
+                    </li>
+                    <li>
+                      <strong>体验修复</strong>：积分说明弹窗在玻璃卡片下不再锁死页面；
+                      首次开启壁纸秒级出图；菜单 / 弹窗多项层级与交互修复。
+                    </li>
+                    <li>
+                      <strong>主页改造</strong>：未登录时主视觉区「登录」「现在注册」双按钮并排；
+                      移除原生的 custom_css / custom_js 注入页，改由后台「个性化」页管理。
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">鸣谢 · 本站使用的开源项目与组件</h3>
+                </div>
+                <div class="card-body p-0">
+                  <table class="table table-hover mb-0">
+                    <thead>
+                      <tr><th>项目</th><th>用途</th><th class="text-right">许可</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><a href="https://github.com/bs-community/blessing-skin-server" target="_blank" rel="noopener">Blessing Skin Server {{ blessing.version }}</a></td>
+                        <td>上游核心：页面、API、Yggdrasil 认证服务</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://laravel.com" target="_blank" rel="noopener">Laravel 8.75</a></td>
+                        <td>后端框架</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://twig.symfony.com" target="_blank" rel="noopener">Twig 3</a></td>
+                        <td>模板引擎</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://adminlte.io" target="_blank" rel="noopener">AdminLTE 3.2.0</a></td>
+                        <td>面板界面框架</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://getbootstrap.com" target="_blank" rel="noopener">Bootstrap 4.6.1</a></td>
+                        <td>基础样式与组件</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://vuejs.org" target="_blank" rel="noopener">Vue.js</a></td>
+                        <td>前端交互</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://jquery.com" target="_blank" rel="noopener">jQuery 3.6.0</a></td>
+                        <td>DOM 操作</td>
+                        <td class="text-right">MIT</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://fontawesome.com" target="_blank" rel="noopener">Font Awesome 5.15.4</a></td>
+                        <td>图标</td>
+                        <td class="text-right">MIT/OFL/CC BY 4.0</td>
+                      </tr>
+                      <tr>
+                        <td><a href="https://fonts.google.com/specimen/ZCOOL+KuaiLe" target="_blank" rel="noopener">站酷快乐体</a> / <a href="https://fonts.google.com/specimen/Noto+Sans+SC" target="_blank" rel="noopener">Noto Sans SC</a></td>
+                        <td>标题 / 正文字体</td>
+                        <td class="text-right">OFL</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <a href="https://www.loliapi.com" target="_blank" rel="noopener">LoliAPI</a> ·
+                          <a href="https://t.alcy.cc" target="_blank" rel="noopener">ALCY</a> ·
+                          <a href="https://www.dmoe.cc" target="_blank" rel="noopener">Dmoe</a> ·
+                          <a href="https://api.paugram.com" target="_blank" rel="noopener">Paugram</a>
+                        </td>
+                        <td>随机二次元壁纸图源（可在后台「个性化」更换）</td>
+                        <td class="text-right">—</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="main-footer">
+        <div class="container">
+          {{ include('shared.copyright') }}
+        </div>
+      </footer>
+    </div>
+      <script>
+        (function () {
+          var btn = document.getElementById('about-ygg-dnd');
+          if (!btn) return;
+          document.body.addEventListener('dragstart', function (e) {
+            var hit = e.target && e.target.closest ? e.target.closest('#about-ygg-dnd') : null;
+            if (!hit) return;
+            if (e.dataTransfer) {
+              e.dataTransfer.setData('text/plain', 'authlib-injector:yggdrasil-server:' + encodeURIComponent(btn.dataset.clipboardText));
+              e.dataTransfer.dropEffect = 'copy';
+            }
+          });
+          btn.addEventListener('click', function () {
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(btn.dataset.clipboardText).then(function () {
+                var old = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                setTimeout(function () { btn.disabled = false; btn.innerHTML = old; }, 1200);
+              });
+            }
+          });
+        })();
+      </script>
+    {{ include('shared.foot') }}
+  </body>
+</html>

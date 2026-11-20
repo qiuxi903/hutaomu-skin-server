@@ -1,0 +1,138 @@
+---
+index:
+  total-users: 登録ユーザー数
+  total-players: プレイヤー数
+  total-textures: 登録したスキン数
+  disk-usage: ディスク使用量
+  overview: 概要
+  texture-uploads: スキンのアップロード
+  user-registration: ユーザー登録
+notifications:
+  send:
+    title: 通知を送信
+    success: 送信に成功しました。
+  receiver:
+    title: 受信者
+    all: すべてのユーザー
+    normal: 一般ユーザー
+    uid: UID を指定
+    email: メールアドレスを指定
+  title: タイトル
+  content: 本文 (Markdown 対応)
+users:
+  operations:
+    non-existent: ユーザーが存在しません。
+    no-permission: このユーザーを操作する権限がありません。
+    email:
+      success: メールアドレスを変更しました。
+    verification:
+      success: アカウントの認証状態を切り替えました。
+    nickname:
+      success: ニックネームを変更しました。
+    password:
+      success: パスワードを変更しました。
+    score:
+      success: スコアを変更しました。
+    permission: 権限を更新しました。
+    delete:
+      success: アカウントを削除しました。
+players:
+  no-permission: このプレイヤーを操作する権限がありません。
+  textures:
+    non-existent: そのような tid のテクスチャは存在しません。:tid
+    success: :player のテクスチャを更新しました。
+  name:
+    success: プレイヤー名を :player に変更しました。
+  owner:
+    success: プレイヤー :player をユーザー :user に譲渡しました。
+  delete:
+    success: プレイヤーを削除しました。
+customize:
+  change-color:
+    title: テーマカラーの変更
+  colors:
+    navbar: トップナビゲーションバー
+    sidebar:
+      dark: サイドバー (ダーク)
+      light: サイドバー (ライト)
+i18n:
+  add: 言語行を追加
+  added: 言語行を追加しました。
+  updated: 言語行を更新しました。
+  deleted: 言語行を削除しました。
+  group: グループ
+  key: キー
+  text: テキスト
+  tip: このページの使い方は？
+status:
+  info: 情報
+  health: ヘルスチェック
+  bs:
+    name: Blessing Skin
+    version: バージョン
+    env: アプリケーション環境
+    debug: デバッグモード
+    commit: コミット
+    laravel: Laravel バージョン
+  server:
+    name: サーバー
+    php: PHP バージョン
+    web: Web サーバーソフトウェア
+    os: オペレーティングシステム
+  db:
+    name: データベース
+    type: サーバー
+    host: ホスト
+    port: ポート
+    username: ユーザー名
+    database: データベース
+    prefix: テーブルプレフィックス
+  plugins: 有効なプラグイン (:amount)
+plugins:
+  readme: README
+  operations:
+    title: 操作
+    enabled: ':plugin を有効にしました。'
+    unsatisfied:
+      notice: プラグインに競合または未充足の依存関係があるため、有効化できません。下記のプラグインをインストールまたは更新し、競合するものを無効化してください。
+      disabled: プラグイン「:name」は有効化されていません。
+      version: プラグイン「:title」のバージョンは制約「:constraint」を満たしていません。
+      conflict: プラグイン「:title」はこのプラグインと同時に実行できません。
+    disabled: ':plugin を無効化しました。'
+    deleted: プラグインを削除しました。
+    no-config-notice: このプラグインはインストールされていないか、設定ページを提供していません。
+    no-readme-notice: このプラグインには README ファイルが含まれていません。
+    not-found: そのようなプラグインは存在しません。
+  market:
+    unresolved: プラグインに競合または未充足の依存関係があるため、ダウンロードできません。下記のプラグインをインストールまたは更新し、競合するものを無効化してください。
+    connection-error: プラグインレジストリに接続できません。:error
+    non-existent: プラグイン :plugin は存在しません。
+    install-success: プラグインをインストールしました。
+update:
+  complete: 更新が完了しました
+  info:
+    title: 更新情報
+    up-to-date: すでに最新です。
+    available: 新しいバージョンがあります。
+    versions:
+      latest: '最新バージョン:'
+      current: '現在のバージョン:'
+    check-github: GitHub Releases を確認
+    button: 今すぐ更新
+  cautions:
+    title: 注意事項
+    link: こちらをご確認ください。
+    text: |
+      ホストのネットワーク環境に応じて更新ソースを選択してください。
+      更新ソースとホスト間の接続速度が遅いと、確認やダウンロードのページの読み込みに時間がかかります。
+      デフォルトの更新ソースを変更するには、
+  errors:
+    connection: '現在の更新ソースにアクセスできません。詳細: :error'
+    spec: 現在の更新ソースはサポートされていません。
+    php: PHP のバージョンが低いため更新できません。:version 以降が必要です。
+download:
+  errors:
+    download: 'ダウンロードに失敗しました。エラー: :error'
+    shasum: ファイルの検証に失敗しました。もう一度ダウンロードしてください。
+    unzip: ファイルの展開に失敗しました。
+invalid-action: 無効な操作です

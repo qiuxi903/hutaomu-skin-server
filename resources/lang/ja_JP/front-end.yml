@@ -1,0 +1,274 @@
+---
+auth:
+  login: ログイン
+  loggingIn: ログイン中
+  tooManyFails:
+    captcha: 失敗回数が多すぎます！CAPTCHAを入力してください。
+    recaptcha: 失敗回数が多すぎます！reCAPTCHAチャレンジに合格してください。
+  emptyEmail: メールアドレスが空です。
+  invalidConfirmPwd: パスワード（確認）がパスワードと一致しません。
+  emptyNickname: ニックネームが空です。
+  register: 新規登録
+  registering: 登録中
+  send: 送信
+  sending: 送信中
+  reset: 再設定
+  resetting: リセット中
+  nickname: ニックネーム
+  player-name: Minecraft プレイヤー名
+  email: メールアドレス
+  identification: メールアドレスまたはプレイヤー名
+  password: パスワード
+  captcha: CAPTCHA
+  change-captcha: クリックで CAPTCHA 画像を変更します。
+  login-link: すでに登録済み？こちらからログインできます。
+  forgot-link: パスワードをお忘れですか？
+  keep: ログイン状態を保持する
+  repeat-pwd: パスワード（確認）
+  nickname-intro: 特殊文字以外でお好きな名前をどうぞ
+  player-name-intro: Minecraft でのプレイヤー名。後から変更できます
+  forgot:
+    login-link: パスワードを思い出しました
+skinlib:
+  private: 非公開
+  anonymous: まずはログインしてください。
+  reset: フィルターをリセット
+  addToCloset: クローゼットに追加
+  removeFromCloset: クローゼットから削除
+  setItemName: このテクスチャの名前を設定
+  applyNotice: クローゼットでプレイヤーに適用できます
+  emptyItemName: テクスチャ名が空です。
+  setNewTextureName: '新しいテクスチャ名を入力してください:'
+  emptyNewTextureName: 新しいテクスチャ名が空です。
+  seeMyUpload: アップロード履歴
+  apply: 適用
+  filter:
+    skin: (全モデル)
+    steve: (Steve)
+    alex: (Alex)
+    cape: (マント)
+    uploader: 'ユーザー (UID = :uid) がアップロード'
+    allUsers: すべてのユーザー
+  sort:
+    title: 並び替え
+    time: 最新
+    likes: いいね数順
+  emptyTextureName: テクスチャ名が空です。
+  emptyUploadFile: ファイルがアップロードされていません。
+  fileExtError: 'エラー: テクスチャは PNG ファイルである必要があります。'
+  uploading: アップロード中
+  setAsPrivate: 非公開に設定
+  setAsPublic: 公開に設定
+  setPublicNotice: このテクスチャを公開してもよろしいですか？
+  setPrivateNotice: このテクスチャを非公開にしてもよろしいですか？
+  deleteNotice: このテクスチャを削除してもよろしいですか？
+  setNewTextureModel: '新しいテクスチャモデルを選択してください:'
+  upload:
+    texture-name: テクスチャ名
+    texture-type: テクスチャの種類
+    select-file: ファイルを選択
+    privacy-notice: スキンライブラリでは公開されなくなります。
+    set-as-private: 非公開にする
+    button: アップロード
+    cost: 約 :score スコアを消費します。
+    award: 公開テクスチャをアップロードすると :score スコアが獲得できます。
+  show:
+    anonymous: クローゼットを利用するにはログインが必要です
+    likes: いいねしたユーザー
+    detail: 詳細
+    name: テクスチャ名
+    edit: 編集
+    model: 適用可能モデル
+    size: ファイルサイズ
+    uploader: アップロード者
+    upload-at: アップロード日時
+    download: ダウンロード
+    delete-texture: テクスチャを削除
+    manage-notice: 削除または非公開に設定されたテクスチャは、いいねしたすべてのユーザーのクローゼットから削除されます。
+  report:
+    title: 報告
+    reason: 理由をお知らせください。
+    positive: スキンライブラリへの健全な貢献を促進するため、不適切なコンテンツを報告した方に :score スコアを報奨します。ただし、悪意ある報告が確認された場合、報奨スコアはすべて取り戻されます。
+    negative: 悪意ある報告の影響を軽減するため、テクスチャの報告には :score スコアが必要です。ご安心ください。報告が管理者によって確認された後、保留中のスコアと追加の報奨がアカウントに送付されます。
+user:
+  signRemainingTime: ':time :unit 後に利用可能'
+  timeUnitHour: 時間
+  timeUnitMin: 分
+  emptyClosetMsg: >-
+    <p>クローゼットには何もありません…</p><p><a href=":url">スキンライブラリ</a> を
+    覗いてみませんか？</p>
+  renameItem: アイテム名を変更
+  removeItem: クローゼットから削除
+  setAsAvatar: アバターに設定
+  viewInSkinlib: スキンライブラリで表示
+  switch2dPreview: 2D プレビューに切り替え
+  switch3dPreview: 3D プレビューに切り替え
+  removeFromClosetNotice: このテクスチャをクローゼットから削除してもよろしいですか？
+  emptySelectedTexture: テクスチャが選択されていません。
+  renameClosetItem: 'このアイテムの新しい名前を入力してください:'
+  changePlayerName: 'プレイヤー名を入力してください:'
+  emptyPlayerName: プレイヤー名が空です。
+  deletePlayer: このプレイヤーを削除してもよろしいですか？
+  deletePlayerNotice: この操作は元に戻せません。バックアップはありません。
+  chooseClearTexture: クリアするテクスチャの種類を選択してください
+  noClearChoice: 種類が選択されていません
+  setAvatar: これをアバターに設定してもよろしいですか？
+  setAvatarNotice: スキンの頭部が使用されます。
+  resetAvatarConfirm: アバターをリセットしてもよろしいですか？
+  typeToSearch: 入力して検索
+  useAs: 適用…
+  resetSelected: 選択をクリア
+  closet:
+    upload: テクスチャをアップロード
+    use-as:
+      title: どのプレイヤーに適用しますか？
+      empty: プレイヤーを所有していないようです…
+  used:
+    title: 使用状況
+    players: 登録済みプレイヤー
+    storage: 使用中の保存容量
+  cur-score: 現在のスコア
+  score-notice: スコアをクリックすると説明が表示されます。
+  sign: チェックイン
+  player:
+    operation: 操作
+    edit-pname: 名前を編集
+    delete-texture: テクスチャを消去
+    delete-player: 削除
+    add-player: プレイヤーを追加
+    texture-empty: なし
+  verification:
+    title: アカウントの認証
+    message: スキンホスティングサービスを利用する前に、メールアドレスの認証が必要です。メールが届いていませんか？
+    resend: クリックして再送信します。
+    sending: 送信中…
+  oauth:
+    id: クライアント ID
+    name: アプリ名
+    secret: クライアントシークレット
+    redirect: コールバック URL
+    modifyName: アプリ名を変更します。
+    modifyUrl: コールバック URL を変更します。
+    create: 新しいアプリを作成
+    confirmRemove: このアプリを削除してもよろしいですか？元に戻すことはできません。
+admin:
+  operationsTitle: 操作
+  permission: 権限
+  deleteUser: 削除
+  changeEmail: メールアドレスを編集
+  newUserEmail: '新しいメールアドレスを入力してください:'
+  verification: メール認証
+  toggleVerification: 認証状態を切り替える
+  changeNickName: ニックネームを編集
+  newUserNickname: '新しいニックネームを入力してください:'
+  changePassword: パスワードを編集
+  newUserPassword: '新しいパスワードを入力してください:'
+  changeScore: スコアを編集
+  newScore: '新しいスコアを入力してください:'
+  changePermission: 権限を変更
+  newPermission: '新しい権限を選択してください:'
+  deleteUserNotice: このユーザーを削除してもよろしいですか？この操作は元に戻せません。
+  banned: 利用停止
+  normal: 通常
+  admin: 管理者
+  superAdmin: 最高管理者
+  unverified: 未認証
+  verified: 認証済み
+  pidNotice: >-
+    テクスチャの tid を入力してください。0 を入力するとこのプレイヤーのテクスチャをクリアします。
+  changeTexture: テクスチャを変更
+  changePlayerName: プレイヤー名を変更
+  changeOwner: 所有者を変更
+  textureType: テクスチャの種類
+  deletePlayer: 削除
+  changePlayerOwner: 'このプレイヤーを譲渡するユーザーの ID を入力してください:'
+  deletePlayerNotice: このプレイヤーを削除してもよろしいですか？この操作は元に戻せません。
+  changePlayerNameNotice: '新しいプレイヤー名を入力してください:'
+  emptyPlayerName: プレイヤー名は空にできません。
+  configurePlugin: 設定
+  deletePlugin: 削除
+  noDependencies: 依存関係なし
+  pluginTitle: プラグイン
+  pluginAuthor: 作者
+  pluginVersion: バージョン
+  pluginReadme: README
+  pluginDescription: 説明
+  pluginDependencies: 依存関係
+  installPlugin: インストール
+  pluginInstalling: インストール中…
+  updatePlugin: 更新
+  pluginUpdating: 更新中…
+  confirmUpdate: ':plugin を :old から :new へ更新してもよろしいですか？'
+  enablePlugin: 有効化
+  disablePlugin: 無効化
+  confirmDeletion: このプラグインを削除してもよろしいですか？
+  uploadArchive: アーカイブをアップロード
+  uploadArchiveNotice: Zip アーカイブをアップロードしてプラグインをインストールします。
+  downloadRemote: リモートからダウンロード
+  downloadRemoteNotice: リモート URL から Zip アーカイブをダウンロードしてプラグインをインストールします。
+  updateButton: 今すぐ更新
+  downloading: ダウンロード中…
+  i18n:
+    group: グループ
+    key: キー
+    text: テキスト
+    empty: (空)
+    modify: 変更
+    delete: 削除
+    updating: '新しいテキストを入力してください:'
+    confirmDelete: 本当によろしいですか？この操作は元に戻せません。
+report:
+  tid: テクスチャ ID
+  reporter: 報告者
+  reason: 理由
+  status-title: 状態
+  status:
+    - 保留中
+    - 解決済み
+    - 却下済み
+  time: 報告日時
+  delete: 削除
+  ban: 利用停止
+  reject: 却下
+general:
+  skin: スキン
+  cape: マント
+  fatalError: 致命的なエラー
+  confirmLogout: ログアウトしてもよろしいですか？
+  confirm: OK
+  cancel: キャンセル
+  submit: 送信
+  close: 閉じる
+  more: もっと見る
+  tip: ヒント
+  noResult: 結果がありません。
+  texturePreview: テクスチャプレビュー
+  walk: 歩き
+  run: 走り
+  rotation: 回転
+  pause: 一時停止
+  reset: リセット
+  skinlib: スキンライブラリ
+  wait: お待ちください…
+  csrf: このページは古いです。再読み込みしてください。
+  user:
+    email: メールアドレス
+    nickname: ニックネーム
+    score: スコア
+    register-at: 登録日時
+  player:
+    owner: 所有者
+    player-name: プレイヤー名
+    previews: テクスチャプレビュー
+    last-modified: 最終更新
+colors:
+  black: 黒
+  white: 白
+  gray: グレー
+  prev: 前の背景
+  next: 次の背景
+vendor:
+  datatable:
+    search: 検索
+    prev: 前
+    next: 次

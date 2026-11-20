@@ -1,0 +1,1806 @@
+/* ============================================================
+   胡桃木皮肤站 · 暖樱白主题 (Handmade Anime Theme)
+   位置: site/public/theme/hutaomu-theme.css (源码资产, 随分支发布)
+   加载: resources/views/shared/head.twig 以 link 标签直连
+   设计: 樱花粉主色 + 奶白玻璃卡片 + 站酷快乐体标题 + 樱花飘落
+   ============================================================ */
+@import url('https://fonts.loli.net/css2?family=ZCOOL+KuaiLe&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+:root {
+  --ht-pink: #f7729c;
+  --ht-pink-deep: #e35a88;
+  --ht-pink-dark: #c4497a;
+  --ht-pink-soft: #ffd7e6;
+  --ht-bg: #fdf6f9;
+  --ht-text: #524a5e;
+  --ht-text-light: #8a7d92;
+  --ht-mint: #5fc7ad;
+  --ht-lav: #9d8cd8;
+  --ht-plum: #463a52;
+  --ht-glass: rgba(255, 255, 255, 0.78);
+  --ht-shadow: 0 6px 24px rgba(247, 114, 156, 0.16);
+  --ht-shadow-hover: 0 12px 32px rgba(247, 114, 156, 0.28);
+  --ht-radius: 16px;
+}
+
+/* ---------- 基础 ---------- */
+body {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  color: var(--ht-text);
+}
+
+/* ---------- 平滑切换 ---------- */
+/* 站内导航: 跨文档视图过渡(Chromium 126+), 旧新页 220ms 交叉淡入,
+   消除整页硬切的「刷新感」; 不支持的浏览器自动回退普通跳转 */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-group(root) {
+  animation-duration: 0.22s;
+}
+
+/* 亮暗切换 + 纯享展示共用: 底色渐变 + 控件退场的 transform/opacity 过渡。
+   必须带 !important——AdminLTE 的 margin-left 过渡规则在级联后方, 会把整个
+   transition 简写覆盖掉(实测: 无 !important 时纯享退场直接瞬变无动画);
+   margin-left/width 并入同一简写保住侧栏折叠动画 */
+body,
+.main-header.navbar,
+.content-wrapper,
+.main-sidebar,
+.main-footer {
+  transition: background-color 0.28s ease, color 0.28s ease,
+              transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease,
+              margin-left 0.3s ease-in-out, width 0.3s ease-in-out !important;
+}
+
+/* ---------- 纯享展示 ---------- */
+/* 开启: 页眉上滑 / 侧栏左滑 / 内容与页脚下沉淡出; 完成态 visibility:hidden
+   彻底退出命中测试, 整页只剩壁纸与浮动设置按钮 */
+body.ht-showcase .main-header { transform: translateY(-110%); }
+body.ht-showcase .main-sidebar { transform: translateX(-110%); }
+body.ht-showcase .content-wrapper { opacity: 0; transform: translateY(6vh); }
+body.ht-showcase .main-footer { opacity: 0; transform: translateY(6vh); }
+body.ht-showcase .ht-petals { opacity: 0 !important; }
+/* 关键: content-wrapper 的入场动画 ht-fade(fill both)会永久锁住 opacity 终值,
+   动画填充在级联里压过声明与过渡——纯享期间必须解除, 否则内容只会瞬间消失 */
+body.ht-showcase .content-wrapper,
+body.ht-showcase .main-footer,
+body.ht-showcase .main-header,
+body.ht-showcase .main-sidebar {
+  animation: none !important;
+}
+body.ht-showcase-done .main-header,
+body.ht-showcase-done .main-sidebar,
+body.ht-showcase-done .content-wrapper,
+body.ht-showcase-done .main-footer,
+body.ht-showcase-done .ht-petals {
+  visibility: hidden;
+}
+.ts-float-trigger {
+  display: none;
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 1035; /* 低于面板 1040: 面板滑出时盖过它 */
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(240, 184, 205, 0.9);
+  background: rgba(255, 252, 253, 0.9);
+  color: var(--ht-pink-deep);
+  font-size: 16px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--ht-shadow);
+}
+.ts-float-trigger:hover { background: var(--ht-pink-soft); }
+body.ht-showcase .ts-float-trigger { display: inline-flex; }
+body.dark-mode .ts-float-trigger {
+  background: rgba(43, 37, 52, 0.92);
+  border-color: rgba(240, 136, 168, 0.45);
+  color: #f088a8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation-duration: 0.01s;
+  }
+  body,
+  .main-header.navbar,
+  .content-wrapper,
+  .main-sidebar,
+  .main-footer {
+    transition: none;
+  }
+}
+
+h1, h2, h3, h4, .navbar-brand, .brand-link {
+  font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  letter-spacing: 0.03em;
+}
+
+::selection {
+  background: var(--ht-pink-soft);
+  color: var(--ht-pink-deep);
+}
+
+/* 滚动条全站视觉隐藏(用户要求): 滚轮/触摸/拖拽滚动全部保留, 只是不渲染滚动条 UI */
+::-webkit-scrollbar { width: 0; height: 0; display: none; }
+* { scrollbar-width: none; }
+
+/* ---------- 通用卡片 ---------- */
+.card {
+  border: none;
+  border-radius: var(--ht-radius);
+  box-shadow: var(--ht-shadow);
+  background: var(--ht-glass);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  overflow: hidden;
+}
+
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid #ffe3ee;
+  color: var(--ht-pink-deep);
+  font-weight: 700;
+}
+
+.card-footer {
+  background: transparent;
+  border-top: 1px dashed #ffd7e6;
+}
+
+/* ---------- 通用按钮 ---------- */
+.btn {
+  border-radius: 999px;
+  transition: all 0.22s ease;
+}
+
+.btn:focus { box-shadow: 0 0 0 3px rgba(247, 114, 156, 0.25) !important; }
+
+.btn-primary {
+  background: #f088a8 !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(233, 116, 152, 0.28);
+}
+
+.btn-primary:hover {
+  background: #e56e94 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 116, 152, 0.35);
+}
+
+/* 表格内的语义小按钮(角色管理的消去/删除、报告页的封禁等):
+   AdminLTE 原生黄/红实底在浅色主题里太扎眼, 且窄列中长按钮会折行断词。
+   改成与卡片头部同款的柔和粉彩底 + 深色字, 禁止换行保持单行胶囊 */
+.table .btn-warning {
+  background: #fff6e0 !important;
+  border: 1px solid #f2e3bd !important;
+  color: #b07d2e !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+}
+
+.table .btn-warning:hover,
+.table .btn-warning:focus {
+  background: #ffefcc !important;
+  color: #96682a !important;
+}
+
+.table .btn-danger {
+  background: #ffe1e6 !important;
+  border: 1px solid #ffd3da !important;
+  color: #d0475e !important;
+  box-shadow: none !important;
+  white-space: nowrap;
+}
+
+.table .btn-danger:hover,
+.table .btn-danger:focus {
+  background: #ffd2da !important;
+  color: #b93850 !important;
+}
+
+/* 深色模式: 粉彩改为半透明深底, 文字提亮 */
+body.dark-mode .table .btn-warning {
+  background: rgba(255, 210, 130, 0.14) !important;
+  border-color: rgba(240, 198, 116, 0.35) !important;
+  color: #f0c674 !important;
+}
+
+body.dark-mode .table .btn-danger {
+  background: rgba(240, 110, 130, 0.16) !important;
+  border-color: rgba(242, 152, 158, 0.35) !important;
+  color: #f2989e !important;
+}
+
+.btn-default, .btn-outline-primary, .btn-outline-dark {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #f3c2d8 !important;
+  color: #92617e !important;
+}
+
+.btn-default:hover, .btn-outline-primary:hover, .btn-outline-dark:hover {
+  background: var(--ht-pink-soft) !important;
+  border-color: var(--ht-pink) !important;
+  color: var(--ht-pink-deep) !important;
+}
+
+/* 皮肤库排序按钮(原橄榄绿) → 樱粉玻璃描边, 与主题统一 */
+.bg-olive {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid #f3c2d8 !important;
+  color: #92617e !important;
+}
+
+.bg-olive:hover {
+  background: var(--ht-pink-soft) !important;
+  border-color: var(--ht-pink) !important;
+  color: var(--ht-pink-deep) !important;
+}
+
+/* 激活态需要压过原生 .bg-olive.btn:not(:disabled):not(.disabled).active(5 类权重) */
+.bg-olive.active,
+.bg-olive.active:hover,
+.bg-olive.btn.active,
+.bg-olive.btn.active:hover,
+.bg-olive.btn:not(:disabled):not(.disabled).active,
+body.dark-mode .btn-group .btn.bg-olive.active {
+  background: #f088a8 !important;
+  background-color: #f088a8 !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+/* 活跃下拉项(原蓝) → 樱粉 */
+.bg-primary { background: var(--ht-pink) !important; }
+
+/* 徽章配色柔化 */
+.bg-teal { background: #63c9b0 !important; }
+.bg-indigo { background: #9d8cd8 !important; }
+.bg-orange { background: #f0a55f !important; }
+
+/* ---------- 表单 ---------- */
+.form-control, .custom-select {
+  border-radius: 12px;
+  border: 1.5px solid #f0d3e0;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ht-text);
+  transition: all 0.2s ease;
+}
+
+.form-control:focus, .custom-select:focus {
+  border-color: var(--ht-pink);
+  box-shadow: 0 0 0 3px rgba(247, 114, 156, 0.18);
+  background: #fff;
+}
+
+.input-group .btn { border-radius: 12px; }
+
+/* 筛选下拉触发钮(原蓝/灰) → 白底粉描边 */
+.input-group .dropdown-toggle {
+  background: #fff !important;
+  color: #ef5e8e !important;
+  border: 1.5px solid #f0d3e0 !important;
+  box-shadow: none !important;
+}
+
+.input-group .dropdown-toggle:hover,
+.input-group .dropdown-toggle.show,
+.input-group .dropdown-toggle:focus {
+  background: var(--ht-pink-soft) !important;
+  color: #e14a7e !important;
+}
+
+.input-group-text {
+  border: 1.5px solid #f0d3e0 !important;
+  background: #fff !important;
+  color: var(--ht-pink-deep) !important;
+  border-radius: 12px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+}
+
+/* 登录页: 图标在输入框右侧(append), 拼接成一整颗胶囊, 外侧边框完整 */
+body.login-page .input-group-append { margin-left: 0 !important; }
+body.login-page .input-group .form-control {
+  border-radius: 12px 0 0 12px !important;
+  border-right: none !important;
+}
+body.login-page .input-group-text {
+  border-radius: 0 12px 12px 0 !important;
+  border-left: none !important;
+}
+body.login-page .input-group:focus-within .form-control,
+body.login-page .input-group:focus-within .input-group-text { border-color: var(--ht-pink) !important; }
+
+.custom-checkbox input:checked + .custom-control-label:before,
+.custom-radio input:checked + .custom-control-label:before {
+  background: var(--ht-pink);
+  border-color: var(--ht-pink);
+}
+
+/* ---------- 导航栏 ---------- */
+.main-header.navbar {
+  background: rgba(255, 255, 255, 0.82) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom: 1px solid rgba(255, 199, 220, 0.6);
+  box-shadow: 0 2px 18px rgba(247, 114, 156, 0.12);
+}
+
+.main-header .navbar-brand {
+  color: var(--ht-pink-deep) !important;
+  font-size: 1.35rem;
+  text-shadow: none;
+}
+
+.main-header .nav-link {
+  color: #7d6c85 !important;
+  font-weight: 500;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.main-header .nav-link:hover {
+  color: var(--ht-pink-deep) !important;
+  background: rgba(255, 215, 230, 0.45);
+}
+
+/* ---------- 主页(登录前) ---------- */
+/* 背景多层兜底(无 JS 时的降级链): 任一图源挂了自动透出下一层, 全挂透出樱粉渐变 */
+/* 实际图源由 JS 每次访问随机选择, 见 custom_theme.js */
+.hp-wrapper {
+  background-image:
+    linear-gradient(rgba(122, 52, 88, 0.10), rgba(122, 52, 88, 0.22)),
+    url('https://www.loliapi.com/acg/'),
+    url('https://t.alcy.cc/ycy'),
+    url('https://www.dmoe.cc/random.php'),
+    linear-gradient(165deg, #f291b6 0%, #fbc2d8 45%, #ffe4ee 100%) !important;
+  background-size: cover, cover, cover, cover, cover;
+  background-position: center, center, center, center, center;
+  background-attachment: fixed, fixed, fixed, fixed, scroll;
+  background-repeat: no-repeat;
+  background-color: #fbc2d8;
+}
+
+#fixed-bg {
+  background-color: #fbc2d8;
+}
+
+.hp-wrapper .navbar.transparent {
+  background: rgba(255, 255, 255, 0.62) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 4px 20px rgba(160, 80, 110, 0.12);
+}
+
+.hp-wrapper .navbar.transparent .navbar-brand,
+.hp-wrapper .navbar.transparent .nav-link,
+.hp-wrapper .navbar.transparent .dropdown-toggle,
+.hp-wrapper .navbar.transparent .navbar-text {
+  color: #7a4b66 !important;
+  text-shadow: none !important;
+}
+
+.hp-wrapper .navbar.transparent .nav-link:hover,
+.hp-wrapper .navbar.transparent .nav-link:focus {
+  background: rgba(239, 94, 142, 0.14);
+  color: #e14a7e !important;
+  border-radius: 10px;
+}
+
+.splash { padding-top: 12vh; }
+
+.splash-head {
+  color: #fff;
+  font-size: 4.2rem;
+  font-weight: 400;
+  text-shadow: 0 3px 0 rgba(190, 70, 120, 0.55), 0 6px 6px rgba(150, 60, 100, 0.35), 0 12px 36px rgba(120, 40, 80, 0.6);
+}
+
+.splash-subhead {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.30);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  padding: 8px 22px;
+  margin: 18px 0 22px;
+  color: #fff;
+  background-color: rgba(160, 70, 110, 0.45);
+  text-shadow: 0 1px 4px rgba(120, 60, 90, 0.55);
+}
+
+.main-button {
+  display: inline-block;
+  background: #f088a8 !important;
+  background-color: #f088a8 !important;
+  border: none !important;
+  color: #fff !important;
+  padding: 11px 34px !important;
+  border-radius: 12px !important;
+  font-size: 1.05rem !important;
+  letter-spacing: 0.05em;
+  box-shadow: 0 3px 10px rgba(233, 116, 152, 0.30);
+  text-shadow: none;
+  transition: all 0.22s ease;
+}
+
+.main-button:hover {
+  background: #e56e94 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(233, 116, 152, 0.40);
+  color: #fff !important;
+  text-decoration: none;
+}
+
+/* 未登录主视觉双按钮容器: 登录 + 注册并排。
+   只作用于 CTA 段落(splash-actions), 不能写成 .splash p —— 会命中 .splash-subhead 破坏胶囊居中 */
+.splash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* 描边版"登录"按钮: 与主色"现在注册"形成主次层级。
+   全透明会压不住花哨壁纸(黑猫/蓝天区文字对比度不足), 用欢迎胶囊同款磨砂白 + 模糊兜底;
+   壁纸在深浅两模式下相同且无滤镜, 故此样式两模式通用。
+   注意必须放在 .main-button:hover 之后, 同特异性靠后才能压住其 color:#fff !important */
+.main-button-ghost {
+  background: rgba(255, 255, 255, 0.55) !important;
+  background-color: rgba(255, 255, 255, 0.55) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--ht-pink-deep) !important;
+  border: 2px solid var(--ht-pink) !important;
+  /* 边框占 4px, 内边距相应减 2px, 保证与主按钮同高(内容 25.2 + 18 + 4 = 25.2 + 22) */
+  padding: 9px 32px !important;
+  box-shadow: none !important;
+}
+
+.main-button-ghost:hover {
+  background: rgba(255, 255, 255, 0.78) !important;
+  background-color: rgba(255, 255, 255, 0.78) !important;
+  color: var(--ht-pink-deep) !important;
+}
+
+/* 主页介绍区 */
+#intro {
+  background: linear-gradient(180deg, #fff9fc, #fdf0f7);
+  color: var(--ht-text);
+}
+
+#intro h1 {
+  color: var(--ht-pink-deep);
+  font-size: 2.4rem;
+}
+
+#intro .fas { color: var(--ht-pink); font-size: 2.6rem; }
+
+#intro h3 { color: var(--ht-text); margin-bottom: 10px; }
+
+#intro .col-lg p { color: var(--ht-text-light); }
+
+/* 主页底部横幅(home-css 后加载会盖掉非 important 规则, 全部 important 压住) */
+#footer-wrap {
+  background: linear-gradient(120deg, #ffeef5, #ffe0ec) !important;
+  color: #a3406b !important;
+}
+
+#footer-wrap p, #footer-wrap .col-lg-6 {
+  color: #a3406b !important;
+  text-shadow: none !important;
+}
+
+#footer-wrap .main-button { box-shadow: 0 4px 14px rgba(239, 94, 142, 0.35); }
+
+#copyright.with-intro { background: #fdf0f7 !important; color: #a4899a !important; }
+#copyright.with-intro a { color: var(--ht-pink-deep) !important; }
+#copyright.without-intro { color: rgba(255, 255, 255, 0.95) !important; text-shadow: 0 1px 4px rgba(120, 40, 80, 0.6); }
+#copyright.without-intro a { color: #ffd7e6 !important; }
+
+/* 侧边栏用户区: 模板的深灰分隔线柔化为樱粉 */
+.user-panel { border-bottom: 1px solid #ffe3ee !important; }
+
+/* ---------- 侧边栏: 折叠 / 悬停展开 ----------
+   原生 AdminLTE 的折叠机制是「标签文字 width:0 + fadeOut/fadeIn 动画」,
+   悬停展开时只淡入文字, 标签始终零宽, 不触发布局重排, 因此不会错位。
+   这里只覆盖几何与配色, 绝不覆盖标签的 display / visibility / width / animation,
+   一旦压掉原生动画, 展开过程中文字就会逐项错位、图标位置跳动。
+*/
+/* 原生 .nav-sidebar 是 flex 容器, flex 项的百分比宽度会按内容的 max-content 解析
+   (折叠时胶囊会被撑到 125px 而不是 41px)。改回 block, 百分比才按侧栏当前宽度解析。 */
+.main-sidebar .nav-sidebar { display: block !important; }
+
+/* 菜单文字全状态禁止换行(展开动画的命门)。
+   原生只给折叠态写了 p{white-space:nowrap;width:0}, 展开态退回 normal;
+   而展开时侧栏宽度从 74px 匀到 250px, 四字标签("配置生成")会按当前宽度
+   逐段折行: 4 行 → 3 行 → 2 行 → 1 行, 胶囊高度被撑到 116px 再回落,
+   观感就是"按钮被扯大、文字一下两行"。这里两态一起锁成 nowrap,
+   文字永远单行, 宽度不够时由 .main-sidebar 的 overflow 裁掉(配合
+   0.18s 延迟淡入, 用户看不到被裁的过程)。 */
+.main-sidebar .nav-sidebar .nav-link p { white-space: nowrap !important; }
+
+/* ---------- 修复: 上游编译 CSS 的媒体查询泄漏 ----------
+   style.7eb5d06.css 中 ".sidebar-collapse .main-sidebar { margin-left: -250px }"
+   是移动端抽屉的滑出规则, 上游本应锁在 @media (max-width:991.98px) 内,
+   这份编译产物却把它裸露在全局。后果: 768-991px 窗口(或桌面缩窗后残留的
+   sidebar-collapse)一折叠, 整个侧栏直接滑出屏幕左缘"消失", 内容区占满全宽。
+   桌面不低于 992px 时, mini 规则(.sidebar-mini.sidebar-collapse 优先级更高)本来就赢,
+   这里只在不低于 768px 时兜底把它按住; 767px 及以下仍走原生抽屉滑出, 不受影响。 */
+@media (min-width: 768px) {
+  .sidebar-collapse .main-sidebar,
+  .sidebar-collapse .main-sidebar::before {
+    margin-left: 0 !important;
+  }
+}
+
+/* 折叠/展开态共用一套几何: 胶囊宽度用百分比而不是固定值。
+   百分比每帧按侧栏当前宽度重新解析, 右缘始终贴在侧栏右缘内 8px;
+   写死宽度(50px)会让胶囊走自己的 .3s 过渡, 和侧栏宽度曲线不同步 ——
+   动画中途胶囊比侧栏窄 50 多 px, 看起来"脱开再回弹"。 */
+/* 折叠态几何: 与展开态共用一套"百分比 + 0.3s 同步滑"的写法, 但缩进改为
+   把整列对到轨道中心(2026-11 修正, 对齐原版 AdminLTE 收起源):
+   轨道 73.6px, 内容盒左缘 8, 内容宽 58; 胶囊 margin-left 5.8 + 宽 46 →
+   胶囊 13.8-59.8(中心 36.8); 图标 padding-left 9.4 → 图标盒 23.2-50.4,
+   中心 36.8, 胶囊内左右留白各 9.4 对称。
+   展开态缩进 12 + 14, 图标在 47.6; 折叠时 margin/padding 各自 0.3s
+   ease-in-out 过渡, 与侧栏宽度动画同拍, 图标从 47.6 平滑滑到 36.8,
+   不再出现"整列贴右、左边空一大条"。 */
+.sidebar-collapse .main-sidebar .sidebar .nav-link {
+  width: calc(100% - 12px) !important;
+  padding: 10px 9.4px !important;
+  margin: 3px 0 3px 5.8px !important;
+  border-radius: 12px !important;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+              margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out !important;
+}
+
+/* 折叠态文字显隐: 用 transition, 不用 animation。
+   动画每次启动都从关键帧的 from 值开始(ht-fade-out 的 from 是 opacity:1), 所以
+   "悬停进入后 0.17s 内又移出"时, 文字会先从 0 瞬间跳到 1、再花 0.1s 淡出 ——
+   这段时间侧栏正在收起或仍是 73px 窄轨, 而原生标签 p 是 width:0 + 溢出可见,
+   文字就被画进窄轨里, 即录屏里"窄条中闪出一整块展开态文字"的鬼影。
+   transition 永远从当前计算值继续, 任何时序都不会跳变。
+   原生的 fadeIn/fadeOut 动画会盖住过渡, 用 animation:none 关掉。 */
+.sidebar-mini.sidebar-collapse .main-sidebar .brand-text,
+.sidebar-mini.sidebar-collapse .main-sidebar .sidebar .nav-link p,
+.sidebar-mini.sidebar-collapse .main-sidebar .user-panel .info,
+.sidebar-mini.sidebar-collapse .main-sidebar .user-panel .badge {
+  animation: none !important;
+  /* 原生的 visibility:hidden 会先一步把文字抹掉, 让淡出失效, 这里强制保留 */
+  visibility: visible !important;
+  opacity: 0 !important;
+  /* 淡出必须与侧栏宽度动画(0.3s ease-in-out)同拍: 若淡得太快(0.1s),
+     文字在侧栏还有 200px 宽时就没了, 用户会看到一块"空白粉板"收缩 */
+  transition: opacity 0.28s ease-in-out !important;
+}
+
+.sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
+.sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-link p,
+.sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .info,
+.sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .badge {
+  opacity: 1 !important;
+  /* 等宽度动画走过大半程(>160px, 标签文字最远 150px)再淡入, 避免文字被窄轨切掉右半截 */
+  transition: opacity 0.12s ease 0.15s !important;
+}
+
+/* 分组标题: 折叠时原生 display:none 会抽走高度导致菜单上移, 这里锁高度并用占位横线代替。
+   文字显隐用 color 过渡(与标签同一套时序): 收起时 0.28s 淡出与宽度同拍;
+   展开时靠下面的 color 延迟过渡把文字推后到轨道变宽之后。
+   标题元素两态都定位, 横线的显隐也交给 opacity 过渡(不再用 display 硬切),
+   这样"横线淡出 / 文字淡入"是交叉的, 不会出现横线瞬间消失、文字凭空冒出。 */
+.sidebar-mini .main-sidebar .nav-sidebar .nav-header { position: relative; }
+.sidebar-mini.sidebar-collapse .main-sidebar .nav-sidebar .nav-header {
+  display: block !important;
+  height: 38px !important;
+  padding: 0 !important;
+  font-size: 0.9rem !important;
+  /* 静止态透明, 显隐交给下面的 color 过渡(不能加 !important 动画, 会盖住过渡) */
+  color: transparent;
+  background-image: none !important;
+  white-space: nowrap !important;
+  transition: color 0.28s ease-in-out;
+}
+.sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-header {
+  color: #9c8296 !important;
+  transition: color 0.12s ease 0.15s;
+}
+/* 展开态(点击汉堡): 文字用与菜单标签同一节奏的延迟淡入(color 0.12s/0.18s),
+   实测若不加这条, color 会在 class 移除的瞬间直接生效, 轨道还只有 74px 时
+   "用户中心 / 浏览 / 管理"就已经整句可见 —— 即用户看到的"凭空出现"。 */
+.sidebar-mini:not(.sidebar-collapse) .main-sidebar .nav-sidebar .nav-header {
+  color: #9c8296 !important;
+  transition: color 0.12s ease 0.18s !important;
+}
+/* 分组占位横线: 与图标列同一条中心线(36.8px = 轨道中心)对齐。
+   标题盒左缘 8 + 16.8 = 24.8(左缘), 宽 24 → 中心 36.8。
+   两态都存在(展开态 opacity:0), 显隐全靠 opacity 过渡, 与文字交叉淡入淡出。 */
+.sidebar-mini .main-sidebar .nav-sidebar .nav-header::after {
+  content: "";
+  position: absolute;
+  left: 16.8px;
+  top: 50%;
+  width: 24px;
+  height: 2px;
+  margin: -1px 0 0 0;
+  border-radius: 2px;
+  background: #ec7ea2;
+  opacity: 0;
+  transition: opacity 0.12s ease 0.15s;
+}
+.sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-header::after {
+  opacity: 1;
+  transition: opacity 0.1s ease 0.2s;
+}
+
+/* 用户区: 高度固定为展开态实测值, 三态等高, 菜单纵向位置零位移 */
+.sidebar .user-panel { height: 103px; }
+
+/* 头像: 保持原生文档流布局(不改 display), 只调 margin-left。
+   展开态头像中心 47.6(与展开态图标列同一中心线); 折叠态随整列滑到
+   轨道中心 36.8(左缘 34.8 - 15 = 19.8, 宽 34 → 中心 36.8)。
+   两态都带 0.3s margin-left 过渡, 与侧栏宽度动画同拍, 悬停进出/折叠展开
+   都是平滑滑动, 不会出现折叠态整列贴右的情况。 */
+.main-sidebar .user-panel .image img {
+  margin-left: -4px !important;
+  transition: margin-left 0.3s ease-in-out;
+}
+.sidebar-collapse .main-sidebar:not(:hover) .user-panel .image img {
+  margin: 0 0 0 -15px !important;
+  transition: margin-left 0.3s ease-in-out;
+}
+/* 折叠态用户区 = 原版收起的样式: 头像 → STAFF 徽章 → 分隔线。
+   原来折叠态把徽章 opacity:0 藏掉, 只留头像下一根短横线; 而徽章在折叠
+   布局里落在 x=30..86(56px 宽), 超出 74px 轨道被裁一半, 所以当初只能藏。
+   这里改成: 徽章保持可见(与原版一致), 通栏 block + text-align:center
+   让 56px 徽章在轨道里居中(落点 9..65, 左右各 9px), 分隔线移到徽章下方。 */
+.sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .user-panel .badge {
+  opacity: 1 !important;
+  margin: 0 !important;
+  transition: none !important;
+}
+.sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .user-panel .d-flex.flex-wrap {
+  display: block !important;
+  /* 抵消 .user-panel 的左右 14px 内边距, 让包装盒拿到面板全宽(58px);
+     否则内容盒只有 30px, text-align:center 对 56px 的徽章会按起始边对齐、往右溢出 */
+  margin: 16px -14px 0 !important;
+  text-align: center;
+}
+/* 头像下方的短横线撤掉(位子让给徽章)。
+   注意不要再往徽章下面加分隔线: 面板下面紧跟着"用户中心"分组占位横线
+   (实测相隔 28px), 两条杠叠在一起看着像画错了 —— 用户区由徽章收尾,
+   分隔交给分组横线, 整列只留一条。 */
+.sidebar-collapse .main-sidebar:not(:hover) .user-panel .image::after { display: none !important; }
+.sidebar-collapse .main-sidebar:hover .user-panel .image::after { display: none !important; }
+
+/* ---------- 取消"悬停展开"(2026-11, 用户反馈: 侧栏像浮在网站前端) ----------
+   AdminLTE 原生的迷你轨道会在鼠标进入时把侧栏从 73.6px 弹到 250px, 且是
+   覆盖在内容之上(z-index 1038, 内容不动) —— 鼠标只要扫过左侧, 内容左侧
+   176px 就被盖住, 观感就是"侧栏一直浮在页面上".
+   这里把悬停行为固定成与静止态一致: 宽度不弹、文字不显、横线不隐、头像不位移,
+   整个折叠态就是一个静态图标轨道; 要完整菜单点汉堡展开(那条路径内容整体让位,
+   本来就不覆盖).
+   下面每条都要写成 :hover 版本 —— 悬停时主题原本的"展开态样式"会接管,
+   只锁宽度会在窄轨道里画出被裁的文字/半截徽章. */
+@media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover,
+  .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused,
+  .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover,
+  .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand).sidebar-focused {
+    width: 4.6rem !important;
+  }
+  .sidebar-mini.sidebar-collapse.layout-fixed .main-sidebar:hover .brand-link { width: 4.6rem !important; }
+
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-link p,
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .info { opacity: 0 !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-header { color: transparent !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-header::after { opacity: 1 !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .image img { margin: 0 0 0 -15px !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .badge { opacity: 1 !important; margin: 0 !important; }
+  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .d-flex.flex-wrap {
+    display: block !important;
+    margin: 16px -14px 0 !important;
+    text-align: center;
+  }
+}
+
+/* 点击汉堡展开(=非悬停路径): 展开态的文字若立刻出现, 会被仍在变宽的侧栏裁成半截字。
+   与悬停展开同一套节奏 —— 延迟 0.18s(此时侧栏已宽过 200px)再淡入。
+   这里用 opacity 过渡, 从折叠态的 0 接着走, 不会出现跳变。 */
+.sidebar-mini:not(.sidebar-collapse) .main-sidebar .sidebar .nav-link p,
+.sidebar-mini:not(.sidebar-collapse) .main-sidebar .brand-text,
+.sidebar-mini:not(.sidebar-collapse) .main-sidebar .user-panel .info,
+.sidebar-mini:not(.sidebar-collapse) .main-sidebar .user-panel .badge {
+  animation: none !important;
+  opacity: 1;
+  transition: opacity 0.12s ease 0.18s;
+}
+/* 分组标题: 展开态的文字淡入交给上面那条 color 过渡(0.12s/0.18s)。
+   这里不能再挂 ht-fade 动画 —— 动画会把整行 opacity 从 0 起步,
+   连带子元素(占位横线)一起在 t=0 就隐形, 交叉淡入就失效了,
+   观感退回"横线瞬间消失 + 文字凭空出现"。 */
+
+/* 侧边栏用户头像: MC 头颅保持方正, 仅轻微圆角 */
+
+/* ---------- 窄窗口文字可见性护栏 ----------
+   上面的"折叠淡出"只属于 >=992px 的 mini 轨道(那里宽度真的会收到 73.6px)。
+   768-991px: 编译 CSS 没有给本宽度段定义 mini 宽度, 侧栏仍是 250px 全宽,
+   文字却跟着 sidebar-collapse 一起淡成 0 —— 菜单只剩图标没有字。
+   767px 及以下: 是抽屉模式, 整个抽屉应该带着文字一起滑走, 而不是先淡掉文字
+   再滑空板(录屏里"收缩时文字乱飘/忽隐忽现"就是这套规则在窄窗口下误触发)。
+   两种宽度下都保持文字可见, 淡出动画只在 >=992px 生效。 */
+@media (max-width: 991.98px) {
+  .sidebar-mini.sidebar-collapse .main-sidebar .brand-text,
+  .sidebar-mini.sidebar-collapse .main-sidebar .sidebar .nav-link p,
+  .sidebar-mini.sidebar-collapse .main-sidebar .user-panel .info,
+  .sidebar-mini.sidebar-collapse .main-sidebar .user-panel .badge {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  .sidebar-mini.sidebar-collapse .main-sidebar .nav-sidebar .nav-header {
+    color: #9c8296 !important;
+    transition: none !important;
+  }
+  .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-header::after {
+    display: none !important;
+  }
+}
+
+/* ---------- 768-991px: 侧栏与内容并排(修"侧栏叠在内容上方") ----------
+   编译 CSS 在 991.98px 及以下就把 .content-wrapper / .main-header 的 margin-left
+   归零(移动端抽屉口径), 但本 build 的抽屉规则只写到 767.98px —— 侧栏在这个
+   宽度段仍是 250px 常驻。两者叠加的结果: 内容从 x=0 铺满、侧栏 absolute
+   叠在最上层, 第一列卡片被压掉一半(用户反馈"侧栏一直浮在网站上方")。
+   767px 及以下仍是抽屉(侧栏滑走 + 内容满宽), 不受影响。 */
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .content-wrapper,
+  .main-header,
+  .main-footer {
+    margin-left: 250px !important;
+  }
+  /* 这个宽度段内容只剩 ~500-740px, 衣柜页的 col-md-8/col-md-4 分栏会把
+     "材质预览"挤到 190px 左右 —— 标题竖排折行、按钮换行。
+     改成上下堆叠: 衣柜占满一行, 预览面板落到下面一行。
+     只作用于含 #closet-list 的那一行, 其它页面布局不受影响。 */
+  .row:has(#closet-list) > [class*="col-"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ---------- 衣柜卡片网格: 自适应列数 ----------
+   原版卡片固定 235px 宽 + flex-wrap, 一排能放几张只看容器宽度:
+   容器 496-737px 之间只能放 2 张, 右侧空白随窗口宽度膨胀 ——
+   实测 1300px 窗口剩 143px(23%)、1400px 剩 210px(30%)、1650px 剩 125px(15%)。
+   改成 grid + auto-fill: 列数随可用宽度自动增减, 每列等分填满整行,
+   不再依赖"窗口宽度刚好是 235 的整数倍"; 最后一行只剩单张时也不会被拉满。
+   只作用于 #closet-list(衣柜页唯一节点), 皮肤库的容器结构不同(子项是链接锚点), 不受影响。 */
+#closet-list .card-body > .d-flex.flex-wrap {
+  display: grid !important;
+  /* 170px 起跳: 848px 这类窄桌面窗口里衣柜列只有 ~395px, 190px 起跳会掉成 1 列大卡 */
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+#closet-list .card-body > .d-flex.flex-wrap > .card {
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+/* 卡片变宽后皮肤预览图仍居中(原图 195px 是给 235px 卡片配的) */
+#closet-list .card-body > .d-flex.flex-wrap > .card .card-body { text-align: center; }
+#closet-list .card-body > .d-flex.flex-wrap > .card .card-body picture img { max-width: 100%; height: auto; }
+
+/* ---------- 登录/注册/找回密码页 ---------- */
+body.login-page {
+  background-image:
+    linear-gradient(rgba(255, 246, 250, 0.42), rgba(253, 235, 244, 0.52)),
+    url('https://www.loliapi.com/acg/'),
+    url('https://t.alcy.cc/ycy'),
+    url('https://www.dmoe.cc/random.php'),
+    linear-gradient(165deg, #f291b6 0%, #fbc2d8 45%, #ffe4ee 100%);
+  background-size: cover, cover, cover, cover, cover;
+  background-position: center, center, center, center, center;
+  background-attachment: fixed, fixed, fixed, fixed, fixed;
+  background-repeat: no-repeat;
+  background-color: #fbc2d8;
+}
+
+.login-box { width: 400px; max-width: 92vw; }
+
+.login-logo a {
+  color: #fff;
+  font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+  font-size: 2.1rem;
+  text-shadow: 0 2px 0 rgba(190, 70, 120, 0.4), 0 6px 18px rgba(120, 40, 80, 0.5);
+  transition: transform 0.2s ease;
+}
+
+.login-logo a:hover { text-decoration: none; transform: scale(1.04); }
+
+.login-card-body {
+  background: rgba(255, 255, 255, 0.82) !important;
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(180, 70, 120, 0.22);
+  color: var(--ht-text);
+}
+
+.login-card-body .input-group .form-control { border-radius: 12px; }
+
+.login-card-body a:not(.btn) { color: var(--ht-pink-deep); }
+
+/* ---------- 登录后面板(侧边栏布局) ---------- */
+body.sidebar-mini { background: var(--ht-bg); }
+
+.content-wrapper {
+  background: var(--ht-bg) !important;
+}
+
+.content-header h1 {
+  color: var(--ht-plum);
+  position: relative;
+  padding-left: 14px;
+}
+
+.content-header h1:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 5px;
+  height: 70%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f9a0bd, #ef5e8e);
+}
+
+/* 侧边栏: 去掉"浮起来"的视觉信号(2026-11, 用户反馈"一直感觉浮在网站前端/一条白带")
+   AdminLTE 给 .main-sidebar 挂了 elevation-3 投影(0 10px 20px rgba(0,0,0,.19)),
+   加上背景是近白的 #fff9fc→#fdf2f8, 而页面底色是粉的 #fdf6f9 ——
+   近白板 + 重投影在粉色页面上就成了一块"浮起来的白板", 折叠成窄轨后
+   侧栏右侧那 14px 近白底还会和内容内边距连成一条白带.
+   处理: 撤掉投影, 换成一条极淡的分隔线; 底色往页面粉调靠, 侧栏与页面自然衔接. */
+/* body.sidebar-mini 前缀(0,2,1)important: 压过 BS6 编译 CSS 的
+   `.main-sidebar { background: initial !important }`——否则侧栏背景透明、
+   品牌区露出 AdminLTE 暗色默认(#343a40) */
+body.sidebar-mini .main-sidebar {
+  background: linear-gradient(180deg, #fff8fc, #fdf3f8) !important;
+  box-shadow: none !important;
+  border-right: 1px solid #f7e2ee !important;
+}
+
+.brand-link {
+  color: var(--ht-pink-deep) !important;
+  border-bottom: 1px solid #ffe3ee !important;
+  font-size: 1.25rem;
+}
+/* 品牌区背景: AdminLTE 的 sidebar-dark-primary 变体给品牌区暗色默认(#343a40),
+   浅色主题下与粉白侧栏割裂——透明化让品牌区融入侧栏渐变底 */
+.main-sidebar .brand-link { background: transparent !important; }
+body.dark-mode .main-sidebar .brand-link { background: rgba(40, 33, 48, 0.9) !important; border-bottom-color: #3a3245 !important; }
+
+.sidebar .nav-link {
+  color: #5f4d68 !important;
+  border-radius: 12px;
+  /* 左边 12px 间距 + 右侧 8px 留白; 100% 是 nav-sidebar 内容宽(侧栏宽 - 16px) */
+  margin: 3px 0 3px 12px !important;
+  width: calc(100% - 12px) !important;
+  padding: 10px 14px;
+  /* 不参与 width 过渡: 胶囊宽度完全跟随侧栏当前宽度,
+     若再叠一条 .3s 的 width 过渡, 两条曲线不同步会让胶囊在动画中途脱开侧栏。
+     margin-left / padding-left 要参与过渡: 折叠时图标列要从 47.6 滑到 36.8
+     (居中口径), 与宽度动画同一条 0.3s ease-in-out 曲线才不会错位。 */
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease,
+              margin-left 0.3s ease-in-out, padding-left 0.3s ease-in-out !important;
+}
+
+.sidebar .nav-link:hover { background: rgba(255, 215, 230, 0.5) !important; color: var(--ht-pink-deep) !important; }
+
+/* 深化菜单文字: AdminLTE 主题变体用三级选择器设色, 这里用四级选择器压过 */
+.sidebar .nav-sidebar .nav-link,
+.sidebar .nav-sidebar .nav-link p { color: #5f4d68 !important; }
+
+.sidebar .nav-link.active {
+  background: #f088a8 !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px rgba(233, 116, 152, 0.28);
+}
+
+.user-panel { padding: 12px 14px !important; }
+.user-panel .info { margin-left: 12px !important; }
+.user-panel .info > a { margin-bottom: 6px; display: inline-block; }
+
+/* 用户区昵称: 原来没设颜色, 吃到了 AdminLTE 给"深色侧栏"配的链接色 #c2c7d0
+   (rgb(194,199,208)) —— 在浅粉侧栏上白得几乎看不清。这里改用主题正文色,
+   深色模式下再切回浅色。 */
+.sidebar .user-panel .info > a { color: #5f4d68 !important; }
+.sidebar .user-panel .info > a:hover { color: var(--ht-pink-deep) !important; }
+body.dark-mode .sidebar .user-panel .info > a { color: #e8dfe8 !important; }
+
+.brand-link { padding: 14px 18px !important; }
+
+.sidebar .nav-sidebar .nav-header {
+  /* 不能加 !important: 会压过折叠态用 color 过渡做的淡出 */
+  color: #9c8296;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+/* 面板内小部件卡片悬浮 */
+.content .card { transition: transform 0.22s ease, box-shadow 0.22s ease; }
+.content .card:hover { box-shadow: var(--ht-shadow-hover); }
+
+/* 表格 */
+.table { color: var(--ht-text); }
+.table thead th { color: var(--ht-pink-deep); border-bottom: 2px solid #ffd7e6; }
+.table td, .table th { border-color: #fdeef4; }
+.table-hover tbody tr:hover { background-color: #fff5f9; }
+
+/* 分页 */
+.pagination .page-link {
+  border-radius: 10px;
+  margin: 0 3px;
+  border: 1px solid #f3d4e2;
+  color: #92617e;
+}
+
+.pagination .page-item.active .page-link {
+  background: #f088a8;
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(233, 116, 152, 0.30);
+}
+
+/* 下拉菜单 */
+.dropdown-menu {
+  border: none;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px rgba(120, 60, 90, 0.18);
+  overflow: hidden;
+  padding: 6px;
+}
+
+/* 展开定位修复: 某些页面样式把 top 改成了固定像素, 导致菜单盖住触发钮 */
+.dropdown-menu.show {
+  top: 100% !important;
+  transform: none !important;
+  margin-top: 6px !important;
+  border-radius: 14px !important;
+}
+
+/* 输入组内的筛选下拉(皮肤库的 皮肤/披风 选择器等): 菜单随内容收缩而不是
+   撑到 Bootstrap 强制的 min-width 10rem——否则紧凑的选中胶囊旁边会拖出一条
+   菜单底色的空白(宽度由最宽的菜单项决定, 视觉上贴合内容) */
+.input-group .dropdown-menu {
+  min-width: 0;
+  width: max-content;
+}
+
+/* 展开态触发钮去蓝 */
+.btn.dropdown-toggle.show,
+.btn.dropdown-toggle.show:hover,
+.btn.dropdown-toggle.show:focus,
+.input-group .btn-default.dropdown-toggle.show,
+.btn-group .btn-default.dropdown-toggle.show {
+  background: var(--ht-pink-soft) !important;
+  color: #e14a7e !important;
+  border-color: #f3c2d8 !important;
+  box-shadow: none !important;
+}
+
+.dropdown-item {
+  color: #6d5c75;
+  border-radius: 10px;
+  /* margin auto 让胶囊在菜单里居中: 菜单宽度由最宽项决定, 窄项左对齐会
+     显得右边距比左边距大(皮肤库筛选下拉实测左 10px / 右 19px) */
+  margin: 2px auto;
+  padding: 7px 14px;
+  /* 紧凑胶囊: 按钮 width:auto 收缩到文字宽度, 选中高亮只包住文字不拉长 */
+  width: auto;
+  transition: all 0.15s ease;
+}
+.dropdown-item:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); }
+
+/* 悬停/选中态加 !important 压过 Bootstrap 默认的蓝色高亮
+   (.dropdown-item.active 默认 #007bff, 皮肤库筛选等以按钮元素构成的
+   下拉里选中项会露蓝); 选中项加粗以示区分 */
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background: var(--ht-pink-soft) !important;
+  color: var(--ht-pink-deep) !important;
+}
+
+.dropdown-item.active,
+.dropdown-item:active {
+  background: var(--ht-pink-soft) !important;
+  color: var(--ht-pink-dark) !important;
+  font-weight: 600;
+}
+
+/* ---------- 主题切换器(页眉调色板 → 右侧滑入面板) ----------
+   面板 DOM 由 JS 搬到 body 下(脱离页眉 backdrop-filter 的包含块), 故选择器不带 #theme-switcher 前缀 */
+.ts-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100vh;
+  background: rgba(255, 252, 253, 0.96);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(247, 114, 156, 0.2);
+  box-shadow: -12px 0 40px rgba(120, 60, 90, 0.18);
+  z-index: 1040;
+  transform: translateX(calc(100% + 24px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 1rem;
+}
+.ts-panel.open { transform: translateX(0); }
+body.dark-mode .ts-panel,
+body.dark-mode.ht-panel .ts-panel {
+  background: rgba(34, 29, 43, 0.96);
+  border-left-color: rgba(247, 114, 156, 0.22);
+}
+.ts-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem 0.7rem;
+  border-bottom: 1px dashed rgba(247, 114, 156, 0.25);
+}
+.ts-panel-title { font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 1.05rem; color: var(--ht-pink-deep); }
+body.dark-mode .ts-panel-title { color: #f2b8cc; }
+.ts-panel-close {
+  background: none;
+  border: none;
+  color: #8e7c9a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  transition: color 0.15s ease;
+}
+.ts-panel-close:hover { color: var(--ht-pink-deep); }
+.ts-panel-content { padding: 1rem 1.1rem 0.6rem; }
+.ts-section-title {
+  font-size: 0.74rem;
+  color: #8e7c9a;
+  letter-spacing: 0.05em;
+  margin: 0.9rem 0 0.45rem;
+}
+body.dark-mode .ts-section-title { color: #8e7c9a; }
+.ts-panel-footer {
+  margin-top: auto;
+  padding: 0.6rem 1rem;
+  border-top: 1px dashed rgba(247, 114, 156, 0.2);
+  color: #8e7c9a;
+  font-size: 0.68rem;
+  text-align: center;
+}
+.ts-btn.disabled { opacity: 0.5; pointer-events: none; }
+a.ts-btn { text-decoration: none; }
+/* 面板展开动画(与 reduced-motion 联动) */
+.ts-panel {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ts-panel { transition: none; }
+}
+.ts-row { display: flex; align-items: center; gap: 8px; margin: 4px 0 10px; flex-wrap: wrap; }
+.ts-modes { display: flex; gap: 6px; }
+.ts-modes .ts-btn { flex: 1 1 0; }
+.ts-label { color: #8e7c9a; font-size: 0.84rem; }
+.ts-actions { display: flex; flex-direction: column; gap: 6px; }
+.ts-actions .ts-btn { width: 100%; justify-content: flex-start; }
+.ts-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: #ffffff;
+  border: 1px solid #f0b8cd;
+  border-radius: 10px;
+  color: #7a5566;
+  font-size: 0.85rem;
+  padding: 9px 13px;
+  transition: all 0.15s ease;
+}
+.ts-btn:hover {
+  background: var(--ht-pink-soft);
+  border-color: #ec9cb8;
+  color: var(--ht-pink-deep);
+}
+/* 换一张进行中: 图标旋转 + 半透明禁点, 明确「在干活」而不是按钮失效 */
+.ts-btn.busy {
+  opacity: 0.55;
+  pointer-events: none;
+}
+.ts-btn.busy .ts-icon {
+  animation: ht-spin 0.9s linear infinite;
+}
+@keyframes ht-spin {
+  to { transform: rotate(360deg); }
+}
+.ts-btn.active {
+  background: var(--ht-pink-soft);
+  border-color: #ec9cb8;
+  color: var(--ht-pink-dark);
+  font-weight: 600;
+}
+.ts-btn.disabled { opacity: 0.5; pointer-events: none; }
+a.ts-btn { text-decoration: none; }
+.ts-icon { flex: none; }
+.ts-btn:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); }
+.ts-btn.active { background: var(--ht-pink-soft); border-color: #f0a0c0; color: var(--ht-pink-dark); font-weight: 600; }
+
+/* 开关(仿参考项目的 toggle) */
+.ts-switch {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.12);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+.ts-switch.active { background: var(--ht-pink); }
+.ts-switch .ts-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.ts-switch.active .ts-thumb { transform: translateX(16px); }
+.ts-intervals { gap: 4px; }
+.ts-intervals .ts-btn { flex: 1 1 0; padding: 7px 6px; font-size: 0.8rem; text-align: center; }
+
+/* 收藏网格 */
+.ts-favs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 6px 0; }
+.ts-fav-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; cursor: pointer; }
+.ts-fav-preview { width: 100%; height: 100%; background-size: cover; background-position: center; transition: transform 0.2s; }
+.ts-fav-item:hover .ts-fav-preview { transform: scale(1.08); }
+.ts-fav-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  background: rgba(0, 0, 0, 0.55);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.6rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.ts-fav-item:hover .ts-fav-remove { opacity: 1; }
+.ts-empty { color: #8e7c9a; font-size: 0.75rem; text-align: center; padding: 6px 0; }
+
+/* 深色模式: 切换器跟随暗夜樱 */
+body.dark-mode #theme-switcher .ts-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #463c50;
+  color: #d9c9d4;
+}
+body.dark-mode #theme-switcher .ts-btn:hover { background: rgba(247, 114, 156, 0.18); color: #f2b8cc; }
+body.dark-mode #theme-switcher .ts-btn.active {
+  background: rgba(247, 114, 156, 0.28);
+  border-color: rgba(247, 114, 156, 0.4);
+  color: #f2b8cc;
+}
+body.dark-mode .ts-label, body.dark-mode .ts-empty { color: #8e7c9a; }
+
+/* ---------- 全站过渡与动画 ---------- */
+/* 页面切换: 内容区淡入, 卡片级联上浮(每次导航重放)。
+   fill 用 backwards 而非 both——both 会让动画结束后永久覆盖 transform,
+   皮肤库卡片等元素的悬停位移将失效 */
+.content-wrapper { animation: ht-fade 0.3s ease both; }
+.content-wrapper .main-footer { animation: ht-fade 0.35s ease both; }
+
+/* 按钮: 按下回弹(全站) */
+.btn:active { transform: translateY(1px) scale(0.97); }
+.btn-primary:active { transform: translateY(0) scale(0.96); }
+.ts-btn:active { transform: translateY(1px) scale(0.97); }
+
+/* 主题切换: 关键表面颜色平滑过渡(明暗互换不生硬); 壁纸图片不参与过渡 */
+body,
+.content-wrapper,
+.main-sidebar,
+.main-header.navbar,
+.card,
+.card-header,
+.main-footer,
+.dropdown-menu,
+.form-control,
+.table td,
+.table th {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* 无障碍: 系统开启「减少动态效果」时全部禁用 */
+@media (prefers-reduced-motion: reduce) {
+  .content-wrapper, .content .card, .content-wrapper .content-header,
+  .main-footer, .sidebar .nav-link, .splash-head,
+  .splash-subhead, .splash .main-button, .login-logo, .login-card-body,
+  .dropdown-menu.show { animation: none !important; }
+  .btn:active, .ts-btn:active { transform: none !important; }
+}
+
+.dropdown-menu.show {
+  animation: ht-drop 0.18s ease both;
+  transform-origin: top center;
+}
+
+/* 模态框 */
+.modal-content {
+  border: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 16px 50px rgba(120, 60, 90, 0.25);
+  overflow: hidden;
+}
+
+.modal-header { border-bottom: 1px dashed #ffd7e6; }
+.modal-footer { border-top: 1px dashed #ffd7e6; }
+
+.modal.fade .modal-dialog {
+  transform: translate(0, 14px) scale(0.96);
+  transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+.modal.show .modal-dialog { transform: translate(0, 0) scale(1); }
+
+/* SweetAlert2 弹窗 */
+.swal2-popup {
+  border-radius: 22px !important;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif !important;
+  animation: ht-pop 0.3s ease both;
+}
+
+.swal2-title { color: var(--ht-text); }
+.swal2-styled { border-radius: 999px !important; }
+
+/* Tooltip / Popover / Toast */
+.tooltip-inner {
+  border-radius: 10px !important;
+  background: rgba(70, 58, 82, 0.92) !important;
+  padding: 6px 12px;
+}
+
+.tooltip.show { animation: ht-fade 0.15s ease both; }
+
+.popover {
+  border: none !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px rgba(120, 60, 90, 0.2);
+}
+
+.popover-header { background: transparent; border-bottom: 1px dashed #ffd7e6; border-radius: 13px 13px 0 0; }
+
+.toast {
+  border: none;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 30px rgba(120, 60, 90, 0.2);
+  overflow: hidden;
+  animation: ht-rise 0.3s ease both;
+}
+
+.toast-header { background: transparent; border-bottom: 1px dashed #ffd7e6; }
+
+/* Select2(后台设置页下拉) */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+  border-radius: 12px !important;
+  border: 1.5px solid #f0d3e0 !important;
+}
+
+.select2-dropdown { border-radius: 12px !important; border: none !important; box-shadow: 0 8px 30px rgba(120, 60, 90, 0.18); }
+.select2-results__option--highlighted { background: var(--ht-pink) !important; border-radius: 8px; }
+
+/* ---------- 皮肤库 ---------- */
+.skinlib-wrapper, #skinlib-container { background: transparent; }
+
+body.layout-top-nav .content-wrapper { background: var(--ht-bg) !important; }
+
+/* 皮肤卡片悬浮效果(编译产物卡片) */
+.d-flex.flex-wrap .card {
+  border-radius: 14px;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.d-flex.flex-wrap .card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--ht-shadow-hover);
+}
+
+/* 皮肤库头部标题 */
+.content-header h1 { font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
+
+/* ---------- 页脚 ---------- */
+.main-footer {
+  background: transparent !important;
+  border-top: 1px dashed #f3cfe0;
+  color: var(--ht-text-light);
+}
+
+.main-footer a { color: var(--ht-pink-deep); }
+
+/* AdminLTE 彩色卡片头部柔化(保留语义色) */
+.card-primary .card-header { background: var(--ht-pink-soft) !important; color: var(--ht-pink-deep) !important; }
+.card-warning .card-header { background: #fff2dd !important; color: #c08a3e !important; }
+.card-danger .card-header { background: #ffe1e6 !important; color: #d95c6c !important; }
+.card-success .card-header { background: #ddf5ec !important; color: #3e9c7f !important; }
+.card-info .card-header { background: #e2f2fb !important; color: #4a90b8 !important; }
+.card-primary, .card-warning, .card-danger, .card-success, .card-info { border-top: none; }
+
+/* 提示条柔化 */
+.alert { border-radius: 12px; border: none; }
+.alert-primary { background: var(--ht-pink-soft) !important; color: var(--ht-pink-deep) !important; }
+.alert-warning { background: #fff2dd !important; color: #a9762f !important; }
+.alert-danger { background: #ffe1e6 !important; color: #c95b6a !important; }
+.alert-success { background: #ddf5ec !important; color: #2f8a6e !important; }
+.alert-info { background: #e2f2fb !important; color: #3f81a7 !important; }
+
+/* ---------- 全站动效 ---------- */
+@keyframes ht-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ht-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ht-drop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ht-pop {
+  0%   { opacity: 0; transform: scale(0.92) translateY(10px); }
+  65%  { opacity: 1; transform: scale(1.02) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 页面内容入场 */
+.content-header h1 { animation: ht-fade 0.45s ease both; }
+
+.content .card { animation: ht-rise 0.45s ease backwards; }
+.content .card:nth-child(1) { animation-delay: 0.03s; }
+.content .card:nth-child(2) { animation-delay: 0.08s; }
+.content .card:nth-child(3) { animation-delay: 0.13s; }
+.content .card:nth-child(4) { animation-delay: 0.18s; }
+.content .card:nth-child(5) { animation-delay: 0.23s; }
+.content .card:nth-child(n+6) { animation-delay: 0.28s; }
+
+/* 皮肤库卡片错落入场 */
+.d-flex.flex-wrap .card { animation: ht-rise 0.4s ease backwards; }
+.d-flex.flex-wrap .card:nth-child(1) { animation-delay: 0.02s; }
+.d-flex.flex-wrap .card:nth-child(2) { animation-delay: 0.06s; }
+.d-flex.flex-wrap .card:nth-child(3) { animation-delay: 0.10s; }
+.d-flex.flex-wrap .card:nth-child(4) { animation-delay: 0.14s; }
+.d-flex.flex-wrap .card:nth-child(5) { animation-delay: 0.18s; }
+.d-flex.flex-wrap .card:nth-child(6) { animation-delay: 0.22s; }
+.d-flex.flex-wrap .card:nth-child(7) { animation-delay: 0.26s; }
+.d-flex.flex-wrap .card:nth-child(8) { animation-delay: 0.30s; }
+.d-flex.flex-wrap .card:nth-child(9) { animation-delay: 0.34s; }
+.d-flex.flex-wrap .card:nth-child(10) { animation-delay: 0.38s; }
+.d-flex.flex-wrap .card:nth-child(11) { animation-delay: 0.42s; }
+.d-flex.flex-wrap .card:nth-child(12) { animation-delay: 0.46s; }
+.d-flex.flex-wrap .card:nth-child(n+13) { animation-delay: 0.5s; }
+
+/* 登录/主页入场 */
+.login-logo { animation: ht-fade 0.4s ease both; }
+.login-card-body { animation: ht-rise 0.5s ease both; }
+.splash-head { animation: ht-rise 0.5s ease both; }
+.splash-subhead { animation: ht-rise 0.5s ease 0.12s both; }
+.splash .main-button { animation: ht-rise 0.5s ease 0.24s both; }
+
+/* 侧边栏项入场 */
+.sidebar .nav-link { animation: ht-rise 0.4s ease both; }
+.sidebar .nav-item:nth-child(1) .nav-link { animation-delay: 0.05s; }
+.sidebar .nav-item:nth-child(2) .nav-link { animation-delay: 0.10s; }
+.sidebar .nav-item:nth-child(3) .nav-link { animation-delay: 0.15s; }
+.sidebar .nav-item:nth-child(4) .nav-link { animation-delay: 0.20s; }
+.sidebar .nav-item:nth-child(5) .nav-link { animation-delay: 0.25s; }
+.sidebar .nav-item:nth-child(n+6) .nav-link { animation-delay: 0.3s; }
+
+/* 按钮按压反馈 */
+.btn:active { transform: scale(0.96); }
+
+/* 分页悬停 */
+.pagination .page-link { transition: all 0.15s ease; }
+.pagination .page-link:hover { transform: translateY(-1px); border-color: var(--ht-pink); color: var(--ht-pink-deep); }
+
+/* 用户减少动态偏好: 关闭所有装饰动画 */
+@media (prefers-reduced-motion: reduce) {
+  *, *:before, *:after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- 圆角统一修正 ---------- */
+/* 输入组: 全员 12px 圆角并留间隙, 消除拼接直角 */
+.input-group > .form-control,
+.input-group > .custom-select,
+.input-group .input-group-prepend > *,
+.input-group .input-group-append > * {
+  border-radius: 12px !important;
+}
+
+.input-group .input-group-prepend { margin-right: 6px !important; }
+.input-group .input-group-append { margin-left: 6px !important; }
+
+/* 按钮组: 每个按钮独立 12px 圆角 + 间隙 */
+.btn-group > .btn { border-radius: 12px !important; margin-right: 6px; }
+.btn-group > .btn:last-child { margin-right: 0; }
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+.btn-group > .btn:not(:first-child) {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+}
+
+/* 卡片内部贴边元素交给父级圆角裁切, 消除角落白缝 */
+.card-header, .card-body, .card-footer, .card-img-top { border-radius: 0 !important; }
+
+/* 头像: Minecraft 头颅保持方正, 轻微圆角 + 像素锐化 */
+.bs-avatar { border-radius: 4px !important; image-rendering: pixelated; }
+.user-panel img { border-radius: 4px !important; image-rendering: pixelated; }
+
+/* 徽章胶囊化 */
+.badge { border-radius: 999px !important; padding: 3px 10px; }
+
+/* 分页首尾/禁用按钮统一 10px 圆角(压过 Bootstrap 的 4px) */
+.pagination .page-item:first-child .page-link,
+.pagination .page-item:last-child .page-link,
+.pagination .page-item.disabled .page-link {
+  border-radius: 10px !important;
+}
+
+/* ---------- 樱花飘落(JS 注入 .ht-petals) ---------- */
+.ht-petals {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  overflow: hidden;
+}
+
+.ht-petals i {
+  position: absolute;
+  top: -24px;
+  left: var(--l);
+  width: var(--s);
+  height: var(--s);
+  background: radial-gradient(circle at 30% 30%, #ffd3e2, #f99cbc);
+  border-radius: 100% 0 100% 0;
+  opacity: var(--o);
+  transform: rotate(0deg);
+  animation: ht-fall var(--d) linear var(--p) infinite;
+}
+
+@keyframes ht-fall {
+  0%   { transform: translate3d(0, -30px, 0) rotate(0deg); }
+  25%  { transform: translate3d(28px, 25vh, 0) rotate(90deg); }
+  50%  { transform: translate3d(-16px, 50vh, 0) rotate(180deg); }
+  75%  { transform: translate3d(24px, 75vh, 0) rotate(270deg); }
+  100% { transform: translate3d(-8px, 108vh, 0) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ht-petals { display: none; }
+}
+
+/* ---------- 暗色模式(暗夜樱) ---------- */
+/* 底色: 纵向梅紫渐变; content-wrapper 透明让渐变贯通, 避免上下割裂
+   注意 background 不能加 !important——会压过 JS 内联设置的二次元壁纸
+   (ht-panel 壁纸页不受影响——柔光规则特异性更高) */
+body.dark-mode { background: linear-gradient(180deg, #1e1826, #251e2f); color: #e8dfe8; }
+body.dark-mode .content-wrapper { background: transparent !important; }
+
+/* 卡片: 暗玻璃 + 樱粉描边, 换掉灰底灰框的呆板感 */
+body.dark-mode .card {
+  background: rgba(43, 37, 52, 0.82) !important;
+  border: 1px solid rgba(247, 114, 156, 0.16);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* 卡片头部统一深色, 消灭亮粉/薄荷绿 header */
+body.dark-mode .card-header,
+body.dark-mode .card-primary .card-header,
+body.dark-mode .card-success .card-header,
+body.dark-mode .card-warning .card-header,
+body.dark-mode .card-danger .card-header,
+body.dark-mode .card-info .card-header {
+  background: rgba(56, 46, 66, 0.55) !important;
+  color: #f2e4ee !important;
+  border-bottom: 1px solid rgba(247, 114, 156, 0.14) !important;
+}
+body.dark-mode .card-header .card-title,
+body.dark-mode .card-header .text-bold { color: #f2e4ee !important; }
+body.dark-mode .card-footer { background: transparent !important; border-top: 1px solid #3a3245 !important; }
+
+body.dark-mode .content-header h1 { color: #f2e7ee !important; }
+
+body.dark-mode .table { color: #d9c9d4 !important; }
+body.dark-mode .table thead th { color: #f2b8cc !important; border-bottom-color: #3a3245 !important; }
+body.dark-mode .table td, body.dark-mode .table th { border-color: #3a3245 !important; }
+body.dark-mode .table-hover tbody tr:hover { background-color: rgba(247, 114, 156, 0.10) !important; }
+
+body.dark-mode .main-sidebar { background: rgba(40, 33, 48, 0.92) !important; border-right: 1px solid rgba(247, 114, 156, 0.16) !important; }
+body.dark-mode .brand-link { color: var(--ht-pink) !important; border-bottom-color: #3a3245 !important; }
+body.dark-mode .sidebar .nav-link { color: #c9b8d0 !important; }
+body.dark-mode .sidebar .nav-link:hover { background: rgba(247, 114, 156, 0.22) !important; color: #f2b8cc !important; }
+body.dark-mode .sidebar .nav-sidebar .nav-link,
+body.dark-mode .sidebar .nav-sidebar .nav-link p { color: #c9b8d0 !important; }
+body.dark-mode .sidebar .nav-link.active { background: #f088a8 !important; color: #fff !important; }
+body.dark-mode .sidebar .nav-sidebar .nav-header { color: #8e7c9a; }
+body.dark-mode .user-panel { border-bottom-color: #3a3245 !important; }
+
+body.dark-mode .dropdown-menu { background: rgba(43, 37, 52, 0.96) !important; border: 1px solid rgba(247, 114, 156, 0.16); }
+body.dark-mode .dropdown-item { color: #d9c9d4 !important; }
+body.dark-mode .dropdown-item:hover { background: rgba(247, 114, 156, 0.18) !important; color: #f2b8cc !important; }
+body.dark-mode .dropdown-item.active,
+body.dark-mode .dropdown-item:active { background: rgba(247, 114, 156, 0.28) !important; color: #f2b8cc !important; }
+
+body.dark-mode .form-control, body.dark-mode .custom-select { background: #241f2d !important; border-color: #463c50 !important; color: #ece1ea !important; }
+body.dark-mode .modal-content { background: rgba(43, 37, 52, 0.98) !important; }
+body.dark-mode .input-group-text { background: #2b2534 !important; border-color: #463c50 !important; color: #f2b8cc !important; }
+
+body.dark-mode .btn-default, body.dark-mode .bg-olive { background: #2b2534 !important; border-color: #463c50 !important; color: #e8b7c8 !important; }
+body.dark-mode .btn-default:hover, body.dark-mode .bg-olive:hover { background: rgba(247, 114, 156, 0.15) !important; }
+body.dark-mode .bg-olive.active { background: #f088a8 !important; color: #fff !important; border-color: transparent !important; }
+
+/* 暗色下的统计色块: 饱和实底改半透明浅色, 与暗底融合 */
+body.dark-mode .bg-teal { background: rgba(99, 201, 176, 0.16) !important; color: #8adec2 !important; }
+body.dark-mode .bg-maroon { background: rgba(240, 136, 168, 0.16) !important; color: #f2b8cc !important; }
+
+/* 暗色: 卡片顶部彩色描边压暗为中性细线, 避免青绿高亮突兀 */
+body.dark-mode .card.card-primary,
+body.dark-mode .card.card-success,
+body.dark-mode .card.card-info,
+body.dark-mode .card.card-warning,
+body.dark-mode .card.card-danger { border-top-color: rgba(255, 255, 255, 0.12) !important; }
+
+/* 暗色: 顶部导航栏(深色磨砂玻璃 + 樱粉描边, 与浅色页眉配方对齐) */
+body.dark-mode .main-header.navbar {
+  background: rgba(34, 29, 43, 0.88) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border-bottom: 1px solid rgba(247, 114, 156, 0.16) !important;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.45) !important;
+}
+body.dark-mode .main-header .navbar-brand { color: var(--ht-pink) !important; }
+body.dark-mode .main-header .nav-link { color: #d9c9d4 !important; }
+body.dark-mode .main-header .nav-link:hover {
+  background: rgba(247, 114, 156, 0.16) !important;
+  color: #f2b8cc !important;
+}
+
+/* 暗色: 衣柜/皮肤库卡片内的浅灰底改为与卡片一致 */
+body.dark-mode .card-body { background-color: #2b2534 !important; }
+body.dark-mode .bg-light { background-color: #322b3c !important; }
+
+/* 暗色: 模板渐变蓝按钮改为纯色粉(去渐变, 与主题统一) */
+body.dark-mode .bg-gradient-primary,
+body.dark-mode .btn.bg-gradient-primary {
+  background: #f088a8 !important;
+  background-image: none !important;
+  border: 0 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* ---------- 移动端 ---------- */
+@media (max-width: 768px) {
+  /* 移动端统一圆角尺度: 收一档, 饱满但不夸张 */
+  :root { --ht-radius: 14px; }
+
+  /* fixed 背景在移动端性能差且 Safari 兼容差, 改为滚动 */
+  .hp-wrapper { background-attachment: scroll, scroll, scroll, scroll !important; }
+  body.login-page { background-attachment: scroll, scroll, scroll, scroll, scroll; }
+
+  /* 文字与布局 */
+  .splash-head { font-size: 2.6rem; }
+  .splash { padding-top: 18vh; }
+  .splash-subhead { font-size: 0.85rem; padding: 6px 16px; max-width: 88vw; }
+  .login-box { width: 92vw; }
+  .login-card-body { border-radius: 16px; }
+  .main-header .navbar-brand { font-size: 1.1rem; }
+  #intro h1 { font-size: 1.8rem; }
+  .content-header h1 { font-size: 1.4rem; }
+
+  /* 卡片与弹窗圆角统一 */
+  .card { border-radius: 14px; }
+  .dropdown-menu { border-radius: 12px; }
+  .modal-content { border-radius: 16px; }
+  .swal2-popup { border-radius: 18px !important; width: 92vw !important; max-width: 360px !important; }
+  .toast { border-radius: 12px; }
+
+  /* 输入组/按钮组在小屏允许换行, 避免横向溢出 */
+  .input-group { flex-wrap: wrap; gap: 6px; }
+  .input-group .input-group-prepend { margin-right: 0 !important; }
+  .input-group .input-group-append { margin-left: 0 !important; }
+  .btn-group { flex-wrap: wrap; gap: 6px; }
+  .btn-group > .btn { margin-right: 0; }
+
+  /* 触控目标加大 */
+  .btn { padding: 9px 22px; }
+  .nav-link { padding-top: 8px; padding-bottom: 8px; }
+
+  /* 皮肤库卡片两列排布时保持紧凑 */
+  .d-flex.flex-wrap .card { animation-duration: 0.35s; }
+
+  /* 主页底部横幅留白收紧 */
+  #footer-wrap { padding: 24px 0; }
+}
+
+/* 超小屏(手机竖排)再收一档圆角 */
+@media (max-width: 420px) {
+  .splash-head { font-size: 2.1rem; }
+  .card { border-radius: 12px; }
+  .modal-content { border-radius: 14px; }
+}
+
+/* ---------- 登录后面板壁纸化(全站面板页) ---------- */
+/* 登录后的所有页面由 JS 加 ht-panel 类并铺随机壁纸(无樱花);
+   内容区做半透明柔光让壁纸透出, 浓度由后台「个性化」下发到 CSS 变量
+   --ht-panel-dim / --ht-panel-dim-dark(JS 写在根元素, 缺省值见下方 var 兜底);
+   卡片保持 --ht-glass 玻璃质感, 侧栏维持实底不参与 */
+body.ht-panel .content-wrapper {
+  background: rgba(253, 246, 249, var(--ht-panel-dim, 0.5)) !important;
+  /* 1px 内边距阻断塌陷: 页面最后一张卡片的 margin-bottom(如皮肤库大卡 16px)原本
+     会穿透 content-wrapper 底缘, 在页脚上方露出一条生壁纸缝; 断开塌陷后
+     边距留在柔光纸内部被盖住, 视觉无缝 */
+  padding-bottom: 1px;
+}
+
+/* 深色模式: 柔光换成暗紫黑半透明, 壁纸在暗色下仍隐约可见 */
+body.dark-mode.ht-panel .content-wrapper {
+  background: rgba(30, 25, 38, var(--ht-panel-dim-dark, 0.72)) !important;
+}
+
+/* 皮肤库容器卡透明化: 皮肤库把筛选栏+全部皮肤卡+分页包在一张近满屏的巨型卡片里,
+   0.78 玻璃 + blur 会把壁纸完全盖死。画廊页让这张容器卡透明, 壁纸直接透上来,
+   筛选控件与皮肤小卡各自保持玻璃质感; 阴影一并去掉以免透明底上留灰色框影。
+   :has 定位「内部包含皮肤卡网格的顶层卡」, 不支持 :has 的老浏览器优雅降级为原样 */
+body.ht-panel .content > .card:has(.d-flex.flex-wrap .card) {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* 侧栏与页脚在壁纸页同为磨砂玻璃: 壁纸从整页透出, 不再被侧栏实底挡死、
+   页脚文字直接压在壁纸上。配方与顶部导航栏一致(0.82 白 + blur14),
+   保证菜单文字/昵称等既有配色依旧可读; 壁纸开关关闭(body 无 ht-panel)时自动还原实底 */
+body.ht-panel .main-sidebar {
+  background: rgba(253, 246, 249, 0.82) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  backdrop-filter: blur(14px) saturate(1.3);
+}
+
+body.ht-panel .main-sidebar .brand-link {
+  background: transparent !important;
+}
+
+body.dark-mode.ht-panel .main-sidebar {
+  background: rgba(40, 33, 48, 0.82) !important;
+}
+
+/* 页脚与内容区同质: 同一柔光变量、同样不加模糊, 壁纸纹理跨过内容区底缘
+   到页脚连续不断(此前页脚单独 0.72+blur10, 与内容区的清晰壁纸在底缘形成割裂) */
+body.ht-panel .main-footer {
+  background: rgba(253, 246, 249, var(--ht-panel-dim, 0.5)) !important;
+  /* 皮肤库等布局会给页脚留 margin-top, 露出一条生壁纸缝(实测 16px), 壁纸页归零贴合 */
+  margin-top: 0 !important;
+}
+
+body.dark-mode.ht-panel .main-footer {
+  background: rgba(30, 25, 38, var(--ht-panel-dim-dark, 0.72)) !important;
+}
+
+/* ---------- 固定骨架(页眉/侧栏常驻视口) ---------- */
+/* body 的 layout-navbar-fixed / layout-fixed 类由模板按登录态输出:
+   AdminLTE 负责页眉固定与内容区顶部 3.5rem 补偿, 这里补侧栏内部的独立滚动——
+   侧栏内容超出视口时自己滚动, 不牵动主页面; 未超出时无滚动条 */
+body.layout-fixed .main-sidebar .sidebar {
+  height: calc(100vh - 3.5rem);
+  overflow-y: auto;
+  /* overflow-y 设为 auto 后 overflow-x 会随之变成可滚动, 菜单内容略超宽时
+     会在底部出现一条横向滚动条——横向直接隐藏 */
+  overflow-x: hidden;
+  /* 滚动条 UI 隐藏但保留滚轮/触摸滚动: scrollbar-width 给 Firefox/新 Chrome,
+     ::-webkit-scrollbar 给旧 Chromium(压过主题全局粉色滚动条样式) */
+  scrollbar-width: none;
+}
+
+body.layout-fixed .main-sidebar .sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 侧栏本体(aside)自身: 菜单文字单行超出 250px 时会触发 aside 的横向滚动条
+   (overflow-x: auto + 全局粉色滚动条样式 = 页面底部的粉色横条),
+   固定骨架下横向裁掉并隐藏滚动条 UI, 竖向由编译样式的 overflow-y: hidden 维持 */
+body.layout-fixed .main-sidebar {
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+body.layout-fixed .main-sidebar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- 壁纸过渡层(面板页, 双层交叉淡入) ---------- */
+.ht-wp-layer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ---------- 主题切换平滑过渡 ---------- */
+/* 明暗互换时关键表面颜色渐变; 壁纸图片本身不参与(由过渡层负责) */
+body,
+.content-wrapper,
+.main-sidebar,
+.main-header.navbar,
+.card,
+.card-header,
+.main-footer,
+.dropdown-menu,
+.form-control,
+.table td,
+.table th {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.content .card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}

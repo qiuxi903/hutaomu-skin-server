@@ -1,0 +1,101 @@
+---
+sign-success: チェックインしました。:score スコアを獲得しました。
+announcement: お知らせ
+no-unread: 新着通知はありません。
+verification:
+  disabled: メール認証は利用できません。
+  frequent-mail: 送信ボタンのクリックが速すぎます。60 秒お待ちください。
+  verified: アカウントはすでに認証済みです。
+  success: 認証リンクを送信しました。受信箱をご確認ください。
+  failed: '認証リンクの送信に失敗しました。詳細: :msg'
+  mail:
+    title: :sitename でアカウントを認証
+    message: このメールアドレスで :sitename のアカウントが登録されたため、このメールをお送りしています。
+    reset: 'アカウントを認証するにはここをクリック: <a href=":url">:url</a>'
+    ignore: アカウントを登録していない場合は、さらに操作を行う必要はありません。
+score-intro:
+  title: スコアとは？
+  introduction: |
+    大量のテクスチャのアップロードや、プレイヤーの気軽な登録といった行為を防ぐため、スコアシステムを導入しています。
+    プレイヤーの追加、テクスチャのアップロード、スキンライブラリのアイテムのクローゼット追加のいずれもスコアを消費します。
+    :return-score
+
+    新規ユーザーには初めに :initial_score スコアが付与され、毎日の簽到で :score-from ~ :score-to スコアを獲得できます。
+  will-return-score: プレイヤー・テクスチャ・クローゼットアイテムを削除すると、スコアは返還されます。
+  no-return-score: プレイヤー・テクスチャ・クローゼットアイテムを削除しても、スコアは返還されません。
+  rates:
+    storage: ':score スコア = 1 KB の保存容量'
+    player: ':score スコア = 1 プレイヤー'
+    closet: ':score スコア = 1 クローゼットアイテム'
+closet:
+  add:
+    success: :name をクローゼットに追加しました。
+    repeated: このテクスチャはすでに追加されています。
+    not-found: このテクスチャが見つかりません。
+    lack-score: クローゼットに追加するのにスコアが足りません。
+  rename:
+    success: アイテムの名前を :name に変更しました。
+  remove:
+    success: テクスチャをクローゼットから削除しました。
+    non-existent: そのテクスチャはクローゼットに存在しません。
+player:
+  login-notice: 今後はメールアドレスの代わりに、所有しているプレイヤー名でログインできます。
+  player-name-rule:
+    official: プレイヤー名には文字・数字・アンダースコアのみ使用できます。
+    cjk: プレイヤー名には文字・数字・アンダースコアに加え、漢字（CJK 統合漢字）も使用できます。
+    utf8: プレイヤー名は UTF-8 文字列である必要があります。
+    custom: このサイトではカスタムのプレイヤー名ルールが適用されています。詳しくは管理者にお問い合わせください。
+  player-name-length: プレイヤー名は :min 文字以上 :max 文字以内で指定してください。
+  add:
+    repeated: そのプレイヤー名はすでに登録されています。
+    lack-score: プレイヤーを追加するのにスコアが足りません。
+    success: プレイヤー :name を追加しました。
+  delete:
+    success: プレイヤー :name を削除しました。
+  rename:
+    repeated: そのプレイヤー名は使用されています。別の名前を選んでください。
+    success: プレイヤー :old の名前を :new に変更しました。
+  set:
+    success: テクスチャをプレイヤー :name に適用しました。
+  clear:
+    success: プレイヤー :name のテクスチャをリセットしました。
+profile:
+  avatar:
+    title: アバターを変更しますか？
+    notice: クローゼット内の任意のスキンの右下にある歯車アイコン「<i class="fa fa-cog"></i>」をクリックし、「アバターに設定」を選ぶと、そのスキンの頭部をアバターとして切り取ります。このようなアイコンが表示されない場合は、広告ブロック拡張機能を無効にしてお試しください。
+    wrong-type: マントをアバターに設定することはできません。
+    success: 新しいアバターを設定しました。
+    reset: アバターをリセット
+  password:
+    title: パスワードの変更
+    old: 現在のパスワード
+    new: 新しいパスワード
+    confirm: パスワード（確認）
+    button: パスワードを変更
+    wrong-password: 現在のパスワードが正しくありません。
+    success: パスワードを更新しました。再度ログインしてください。
+  nickname:
+    title: ニックネームの変更
+    empty: ニックネームが設定されていません。
+    success: ニックネームを :nickname に更新しました。
+  email:
+    title: メールアドレスの変更
+    new: 新しいメールアドレス
+    password: 現在のパスワード
+    button: メールアドレスを変更
+    wrong-password: パスワードが正しくありません。
+    existed: そのメールアドレスはすでに使用されています。
+    success: メールアドレスを更新しました。再度ログインしてください。
+  delete:
+    title: アカウントの削除
+    notice: :site のアカウントを本当に削除しますか？
+    admin: 管理者アカウントは削除できません。
+    button: アカウントを削除する
+    modal-title: 続行するにはパスワードの入力が必要です
+    modal-notice: |
+      アカウントを削除しようとしています。
+      この操作は元に戻せません！バックアップも、復元も、やり直しの魔法もありません。
+      覚悟はいいですか？
+    password: 現在のパスワード
+    wrong-password: パスワードが正しくありません。
+    success: アカウントを削除しました。
