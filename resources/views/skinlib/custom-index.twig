@@ -4,7 +4,9 @@
 
 {% block content %}
   {# 皮肤库首页: 服务端渲染, 筛选/搜索/排序/可见性全部走 URL 参数(PJAX 友好) #}
-  <div class="content-header d-flex flex-wrap align-items-center">
+  <section class="content">
+  <div class="container-fluid">
+  <div class="content-header d-flex flex-wrap align-items-center mb-2">
     <h1 class="mb-0"><i class="fas fa-archive"></i> {{ trans('general.skinlib') }}</h1>
     <span class="text-muted ml-3">共 {{ textures.total() }} 个材质</span>
     {% if authed %}
@@ -15,10 +17,10 @@
   </div>
 
   {# ── 筛选栏 ─────────────────────────────── #}
-  <div class="card card-primary card-outline sl-filter-card">
-    <div class="card-body p-2">
+  <div class="card sl-filter-card">
+    <div class="card-body p-2 px-3">
       <div class="d-flex flex-wrap align-items-center sl-filter">
-        {# 类型 chips #}
+        <span class="sl-filter-label"><i class="fas fa-shapes mr-1"></i>类型</span>
         <div class="sl-chip-group mr-3 mb-1">
           {% set typeChips = [
             {key: 'all',  label: '全部'},
@@ -29,12 +31,13 @@
           ] %}
           {% for chip in typeChips %}
             <a class="sl-chip {{ filter == chip.key ? 'active' : '' }}"
-               href="{{ url('skinlib') }}?{{ query|merge({filter: chip.key, page: 1})|url_encode }}">{{ chip.label }}</a>
+               href="{{ url('skinlib') }}?{{ (query|default({}))|merge({filter: chip.key, page: 1})|url_encode }}">{{ chip.label }}</a>
           {% endfor %}
         </div>
 
         {# 可见性 chips: 管理员三态; 玩家=全部/仅公开/仅我的; 游客无此项 #}
         {% if authed %}
+          <span class="sl-filter-label"><i class="fas fa-eye mr-1"></i>可见</span>
           <div class="sl-chip-group mr-3 mb-1">
             {% if is_admin %}
               {% set visChips = [
@@ -52,17 +55,17 @@
             {% endif %}
             {% for chip in visChips %}
               <a class="sl-chip sl-chip-vis {{ visibility == chip.key ? 'active' : '' }}"
-                 href="{{ url('skinlib') }}?{{ query|merge({visibility: chip.key, page: 1})|url_encode }}"
+                 href="{{ url('skinlib') }}?{{ (query|default({}))|merge({visibility: chip.key, page: 1})|url_encode }}"
                  title="{{ is_admin ? '管理员可查看全部私密内容' : '' }}">{{ chip.label }}</a>
             {% endfor %}
           </div>
         {% endif %}
 
         {# 搜索 + 排序 #}
-        <form class="d-flex flex-wrap align-items-center ml-auto mb-1" method="get" action="{{ url('skinlib') }}">
+        <form class="d-flex flex-wrap align-items-center ml-auto mt-1" method="get" action="{{ url('skinlib') }}">
           <input type="hidden" name="filter" value="{{ filter }}">
           <input type="hidden" name="visibility" value="{{ visibility }}">
-          <div class="input-group input-group-sm mr-2" style="width: 200px;">
+          <div class="input-group input-group-sm mr-2 sl-search">
             <input type="text" name="keyword" class="form-control" placeholder="搜索材质名…"
                    value="{{ keyword|e }}">
             <div class="input-group-append">
@@ -134,19 +137,19 @@
       <nav class="sl-pagination">
         <ul class="pagination pagination-sm mb-0">
           <li class="page-item {{ textures.currentPage() == 1 ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ url('skinlib') }}?{{ query|merge({page: textures.currentPage() - 1})|url_encode }}"><i class="fas fa-angle-left"></i></a>
+            <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: textures.currentPage() - 1})|url_encode }}"><i class="fas fa-angle-left"></i></a>
           </li>
           {% for p in 1..textures.lastPage() %}
             {% if p == 1 or p == textures.lastPage() or (p >= textures.currentPage() - 2 and p <= textures.currentPage() + 2) %}
               <li class="page-item {{ p == textures.currentPage() ? 'active' : '' }}">
-                <a class="page-link" href="{{ url('skinlib') }}?{{ query|merge({page: p})|url_encode }}">{{ p }}</a>
+                <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: p})|url_encode }}">{{ p }}</a>
               </li>
             {% elseif p == textures.currentPage() - 3 or p == textures.currentPage() + 3 %}
               <li class="page-item disabled"><span class="page-link">…</span></li>
             {% endif %}
           {% endfor %}
           <li class="page-item {{ textures.currentPage() == textures.lastPage() ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ url('skinlib') }}?{{ query|merge({page: textures.currentPage() + 1})|url_encode }}"><i class="fas fa-angle-right"></i></a>
+            <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: textures.currentPage() + 1})|url_encode }}"><i class="fas fa-angle-right"></i></a>
           </li>
         </ul>
       </nav>
@@ -181,4 +184,6 @@
       });
     })();
   </script>
+  </div>
+  </section>
 {% endblock %}

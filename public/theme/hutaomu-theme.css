@@ -1806,40 +1806,21 @@ body,
 }
 
 /* ---------- 皮肤库(服务端渲染版) ---------- */
-/* 筛选栏 */
-.sl-filter-card { border-radius: 16px; }
-.sl-chip {
-  display: inline-block;
-  padding: 4px 14px;
-  margin: 2px 3px;
-  border-radius: 999px;
-  background: #fff;
-  border: 1px solid #f0b8cd;
-  color: #7a5566;
-  font-size: 0.85rem;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-.sl-chip:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); text-decoration: none; }
-.sl-chip.active {
-  background: var(--ht-pink);
-  border-color: var(--ht-pink);
-  color: #fff;
-  font-weight: 600;
-}
-.sl-chip-vis { border-style: dashed; }
-.sl-chip-vis.active { background: var(--ht-lav); border-color: var(--ht-lav); }
-
-/* 材质网格 */
+/* 防溢出关键: 网格轨道的 1fr 隐式 min 是 auto, 会被 nowrap 长文本撑大导致
+   整格溢出容器(实测横向滚条)——卡片必须 min-width:0, 截断元素必须有 overflow */
 .sl-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
   gap: 14px;
+  padding: 0 4px;
 }
 .sl-card {
   position: relative;
+  min-width: 0;               /* 防轨道被内容撑爆 */
   border-radius: 16px;
   border: 1px solid rgba(240, 184, 205, 0.5);
+  background: rgba(255, 252, 253, 0.82);
+  backdrop-filter: blur(10px);
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   animation: ht-fade 0.3s ease backwards;
@@ -1848,16 +1829,16 @@ body,
   transform: translateY(-3px);
   box-shadow: var(--ht-shadow-hover);
 }
-.sl-card-link { display: block; color: inherit; text-decoration: none; }
+.sl-card-link { display: block; color: inherit; text-decoration: none; min-width: 0; }
 .sl-preview {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: contain;
-  background: linear-gradient(160deg, rgba(255, 240, 246, 0.9), rgba(255, 214, 230, 0.6));
+  background: linear-gradient(160deg, rgba(255, 240, 246, 0.92), rgba(255, 214, 230, 0.62));
   padding: 8px;
 }
-.sl-card-body { padding: 9px 12px 11px; }
+.sl-card-body { padding: 9px 12px 11px; min-width: 0; }
 .sl-name {
   font-weight: 600;
   font-size: 0.9rem;
@@ -1870,10 +1851,59 @@ body,
   gap: 9px;
   font-size: 0.74rem;
   margin-top: 3px;
-  white-space: nowrap;
   overflow: hidden;
 }
+.sl-meta span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 0 1 auto;
+}
 .sl-meta .text-muted { color: var(--ht-text-light) !important; }
+.sl-meta span:nth-child(1) { flex: 1 1 auto; }  /* 上传者名优先截断 */
+
+/* 筛选栏: 玻璃卡贴合主题, 与页眉留距; 窄屏自动换行 */
+.sl-filter-card {
+  border-radius: 16px;
+  background: rgba(255, 252, 253, 0.78);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid rgba(240, 184, 205, 0.55);
+  margin-bottom: 16px;
+}
+.sl-filter { row-gap: 6px; }
+.sl-filter-label {
+  font-size: 0.72rem;
+  color: var(--ht-text-light);
+  margin-right: 2px;
+  align-self: center;
+  white-space: nowrap;
+}
+.sl-chip-group { display: flex; flex-wrap: wrap; align-items: center; }
+.sl-chip {
+  display: inline-block;
+  padding: 4px 14px;
+  margin: 2px 3px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #f0b8cd;
+  color: #7a5566;
+  font-size: 0.85rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.sl-chip:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); text-decoration: none; }
+.sl-chip.active {
+  background: linear-gradient(135deg, var(--ht-pink), var(--ht-pink-deep));
+  border-color: var(--ht-pink-deep);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 3px 10px rgba(247, 114, 156, 0.3);
+}
+.sl-chip-vis { border-style: dashed; }
+.sl-chip-vis.active { background: linear-gradient(135deg, var(--ht-lav), #8573c4); border-color: #8573c4; }
+.sl-search { width: 190px; max-width: 100%; }
 
 /* 徽章 */
 .sl-badges {
@@ -1883,6 +1913,8 @@ body,
   display: flex;
   gap: 4px;
   pointer-events: none;
+  max-width: calc(100% - 46px);
+  flex-wrap: wrap;
 }
 .badge.sl-badge-private {
   background: rgba(70, 58, 82, 0.85);
@@ -1903,10 +1935,10 @@ body,
 .sl-card.sl-private .sl-preview {
   background: repeating-linear-gradient(
     -45deg,
-    rgba(253, 246, 249, 0.9),
-    rgba(253, 246, 249, 0.9) 10px,
-    rgba(255, 222, 235, 0.7) 10px,
-    rgba(255, 222, 235, 0.7) 20px
+    rgba(253, 246, 249, 0.92),
+    rgba(253, 246, 249, 0.92) 10px,
+    rgba(255, 222, 235, 0.72) 10px,
+    rgba(255, 222, 235, 0.72) 20px
   );
 }
 
@@ -1937,12 +1969,14 @@ body,
 .sl-pagination .page-item.disabled .page-link { opacity: 0.5; }
 
 /* 暗色分支 */
-body.dark-mode .sl-chip { background: rgba(43, 37, 52, 0.9); border-color: rgba(240, 136, 168, 0.4); color: #d8c8e0; }
+body.dark-mode .sl-filter-card { background: rgba(43, 37, 52, 0.85); border-color: rgba(240, 136, 168, 0.4); }
+body.dark-mode .sl-chip { background: rgba(56, 48, 68, 0.9); border-color: rgba(240, 136, 168, 0.4); color: #d8c8e0; }
 body.dark-mode .sl-chip:hover { background: rgba(240, 136, 168, 0.2); color: #f0a0bc; }
-body.dark-mode .sl-chip.active { background: var(--ht-pink); color: #fff; }
+body.dark-mode .sl-chip.active { background: linear-gradient(135deg, var(--ht-pink), var(--ht-pink-deep)); color: #fff; }
 body.dark-mode .sl-card { background: rgba(43, 37, 52, 0.85); border-color: rgba(240, 136, 168, 0.35); }
 body.dark-mode .sl-name { color: #efe6f4; }
 body.dark-mode .sl-meta .text-muted { color: #a795b5 !important; }
+body.dark-mode .sl-filter-label { color: #a795b5; }
 body.dark-mode .sl-preview { background: linear-gradient(160deg, rgba(56, 48, 68, 0.9), rgba(70, 58, 82, 0.7)); }
 body.dark-mode .sl-card.sl-private .sl-preview {
   background: repeating-linear-gradient(
@@ -1956,3 +1990,10 @@ body.dark-mode .sl-card.sl-private .sl-preview {
 body.dark-mode .sl-privacy-toggle { background: rgba(43, 37, 52, 0.92); border-color: rgba(240, 136, 168, 0.45); color: #f088a8; }
 body.dark-mode .sl-pagination .page-link { background: rgba(43, 37, 52, 0.9); border-color: rgba(240, 136, 168, 0.4); color: #d8c8e0; }
 body.dark-mode .sl-pagination .page-item.active .page-link { background: var(--ht-pink); color: #fff; }
+
+/* 窄屏自适应 */
+@media (max-width: 767.98px) {
+  .sl-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .sl-search { width: 100%; }
+  .sl-filter .ml-auto { margin-left: 0 !important; width: 100%; }
+}
