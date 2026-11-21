@@ -63,7 +63,7 @@ class SkinlibController extends Controller
         $user = Auth::user();
         $isAdmin = $user && $user->isAdmin();
 
-        $type = $request->input('filter', 'all');           // all | skin | steve | alex | cape
+        $type = $request->input('filter', 'skin');          // skin(含 steve/alex) | steve | alex | cape
         $keyword = trim((string) $request->input('keyword', ''));
         $sort = $request->input('sort', 'time');            // time | likes | size
         $visibility = $request->input('visibility', 'all'); // all | public | private | mine
@@ -120,7 +120,8 @@ class SkinlibController extends Controller
 
         return view('skinlib.custom-index')->with([
             'textures' => $textures,
-            'query' => $request->query->all(),
+            /* 去掉 page: 加载更多按钮由 JS 追加页码 */
+            'query' => collect($request->query->all())->except('page')->all(),
             'filter' => $type,
             'keyword' => $keyword,
             'sort' => $sort,

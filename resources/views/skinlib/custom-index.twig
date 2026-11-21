@@ -26,10 +26,7 @@
         <span class="sl-filter-label"><i class="fas fa-shapes mr-1"></i>类型</span>
         <div class="sl-chip-group mr-3 mb-1">
           {% set typeChips = [
-            {key: 'all',  label: '全部'},
             {key: 'skin', label: '皮肤'},
-            {key: 'steve', label: 'Steve'},
-            {key: 'alex', label: 'Alex'},
             {key: 'cape', label: '披风'},
           ] %}
           {% for chip in typeChips %}
@@ -39,27 +36,19 @@
         </div>
 
         {# 可见性 chips: 管理员三态; 玩家=全部/仅公开/仅我的; 游客无此项 #}
-        {% if authed %}
+        {% if is_admin %}
+          {# 可见性筛选仅管理员: 玩家本来就只能看到公开+自己的 #}
           <span class="sl-filter-label"><i class="fas fa-eye mr-1"></i>可见</span>
           <div class="sl-chip-group mr-3 mb-1">
-            {% if is_admin %}
-              {% set visChips = [
-                {key: 'all', label: '全部'},
-                {key: 'public', label: '仅公开'},
-                {key: 'private', label: '仅私密'},
-                {key: 'mine', label: '我的'},
-              ] %}
-            {% else %}
-              {% set visChips = [
-                {key: 'all', label: '全部'},
-                {key: 'public', label: '仅公开'},
-                {key: 'mine', label: '我的'},
-              ] %}
-            {% endif %}
+            {% set visChips = [
+              {key: 'all', label: '全部'},
+              {key: 'public', label: '仅公开'},
+              {key: 'private', label: '仅私密'},
+            ] %}
             {% for chip in visChips %}
               <a class="sl-chip sl-chip-vis {{ visibility == chip.key ? 'active' : '' }}"
                  href="{{ url('skinlib') }}?{{ (query|default({}))|merge({visibility: chip.key, page: 1})|url_encode }}"
-                 title="{{ is_admin ? '管理员可查看全部私密内容' : '' }}">{{ chip.label }}</a>
+                 title="管理员可查看全部私密内容">{{ chip.label }}</a>
             {% endfor %}
           </div>
         {% endif %}
@@ -135,27 +124,16 @@
       {% endfor %}
     </div>
 
-    {# ── 分页 ─────────────────────────────── #}
-    {% if textures.lastPage() > 1 %}
-      <nav class="sl-pagination">
-        <ul class="pagination pagination-sm mb-0">
-          <li class="page-item {{ textures.currentPage() == 1 ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: textures.currentPage() - 1})|url_encode }}"><i class="fas fa-angle-left"></i></a>
-          </li>
-          {% for p in 1..textures.lastPage() %}
-            {% if p == 1 or p == textures.lastPage() or (p >= textures.currentPage() - 2 and p <= textures.currentPage() + 2) %}
-              <li class="page-item {{ p == textures.currentPage() ? 'active' : '' }}">
-                <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: p})|url_encode }}">{{ p }}</a>
-              </li>
-            {% elseif p == textures.currentPage() - 3 or p == textures.currentPage() + 3 %}
-              <li class="page-item disabled"><span class="page-link">…</span></li>
-            {% endif %}
-          {% endfor %}
-          <li class="page-item {{ textures.currentPage() == textures.lastPage() ? 'disabled' : '' }}">
-            <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: textures.currentPage() + 1})|url_encode }}"><i class="fas fa-angle-right"></i></a>
-          </li>
-        </ul>
-      </nav>
+    {# ── 加载更多(替代分页): 主题 JS 自动补满最后一行 #}
+    {% if textures.hasMorePages() %}
+      <div class="sl-more-wrap">
+        <button type="button" class="btn sl-more" id="sl-more"
+                data-next="{{ textures.currentPage() + 1 }}"
+                data-last="{{ textures.lastPage() }}"
+                data-url="{{ url('skinlib') }}?{{ (query|default({}))|url_encode }}">
+          <i class="fas fa-angle-down mr-1"></i>加载更多
+        </button>
+      </div>
     {% endif %}
   {% endif %}
 

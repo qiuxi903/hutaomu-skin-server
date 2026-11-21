@@ -1997,3 +1997,17 @@ body.dark-mode .sl-pagination .page-item.active .page-link { background: var(--h
   .sl-search { width: 100%; }
   .sl-filter .ml-auto { margin-left: 0 !important; width: 100%; }
 }
+
+/* 加载更多按钮(皮肤库, 替代分页) */
+.sl-more-wrap { display: flex; justify-content: center; margin-top: 18px; }
+.sl-more {
+  border-radius: 999px;
+  border: 1px solid #f0b8cd;
+  background: rgba(255, 252, 253, 0.9);
+  color: #7a5566;
+  padding: 8px 26px;
+  transition: all 0.15s ease;
+}
+.sl-more:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); }
+body.dark-mode .sl-more { background: rgba(43, 37, 52, 0.9); border-color: rgba(240, 136, 168, 0.4); color: #d8c8e0; }
+body.dark-mode .sl-more:hover { background: rgba(240, 136, 168, 0.2); color: #f0a0bc; }

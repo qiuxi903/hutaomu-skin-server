@@ -546,6 +546,7 @@
       setAutoTimer();
     }
     bindSwitcher();
+    if (document.querySelector('.sl-grid')) { htSkinlibFill(false); }
 
     /* ---------- 皮肤库列表页(服务端渲染): 委托绑定, PJAX 换页后仍生效 ---------- */
     document.addEventListener('click', function (e) {
@@ -608,6 +609,69 @@
       }
     }, true);
 
+    /* ---------- 皮肤库列表: 加载更多 + 自动补满最后一行 ---------- */
+    /* 服务端渲染首页后, 末行空洞用下一页卡片补齐(替代翻页的割裂感);
+       「加载更多」按钮追加整页。两路都走同一取数: 抓下一页 HTML 提取卡片 */
+    function htSkinlibFill(force) {
+      var grid = document.querySelector('.sl-grid');
+      var more = document.getElementById('sl-more');
+      if (!grid || !more || more.dataset.busy === '1') return;
+      var next = parseInt(more.dataset.next, 10) || 0;
+      var last = parseInt(more.dataset.last, 10) || 0;
+      var cards = grid.querySelectorAll('.sl-card');
+      if (!cards.length) return;
+      var cols = 0, top0 = cards[0].offsetTop;
+      for (var k = 0; k < cards.length; k++) {
+        if (cards[k].offsetTop === top0) cols++; else break;
+      }
+      if (!cols) return;
+      var remainder = cards.length % cols;
+      var holes = remainder === 0 ? 0 : cols - remainder;
+      if (!force && holes === 0) return; /* 行已满: 不自动取 */
+      if (next > last) {
+        more.parentNode.innerHTML = '<div class="text-muted small text-center py-3">没有更多材质了</div>';
+        return;
+      }
+      more.dataset.busy = '1';
+      more.innerHTML = '<i class="fas fa-spin fa-spinner mr-1"></i>加载中…';
+      var url = more.dataset.url + (more.dataset.url.indexOf('?') === -1 ? '?' : '&') + 'page=' + next;
+      fetch(url, { credentials: 'same-origin' })
+        .then(function (r) { return r.text(); })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var nodes = doc.querySelectorAll('.sl-grid .sl-card');
+          for (var k2 = 0; k2 < nodes.length; k2++) {
+            grid.appendChild(document.importNode(nodes[k2], true));
+          }
+          more.dataset.next = String(next + 1);
+          more.dataset.busy = '0';
+          more.innerHTML = '<i class="fas fa-angle-down mr-1"></i>加载更多';
+          if (next + 1 > last) {
+            more.parentNode.innerHTML = '<div class="text-muted small text-center py-3">没有更多材质了</div>';
+            return;
+          }
+          /* 末行仍有空洞: 自动再补一轮(上限 4 轮防死循环) */
+          var cards2 = grid.querySelectorAll('.sl-card');
+          var top02 = cards2[0].offsetTop, cols2 = 0;
+          for (var k3 = 0; k3 < cards2.length; k3++) {
+            if (cards2[k3].offsetTop === top02) cols2++; else break;
+          }
+          var holes2 = cards2.length % cols2 === 0 ? 0 : cols2 - (cards2.length % cols2);
+          if (holes2 > 0 && parseInt(more.dataset.next, 10) <= parseInt(more.dataset.last, 10)) {
+            var tries = parseInt(more.dataset.tries || '0', 10) + 1;
+            if (tries < 4) { more.dataset.tries = String(tries); htSkinlibFill(false); return; }
+          }
+          more.dataset.tries = '0';
+        })
+        .catch(function () {
+          more.dataset.busy = '0';
+          more.innerHTML = '<i class="fas fa-angle-down mr-1"></i>加载更多';
+        });
+    }
+    document.addEventListener('click', function (e) {
+      var more = e.target && e.target.closest ? e.target.closest('#sl-more') : null;
+      if (more) { e.preventDefault(); htSkinlibFill(true); }
+    });
     /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
     /* 详情页 React 侧栏没有隐私开关——注入到 #side 同级, 不干扰 React 渲染 */
     if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
@@ -776,6 +840,7 @@
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
           oldCW.parentNode.replaceChild(document.importNode(newCW, true), oldCW);
+          if (document.getElementById('sl-more')) { setTimeout(function () { htSkinlibFill(false); }, 60); }
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);
