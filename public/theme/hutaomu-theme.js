@@ -571,6 +571,34 @@
       if (sel && sel.form) sel.form.submit();
     });
 
+    /* ---------- 退出登录: 确定性处理 ----------
+       bundle 的退出链路依赖 React 确认框(showModal), 该链路在玻璃拟态站点
+       上过于脆弱(层叠陷阱/事件失联)——这里在捕获阶段拦截, 用原生 confirm
+       + 直接 fetch 注销, 不再依赖弹窗栈; stopImmediatePropagation 阻断
+       bundle 同按钮的确认框处理器 */
+    document.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('#logout-button') : null;
+      if (!btn) return;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+      var finish = function () {
+        window.location.href = (window.blessing && blessing.base_url) || '/';
+      };
+      var doLogout = function () {
+        fetch('/auth/logout', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+            'Accept': 'application/json',
+          },
+        }).then(function (r) { return r.json(); }).then(function () {
+          finish();
+        }).catch(function () { finish(); });
+      };
+      if (window.confirm('确定退出登录？')) doLogout();
+    }, true);
+
     /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
     /* 详情页 React 侧栏没有隐私开关——注入到 #side 同级, 不干扰 React 渲染 */
     if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
