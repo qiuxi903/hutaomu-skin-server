@@ -2060,11 +2060,17 @@ body.dark-mode.ht-skin-show .content-wrapper {
 
 /* 预览卡本体: 与详细信息卡一致的奶白玻璃——壁纸隐约透出,
    模型浮在柔和磨砂上(画布已真透明, 玻璃浓度即最终观感) */
-body.ht-skin-show .card:has(#previewer),
-body.ht-skin-show .card:has(#previewer) .card-body {
+body.ht-skin-show .card:has(#previewer) {
   background: rgba(255, 252, 253, 0.55) !important;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
+}
+/* 卡体透明: 卡壳 55% 一层玻璃足够——卡壳+卡体双层叠加会复合成 ~80% 白,
+   等于没有透明效果(此前"没变化"的根因) */
+body.ht-skin-show .card:has(#previewer) .card-body {
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 body.dark-mode.ht-skin-show .card:has(#previewer),
 body.dark-mode.ht-skin-show .card:has(#previewer) .card-body {
