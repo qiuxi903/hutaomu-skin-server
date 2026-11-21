@@ -635,11 +635,23 @@
     (function () {
       var jq = window.jQuery || window.$;
       if (!jq || !jq.fn || !jq.fn.on) return;
+      /* 只搬「真的被玻璃祖先困住」的弹窗。无条件搬到 body 会拆散 React 弹窗
+         (blessing.notify.showModal 确认框等)——React 事件托管在渲染容器上,
+         搬出容器后确定按钮点击失联(取消按钮走 jQuery data-dismiss 不受影响) */
+      function trappedInGlass(el) {
+        var p = el.parentElement;
+        while (p && p !== document.body) {
+          var cs = getComputedStyle(p);
+          var bf = cs.backdropFilter || cs.webkitBackdropFilter;
+          if (bf && bf !== 'none') return true;
+          p = p.parentElement;
+        }
+        return false;
+      }
       jq(document).on('show.bs.modal', function (e) {
         var el = e.target;
-        if (el && el !== document.body && el.parentElement !== document.body) {
-          document.body.appendChild(el);
-        }
+        if (!el || el === document.body || !el.parentElement || el.parentElement === document.body) return;
+        if (trappedInGlass(el)) document.body.appendChild(el);
       });
     })();
 
