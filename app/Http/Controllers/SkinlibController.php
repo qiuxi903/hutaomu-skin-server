@@ -115,7 +115,9 @@ class SkinlibController extends Controller
         $textures = $query
             ->orderBy($sortBy, 'desc')
             ->orderBy('textures.tid', 'desc')
-            ->paginate(20)
+            /* 每页 24: 可被 6/4/3 整除——固定列数断点(6/4/3)下每页恰好整行,
+               不再需要 JS 后补卡片 */
+            ->paginate(24)
             ->appends($request->query());
 
         return view('skinlib.custom-index')->with([
@@ -166,7 +168,9 @@ class SkinlibController extends Controller
             })
             ->join('users', 'uid', 'uploader')
             ->select(['tid', 'name', 'type', 'uploader', 'public', 'likes', 'nickname'])
-            ->paginate(20);
+            /* 每页 24: 可被 6/4/3 整除——固定列数断点(6/4/3)下每页恰好整行,
+               不再需要 JS 后补卡片 */
+            ->paginate(24);
     }
 
     public function show(Filter $filter, Texture $texture)

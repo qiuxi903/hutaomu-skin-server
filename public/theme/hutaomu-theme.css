@@ -1808,11 +1808,21 @@ body,
 /* ---------- 皮肤库(服务端渲染版) ---------- */
 /* 防溢出关键: 网格轨道的 1fr 隐式 min 是 auto, 会被 nowrap 长文本撑大导致
    整格溢出容器(实测横向滚条)——卡片必须 min-width:0, 截断元素必须有 overflow */
+/* 固定列数断点(6/4/3)——与每页 24 张匹配, 任何屏宽都恰好整行 */
 .sl-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(172px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   padding: 0 4px;
+}
+@media (min-width: 768px) {
+  .sl-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 992px) {
+  .sl-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 1200px) {
+  .sl-grid { grid-template-columns: repeat(6, 1fr); }
 }
 .sl-card {
   position: relative;

@@ -546,7 +546,6 @@
       setAutoTimer();
     }
     bindSwitcher();
-    if (document.querySelector('.sl-grid')) { htSkinlibFill(false); }
 
     /* ---------- 皮肤库列表页(服务端渲染): 委托绑定, PJAX 换页后仍生效 ---------- */
     document.addEventListener('click', function (e) {
@@ -609,44 +608,6 @@
       }
     }, true);
 
-    /* ---------- 皮肤库列表: 加载更多 + 自动补满最后一行 ---------- */
-    /* 服务端渲染首页后, 末行空洞用下一页卡片补齐(替代翻页的割裂感);
-       「加载更多」按钮追加整页。两路都走同一取数: 抓下一页 HTML 提取卡片 */
-    function htSkinlibFill(force) {
-      var grid = document.querySelector('.sl-grid');
-      var meta = document.getElementById('sl-fill-meta');
-      if (!grid || !meta || meta.dataset.busy === '1') return;
-      var next = parseInt(meta.dataset.next, 10) || 0;
-      var last = parseInt(meta.dataset.last, 10) || 0;
-      var cards = grid.querySelectorAll('.sl-card');
-      if (!cards.length) return;
-      var cols = 0, top0 = cards[0].offsetTop;
-      for (var k = 0; k < cards.length; k++) {
-        if (cards[k].offsetTop === top0) cols++; else break;
-      }
-      if (!cols) return;
-      var remainder = cards.length % cols;
-      var holes = remainder === 0 ? 0 : cols - remainder;
-      if (holes === 0) return;               /* 末行已满 */
-      if (next > last) return;               /* 没有下一页可补 */
-      meta.dataset.busy = '1';
-      var url = meta.dataset.url + (meta.dataset.url.indexOf('?') === -1 ? '?' : '&') + 'page=' + next;
-      fetch(url, { credentials: 'same-origin' })
-        .then(function (r) { return r.text(); })
-        .then(function (html) {
-          var doc = new DOMParser().parseFromString(html, 'text/html');
-          var nodes = doc.querySelectorAll('.sl-grid .sl-card');
-          /* 只取填洞所需的数量: 补满即止, 分页数学保持不变 */
-          var take = Math.min(nodes.length, holes);
-          for (var k2 = 0; k2 < take; k2++) {
-            grid.appendChild(document.importNode(nodes[k2], true));
-          }
-          meta.dataset.next = String(next + 1);
-          meta.dataset.busy = '0';
-          /* 理论上补满后 holes=0; 极端情况(下一页卡片不足)静默结束 */
-        })
-        .catch(function () { meta.dataset.busy = '0'; });
-    }
     /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
     /* 详情页 React 侧栏没有隐私开关——注入到 #side 同级, 不干扰 React 渲染 */
     if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
@@ -815,7 +776,6 @@
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
           oldCW.parentNode.replaceChild(document.importNode(newCW, true), oldCW);
-          if (document.getElementById('sl-fill-meta')) { setTimeout(function () { htSkinlibFill(false); }, 60); }
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);

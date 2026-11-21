@@ -145,11 +145,6 @@
           </li>
         </ul>
       </nav>
-      {# 自动铺满: 末行空洞由主题 JS 从下一页取卡片补齐(仅显示层, 分页数学不变) #}
-      <div id="sl-fill-meta" style="display:none"
-           data-next="{{ textures.currentPage() + 1 }}"
-           data-last="{{ textures.lastPage() }}"
-           data-url="{{ url('skinlib') }}?{{ (query|default({}))|url_encode }}"></div>
     {% endif %}
   {% endif %}
 
