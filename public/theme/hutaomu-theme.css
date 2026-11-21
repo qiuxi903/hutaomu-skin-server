@@ -2058,14 +2058,15 @@ body.dark-mode.ht-skin-show .content-wrapper {
   background: rgba(30, 25, 38, 0.12) !important;
 }
 
-/* 预览卡本体也降到近透明: 模型直接浮在壁纸上(其他卡保持 0.5 玻璃) */
+/* 预览卡本体: 与详细信息卡一致的奶白玻璃——壁纸隐约透出,
+   模型浮在柔和磨砂上(画布已真透明, 玻璃浓度即最终观感) */
 body.ht-skin-show .card:has(#previewer),
 body.ht-skin-show .card:has(#previewer) .card-body {
-  background: rgba(255, 252, 253, 0.12) !important;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 252, 253, 0.55) !important;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 body.dark-mode.ht-skin-show .card:has(#previewer),
 body.dark-mode.ht-skin-show .card:has(#previewer) .card-body {
-  background: rgba(30, 25, 38, 0.12) !important;
+  background: rgba(43, 37, 52, 0.55) !important;
 }
