@@ -782,6 +782,12 @@
           htMarkSidebar(u.pathname);
           htPjaxBusy = false;
           var page = HT_PAGES[u.pathname.replace(/\/$/, '')] || HT_PAGES[u.pathname];
+          /* 皮肤详情页: 路径带 tid(正则路由), 挂载表用动态条目——
+             漏了它会导致 PJAX 进入详情页时 #previewer/#side 空壳(需手动刷新) */
+          var showMatch = u.pathname.match(/^\/skinlib\/show\/(\d+)$/);
+          if (!page && showMatch) {
+            page = { route: 'skinlib/show/' + showMatch[1], chunks: [390, 512], module: 8512, el: '#side' };
+          }
           if (page) {
             htRemount(page).catch(function () { location.href = u.href; });
           }
