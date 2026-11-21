@@ -159,35 +159,15 @@
     {% endif %}
   {% endif %}
 
-  <script>
-    (function () {
-      /* 排序下拉变更即提交 */
-      var sort = document.querySelector('.sl-sort');
-      if (sort) sort.addEventListener('change', function () { sort.form.submit(); });
-
-      /* 快捷私密切换: PUT /texture/{tid}/privacy */
-      document.querySelectorAll('.sl-privacy-toggle').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var toPublic = btn.dataset.public !== '1';
-          var word = toPublic ? '公开' : '私密';
-          if (!window.confirm('确定将此材质设为「' + word + '」？切换会按站点规则增减积分。')) return;
-          btn.disabled = true;
-          fetch(btn.dataset.base + '/' + btn.dataset.tid + '/privacy', {
-            method: 'PUT',
-            credentials: 'same-origin',
-            headers: {
-              'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
-              'Accept': 'application/json',
-            },
-          }).then(function (r) { return r.json(); }).then(function (d) {
-            if (d.code === 0) { location.reload(); }
-            else { window.alert(d.message || '操作失败'); btn.disabled = false; }
-          }).catch(function () { window.alert('网络错误'); btn.disabled = false; });
-        });
-      });
-    })();
-  </script>
   </div>
   </section>
   </div>
+{% endblock %}
+
+{% block before_foot %}
+  {# 站点 bundle 启动时会按 blessing.route 挂载原版 React 皮肤库到 .content-wrapper
+     (先显示新版再瞬间变回原版的根因)——在 bundle 执行前改写 route 使其不匹配 #}
+  <script>
+    if (window.blessing) { blessing.route = 'skinlib-custom'; }
+  </script>
 {% endblock %}

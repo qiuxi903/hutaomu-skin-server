@@ -547,6 +547,30 @@
     }
     bindSwitcher();
 
+    /* ---------- 皮肤库列表页(服务端渲染): 委托绑定, PJAX 换页后仍生效 ---------- */
+    document.addEventListener('click', function (e) {
+      var btn = e.target && e.target.closest ? e.target.closest('.sl-privacy-toggle') : null;
+      if (!btn || btn.disabled) return;
+      var toPublic = btn.dataset.public !== '1';
+      if (!window.confirm('确定将此材质设为「' + (toPublic ? '公开' : '私密') + '」？切换会按站点规则增减积分。')) return;
+      btn.disabled = true;
+      fetch(btn.dataset.base + '/' + btn.dataset.tid + '/privacy', {
+        method: 'PUT',
+        credentials: 'same-origin',
+        headers: {
+          'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '',
+          'Accept': 'application/json',
+        },
+      }).then(function (r) { return r.json(); }).then(function (d) {
+        if (d.code === 0) { location.reload(); }
+        else { window.alert(d.message || '操作失败'); btn.disabled = false; }
+      }).catch(function () { window.alert('网络错误'); btn.disabled = false; });
+    });
+    document.addEventListener('change', function (e) {
+      var sel = e.target && e.target.closest ? e.target.closest('.sl-sort') : null;
+      if (sel && sel.form) sel.form.submit();
+    });
+
     /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
     /* 详情页 React 侧栏没有隐私开关——注入到 #side 同级, 不干扰 React 渲染 */
     if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
@@ -703,6 +727,7 @@
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
           oldCW.parentNode.replaceChild(document.importNode(newCW, true), oldCW);
+          if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);
           htMarkSidebar(u.pathname);
