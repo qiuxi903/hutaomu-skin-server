@@ -573,9 +573,8 @@
 
     /* ---------- 退出登录: 确定性处理 ----------
        bundle 的退出链路依赖 React 确认框(showModal), 该链路在玻璃拟态站点
-       上过于脆弱(层叠陷阱/事件失联)——这里在捕获阶段拦截, 用原生 confirm
-       + 直接 fetch 注销, 不再依赖弹窗栈; stopImmediatePropagation 阻断
-       bundle 同按钮的确认框处理器 */
+       上过于脆弱(层叠陷阱/事件失联)——这里在捕获阶段拦截, 确认 UI 用站点自带 React 弹窗(主题化样式), 注销 fetch 由主题 JS 直发;
+       stopImmediatePropagation 阻断 bundle 同按钮的旧确认链路(其 fetch 不受控) */
     document.addEventListener('click', function (e) {
       var btn = e.target && e.target.closest ? e.target.closest('#logout-button') : null;
       if (!btn) return;
@@ -596,7 +595,17 @@
           finish();
         }).catch(function () { finish(); });
       };
-      if (window.confirm('确定退出登录？')) doLogout();
+      /* 确认 UI 用站点自带 React 弹窗(v20261122g 已修复其事件失联), 无该 API 时回退原生 confirm */
+      var notify = window.blessing && blessing.notify;
+      if (notify && typeof notify.showModal === 'function') {
+        try {
+          notify.showModal({ text: '确定要退出登录吗？', center: true }).then(doLogout, function () { /* 取消 */ });
+        } catch (err) {
+          if (window.confirm('确定要退出登录吗？')) doLogout();
+        }
+      } else if (window.confirm('确定要退出登录吗？')) {
+        doLogout();
+      }
     }, true);
 
     /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
