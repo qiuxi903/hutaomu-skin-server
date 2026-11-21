@@ -613,27 +613,6 @@
     if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
       body.classList.add('ht-skin-show'); /* 详情页专属: 卡片浅白玻璃化(见主题 CSS) */
       try {
-        setTimeout(function () {
-          var pc = document.querySelector('#previewer canvas');
-          if (!pc) { window.__htProbe = 'canvas 未挂载'; return; }
-          setTimeout(function () {
-            try {
-              var probe = document.createElement('canvas');
-              probe.width = pc.width; probe.height = pc.height;
-              var ctx = probe.getContext('2d');
-              ctx.drawImage(pc, 0, 0);
-              var pts = [[10, 10], [360, 250], [700, 480]];
-              var out = [];
-              for (var i = 0; i < pts.length; i++) {
-                var d = ctx.getImageData(pts[i][0], pts[i][1], 1, 1).data;
-                out.push('p' + i + '(x' + pts[i][0] + ',y' + pts[i][1] + ') a=' + d[3] + ' rgb=' + d[0] + '/' + d[1] + '/' + d[2]);
-              }
-              window.__htProbe = out.join(' | ');
-            } catch (err) { window.__htProbe = 'probe-err: ' + err.message; }
-          }, 800);
-        }, 400);
-      } catch (e) { }
-      try {
         var tid = location.pathname.match(/(\d+)/)[1];
         var extra = (function () {
           try { return window.blessing && blessing.extra ? blessing.extra : {}; } catch (e) { return {}; }
