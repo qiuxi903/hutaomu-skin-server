@@ -611,6 +611,7 @@
     /* ---------- 皮肤库详情页: 私密状态徽章 + 快捷切换 ---------- */
     /* 详情页 React 侧栏没有隐私开关——注入到 #side 同级, 不干扰 React 渲染 */
     if (/^\/skinlib\/show\/\d+/.test(location.pathname)) {
+      body.classList.add('ht-skin-show'); /* 详情页专属: 卡片浅白玻璃化(见主题 CSS) */
       try {
         var tid = location.pathname.match(/(\d+)/)[1];
         var extra = (function () {

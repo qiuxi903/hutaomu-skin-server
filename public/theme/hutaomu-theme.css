@@ -2021,3 +2021,25 @@ body.dark-mode .sl-pagination .page-item.active .page-link { background: var(--h
 .sl-more:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); }
 body.dark-mode .sl-more { background: rgba(43, 37, 52, 0.9); border-color: rgba(240, 136, 168, 0.4); color: #d8c8e0; }
 body.dark-mode .sl-more:hover { background: rgba(240, 136, 168, 0.2); color: #f0a0bc; }
+
+/* ---------- 皮肤详情页: 浅白玻璃卡(透出壁纸) ---------- */
+/* 卡壳+卡体+预览画布全部降不透明度, 壁纸透过毛玻璃隐约可见 */
+body.ht-skin-show .card,
+body.ht-skin-show .card-body {
+  background: rgba(255, 252, 253, 0.5) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+body.ht-skin-show .card-header {
+  background: rgba(255, 214, 230, 0.62) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+body.ht-skin-show .card-body canvas { background: transparent; }
+body.dark-mode.ht-skin-show .card,
+body.dark-mode.ht-skin-show .card-body {
+  background: rgba(43, 37, 52, 0.55) !important;
+}
+body.dark-mode.ht-skin-show .card-header {
+  background: rgba(240, 136, 168, 0.28) !important;
+}
