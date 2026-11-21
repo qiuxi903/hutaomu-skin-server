@@ -3,7 +3,10 @@
 {% block title %}{{ trans('general.skinlib') }}{% endblock %}
 
 {% block content %}
-  {# 皮肤库首页: 服务端渲染, 筛选/搜索/排序/可见性全部走 URL 参数(PJAX 友好) #}
+  {# 皮肤库首页: 服务端渲染, 筛选/搜索/排序/可见性全部走 URL 参数(PJAX 友好)。
+     关键: skinlib.base 没有自带 .content-wrapper——AdminLTE 的 margin-left:250px
+     规则作用于 .content-wrapper, 必须自己包一层, 否则内容全宽铺到侧栏底下 #}
+  <div class="content-wrapper">
   <section class="content">
   <div class="container-fluid">
   <div class="content-header d-flex flex-wrap align-items-center mb-2">
@@ -186,4 +189,5 @@
   </script>
   </div>
   </section>
+  </div>
 {% endblock %}
