@@ -2035,15 +2035,11 @@ body.ht-skin-show .card-header {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-/* 3D 预览画布: skinview3d 旧版强制 alpha:false + 白底清屏, 透明度不可行。
-   改用 multiply 混合——白色与下层相乘=消失, 皮肤在浅色玻璃/壁纸上近乎原色 */
+/* 3D 预览画布: 编译产物已补丁为真透明(alpha:true + 无白底清屏),
+   模型以正常颜色浮在玻璃卡/壁纸上——不再需要 multiply
+   (multiply 会把模型的白色衣装也混进背景, 整体发虚) */
 body.ht-skin-show .card-body canvas {
   background: transparent;
-  mix-blend-mode: multiply;
-}
-body.dark-mode.ht-skin-show .card-body canvas {
-  /* 暗色壁纸下 multiply 会把皮肤染黑: 恢复正常混合(997 已为暗色设灰底) */
-  mix-blend-mode: normal;
 }
 body.dark-mode.ht-skin-show .card,
 body.dark-mode.ht-skin-show .card-body {
