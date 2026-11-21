@@ -88,7 +88,7 @@
       {% for item in textures %}
         <div class="card sl-card {{ item.public ? '' : 'sl-private' }}">
           <a class="sl-card-link" href="{{ url('skinlib/show/' ~ item.tid) }}" title="{{ item.name }}">
-            <img class="sl-preview" src="{{ url('preview/' ~ item.tid) }}" alt="{{ item.name }}" loading="lazy">
+            <img class="sl-preview" src="{{ item.preview_url }}" alt="{{ item.name }}" loading="lazy">
             <div class="sl-card-body">
               <div class="sl-name" title="{{ item.name }}">{{ item.name }}</div>
               <div class="sl-meta">

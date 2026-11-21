@@ -120,6 +120,16 @@ class SkinlibController extends Controller
             ->paginate(24)
             ->appends($request->query());
 
+        /* 公开且已静态化的材质走 /previews/{tid} 静态文件(php -S 直接回源,
+           免框架启动); 私密材质保持动态路由(访问控制不可绕过) */
+        $staticExt = (imagetypes() & IMG_WEBP) ? '.webp' : '.png';  /* 与动态路由格式一致 */
+        foreach ($textures as $texture) {
+            $static = 'previews/'.$texture->tid.$staticExt;
+            $texture->preview_url = $texture->public && file_exists(public_path($static))
+                ? url($static)
+                : url('preview/'.$texture->tid);
+        }
+
         return view('skinlib.custom-index')->with([
             'textures' => $textures,
             /* 去掉 page: 加载更多按钮由 JS 追加页码 */
@@ -407,6 +417,8 @@ class SkinlibController extends Controller
         if (Texture::where('hash', $texture->hash)->count() === 1) {
             Storage::disk('textures')->delete($texture->hash);
         }
+        @unlink(public_path('previews/'.$texture->tid.'.webp'));
+        @unlink(public_path('previews/'.$texture->tid.'.png'));
 
         $texture->delete();
 
@@ -449,6 +461,10 @@ class SkinlibController extends Controller
 
         $texture->public = !$texture->public;
         $texture->save();
+
+        /* 隐私变化即清理静态预览: 私密材质的预览不能以静态文件形式公开可取 */
+        @unlink(public_path('previews/'.$texture->tid.'.webp'));
+        @unlink(public_path('previews/'.$texture->tid.'.png'));
 
         $dispatcher->dispatch('texture.privacy.updated', [$texture]);
 

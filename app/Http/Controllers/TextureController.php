@@ -71,9 +71,24 @@ class TextureController extends Controller
 
                 $lastModified = $disk->lastModified($hash);
 
-                return Image::make($image)
-                    ->response($usePNG ? 'png' : 'webp', 100)
-                    ->setLastModified(Carbon::createFromTimestamp($lastModified));
+                $rendered = Image::make($image)->response($usePNG ? 'png' : 'webp', 100)
+                    ->setLastModified(Carbon::createFromTimestamp($lastModified))
+                    /* 浏览器缓存 7 天: 预览与 tid 一一对应(材质不可变), 重复浏览
+                       免重拉 24 张图——皮肤库刷新慢的主因 */
+                    ->header('Cache-Control', 'public, max-age=604800, immutable');
+                /* 静态化: 公开材质的预览落盘 public/previews/{tid}.{ext},
+                   列表页直接取静态文件(php -S 秒回), 私密材质不入盘(防绕过访问控制) */
+                if ($texture->public && !$disk->missing($hash)) {
+                    $staticDir = public_path('previews');
+                    if (!is_dir($staticDir)) {
+                        @mkdir($staticDir, 0755, true);
+                    }
+                    @file_put_contents(
+                        $staticDir.'/'.$tid.($usePNG ? '.png' : '.webp'),
+                        $rendered->getContent()
+                    );
+                }
+                return $rendered;
             }
         );
 
