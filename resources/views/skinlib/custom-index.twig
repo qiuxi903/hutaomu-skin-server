@@ -124,16 +124,32 @@
       {% endfor %}
     </div>
 
-    {# ── 加载更多(替代分页): 主题 JS 自动补满最后一行 #}
+    {# ── 分页 ─────────────────────────────── #}
     {% if textures.hasMorePages() %}
-      <div class="sl-more-wrap">
-        <button type="button" class="btn sl-more" id="sl-more"
-                data-next="{{ textures.currentPage() + 1 }}"
-                data-last="{{ textures.lastPage() }}"
-                data-url="{{ url('skinlib') }}?{{ (query|default({}))|url_encode }}">
-          <i class="fas fa-angle-down mr-1"></i>加载更多
-        </button>
-      </div>
+      <nav class="sl-pagination">
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item {{ textures.currentPage() == 1 ? 'disabled' : '' }}">
+            <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: textures.currentPage() - 1})|url_encode }}"><i class="fas fa-angle-left"></i></a>
+          </li>
+          {% for p in 1..textures.lastPage() %}
+            {% if p == 1 or p == textures.lastPage() or (p >= textures.currentPage() - 2 and p <= textures.currentPage() + 2) %}
+              <li class="page-item {{ p == textures.currentPage() ? 'active' : '' }}">
+                <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: p})|url_encode }}">{{ p }}</a>
+              </li>
+            {% elseif p == textures.currentPage() - 3 or p == textures.currentPage() + 3 %}
+              <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+          <li class="page-item {{ textures.currentPage() == textures.lastPage() ? 'disabled' : '' }}">
+            <a class="page-link" href="{{ url('skinlib') }}?{{ (query|default({}))|merge({page: textures.currentPage() + 1})|url_encode }}"><i class="fas fa-angle-right"></i></a>
+          </li>
+        </ul>
+      </nav>
+      {# 自动铺满: 末行空洞由主题 JS 从下一页取卡片补齐(仅显示层, 分页数学不变) #}
+      <div id="sl-fill-meta" style="display:none"
+           data-next="{{ textures.currentPage() + 1 }}"
+           data-last="{{ textures.lastPage() }}"
+           data-url="{{ url('skinlib') }}?{{ (query|default({}))|url_encode }}"></div>
     {% endif %}
   {% endif %}
 
