@@ -3,8 +3,11 @@
 namespace App\Providers;
 
 use App\Events\ConfigureRoutes;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Laravel\Passport\Passport;
 use Route;
@@ -16,6 +19,17 @@ class RouteServiceProvider extends ServiceProvider
      * In addition, it is set as the URL generator's root namespace.
      */
     protected $namespace = 'App\Http\Controllers';
+
+    /**
+     * Define rate limiters for the application.
+     */
+    public function boot()
+    {
+        /* 材质评论发表限流: 按用户(未登录按 IP), 每分钟 5 条 */
+        RateLimiter::for('comments', function (Request $request) {
+            return Limit::perMinute(5)->by($request->user() ? 'u'.$request->user()->uid : 'g'.$request->ip());
+        });
+    }
 
     /**
      * Define the routes for the application.

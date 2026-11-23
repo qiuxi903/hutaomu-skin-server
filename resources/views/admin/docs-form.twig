@@ -1,0 +1,96 @@
+{% extends 'admin.base' %}
+
+{% block title %}{{ doc ? '编辑文档' : '新建文档' }}{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">{{ doc ? '编辑文档：' ~ doc.title : '新建文档' }}</h3>
+        </div>
+        <div class="card-body">
+          {% if errors.any %}
+            <div class="alert alert-danger">
+              {% for error in errors.all() %}<div>{{ error }}</div>{% endfor %}
+            </div>
+          {% endif %}
+          <form method="POST" action="{{ doc ? url('admin/docs/' ~ doc.id) : url('admin/docs') }}">
+            {{ csrf_field() }}
+            {% if doc %}{{ method_field('PUT') }}{% endif %}
+            <div class="form-group">
+              <label>标题（最长 100 字）</label>
+              <input type="text" name="title" class="form-control" maxlength="100" required
+                     value="{{ old.title ?? (doc ? doc.title : '') }}">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label>slug（URL 的一部分，仅小写字母/数字/中划线）</label>
+                <input type="text" name="slug" class="form-control" pattern="[a-z0-9-]{1,60}" required
+                       placeholder="例如：getting-started"
+                       value="{{ old.slug ?? (doc ? doc.slug : '') }}">
+              </div>
+              <div class="form-group col-md-3">
+                <label>排序（小的在前）</label>
+                <input type="number" name="sort" class="form-control" min="0" max="9999"
+                       value="{{ old.sort ?? (doc ? doc.sort : 0) }}">
+              </div>
+              <div class="form-group col-md-3">
+                <label>发布</label>
+                <div class="custom-control custom-checkbox mt-1">
+                  <input type="checkbox" class="custom-control-input" id="d-published" name="published" value="1"
+                         {% if (old.published ?? ((doc and doc.published) ? '1' : '')) %}checked{% endif %}>
+                  <label class="custom-control-label" for="d-published">勾选后对玩家公开</label>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>正文（Markdown，支持表格/代码块；Raw HTML 会被转义）</label>
+              <textarea name="content" id="doc-content" class="form-control font-weight-normal" rows="18" required
+                        placeholder="# 标题&#10;正文内容…">{{ old.content ?? (doc ? doc.content : '') }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">{{ doc ? '保存修改' : '创建文档' }}</button>
+            <a href="{{ url('admin/docs') }}" class="btn btn-outline-secondary">返回列表</a>
+          </form>
+
+          <div class="border-top pt-3 mt-3">
+            <button type="button" class="btn btn-outline-info btn-sm" id="doc-preview-btn">预览渲染效果</button>
+            <div id="doc-preview" class="ht-md card mt-2" style="display:none">
+              <div class="card-body"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var btn = document.getElementById('doc-preview-btn');
+      var box = document.getElementById('doc-preview');
+      var ta = document.getElementById('doc-content');
+      if (!btn || !box || !ta) return;
+      var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      btn.addEventListener('click', function () {
+        if (!ta.value.trim()) { window.alert('先写点正文再预览'); return; }
+        btn.disabled = true;
+        btn.textContent = '渲染中…';
+        fetch({{ url('admin/docs/preview') | json_encode | raw }}, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: ta.value }),
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.code === 0) {
+            box.querySelector('.card-body').innerHTML = d.html;
+            box.style.display = 'block';
+            btn.textContent = '刷新预览';
+          } else {
+            window.alert(d.message || '渲染失败');
+          }
+        }).catch(function () { window.alert('网络错误'); })
+          .finally(function () { btn.disabled = false; });
+      });
+    })();
+  </script>
+{% endblock %}

@@ -56,7 +56,24 @@ class TextureController extends Controller
         $disk = Storage::disk('textures');
         abort_if($disk->missing($hash), 404);
 
+        /* 私密材质可见性(与详情页同规则): 路由迁入 web 组后才有会话可校验 */
+        $user = $request->user();
+        if (!$texture->public && (!$user || ($user->uid != $texture->uploader && !$user->isAdmin()))) {
+            $statusCode = (int) option('status_code_for_private');
+            abort($statusCode === 404 ? 404 : 403, trans('skinlib.show.private'));
+        }
+
         $height = (int) $request->query('height', 200);
+
+        /* 读穿: 公开材质的落盘静态预览直接回——衣柜/角色页等动态引用每张 ~0.47s
+           的 GD 渲染在 php -S 单线程下串行排队, 是「图片加载非常慢」的主因 */
+        $staticFile = public_path('previews/'.$tid.'.'.$format);
+        if ($texture->public && is_file($staticFile)) {
+            return response(file_get_contents($staticFile), 200, [
+                'Content-Type' => $usePNG ? 'image/png' : 'image/webp',
+                'Cache-Control' => 'public, max-age=604800, immutable',
+            ]);
+        }
         $now = Carbon::now();
         $response = Cache::remember(
             'preview-t'.$tid."-$format",

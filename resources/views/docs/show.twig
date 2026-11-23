@@ -1,0 +1,41 @@
+{% extends 'docs.layout' %}
+
+{% block title %}{{ doc.title }}{% endblock %}
+
+{% block docscontent %}
+  <div class="content-header">
+    <h1><i class="fas fa-book"></i> {{ doc.title }}</h1>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card doc-side">
+            <div class="card-body p-2">
+              <div class="doc-side-title">目录</div>
+              {% for s in side %}
+                <a class="doc-side-link {{ s.slug == doc.slug ? 'active' : '' }}" href="{{ url('docs/' ~ s.slug) }}">
+                  {{ s.title }}
+                  {% if not s.published %}<span class="badge badge-warning">未发布</span>{% endif %}
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <div class="col-md-9">
+          <div class="card">
+            <div class="card-body ht-md">
+              {% if not doc.published %}
+                <div class="callout callout-warning">
+                  这篇文档当前是「未发布」状态，只有管理员能看到。到后台「文档管理」勾选发布后公开。
+                </div>
+              {% endif %}
+              {{ html|raw }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}

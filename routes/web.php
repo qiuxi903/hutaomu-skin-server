@@ -19,13 +19,20 @@ Route::get('', 'HomeController@index');
    浏览器直连图源没有 CORS 头(图无法转 dataURL 保存/收藏), weserv 代理又
    只放行 paugram——由本站后端随机挑一个后台配置的源抓图, 同源返回。
    逐源回退, 全挂时 502; 仅请求后台配置的固定源, 不是开放代理。 */
-Route::get('theme/wallpaper', function () {
-    $sources = array_values(array_filter(array_map('trim', preg_split(
-        '/\r\n|\r|\n/',
-        (string) option('theme_wallpaper_sources', '')
-    )), function ($line) {
-        return $line !== '';
-    }));
+Route::get('theme/wallpaper', function (\Illuminate\Http\Request $request) {
+    $pick = function (string $key) {
+        return array_values(array_filter(array_map('trim', preg_split(
+            '/\r\n|\r|\n/',
+            (string) option($key, '')
+        )), function ($line) {
+            return $line !== '';
+        }));
+    };
+    /* 移动端图源独立配置(?mobile=1, 管理面板「壁纸图源（移动端）」), 未配置时回退桌面源 */
+    $sources = $request->boolean('mobile') ? $pick('theme_mobile_wallpaper_sources') : $pick('theme_wallpaper_sources');
+    if (!$sources && $request->boolean('mobile')) {
+        $sources = $pick('theme_wallpaper_sources');
+    }
     if (!$sources) {
         $sources = ['https://api.paugram.com/wallpaper/'];
     }
@@ -36,9 +43,11 @@ Route::get('theme/wallpaper', function () {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 3,
-            CURLOPT_TIMEOUT => 5,
+            CURLOPT_TIMEOUT => 8,
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_SSL_VERIFYPEER => false, // 自用站点, 个别图源证书链不全
+            /* 固定桌面 UA: loliapi 按 UA 跳「手机池」端点(当前 404), 桌面池才可用 */
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         ]);
         $body = curl_exec($ch);
         $ctype = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
@@ -157,8 +166,37 @@ Route::prefix('skinlib')->name('skinlib.')->group(function () {
     });
 });
 
+// 材质评论区(皮肤/披风共用详情页): 游客可读已通过评论, 登录可发(限流), 作者/管理员可删
+// 可见性与详情页同规则(私密材质仅上传者与管理员), 校验在 CommentController
+Route::get('skinlib/show/{texture}/comments', 'CommentController@index');
+
+// 材质预览动态路由(衣柜/角色页等旧引用): 自 static.php 迁入带会话的 web 组,
+// 私密材质按观看者校验可见性(原静态路由无会话, 私密预览图存在越权泄露);
+// 公开材质由控制器读穿 public/previews 静态文件, 免 GD 渲染排队
+Route::get('preview/hash/{hash}', 'TextureController@previewByHash');
+Route::get('preview/{texture}', 'TextureController@preview');
+Route::middleware('authorize')->group(function () {
+    Route::post('skinlib/show/{texture}/comments', 'CommentController@store')
+        ->middleware('throttle:comments');
+    Route::delete('comments/{comment}', 'CommentController@destroy');
+    /* 评论举报: 与材质举报同一 reports 表(type 分区), 后台举报管理分 Tab 展示 */
+    Route::post('comments/{comment}/report', 'ReportController@submitComment')
+        ->middleware(['verified', 'throttle:comments']);
+
+    // 壁纸收藏(跟随登录态): 索引在 users.wallpaper_favorites, 字节在私有磁盘
+    Route::get('theme/wallpaper/favorites', 'WallpaperController@index');
+    Route::post('theme/wallpaper/favorites', 'WallpaperController@store')
+        ->middleware('throttle:comments');
+    Route::delete('theme/wallpaper/favorites/{id}', 'WallpaperController@destroy');
+    Route::get('theme/wallpaper/favorites/{id}/file', 'WallpaperController@file');
+});
+
 // 关于页: 源项目地址 / 开源组件鸣谢 / 本分支修改清单, 公开可访问
 Route::view('about', 'about');
+
+// 站点文档(/docs): 公开读已发布文档; 未发布仅管理员可预览(404 兜底)
+Route::get('docs', 'DocsController@index');
+Route::get('docs/{slug}', 'DocsController@show');
 
 Route::prefix('admin')
     ->name('admin.')
@@ -171,6 +209,19 @@ Route::prefix('admin')
         // 个性化(暖樱白主题专属配置): 主题本体为源码资产 site/public/theme/, 见 shared/head.twig
         Route::any('theme', 'OptionsController@theme');
         Route::post('theme/sidebar', 'OptionsController@saveSidebar');
+
+        // 材质评论管理: 总开关/审核开关 + 待审队列(通过/删除, 删除走前台同一接口)
+        Route::any('comments', 'CommentController@adminPage');
+        Route::post('comments/{comment}/approve', 'CommentController@approve');
+
+        // 站点文档管理: 管理员撰写教程/更新文档(Markdown + 实时预览)
+        Route::post('docs/preview', 'DocsController@preview');
+        Route::get('docs/create', 'DocsController@create');
+        Route::post('docs', 'DocsController@store');
+        Route::get('docs/{doc}/edit', 'DocsController@edit');
+        Route::put('docs/{doc}', 'DocsController@update');
+        Route::delete('docs/{doc}', 'DocsController@destroy');
+        Route::get('docs', 'DocsController@adminList');
         Route::any('score', 'OptionsController@score');
         Route::any('options', 'OptionsController@options');
         Route::any('resource', 'OptionsController@resource');
@@ -208,7 +259,8 @@ Route::prefix('admin')
         });
 
         Route::prefix('reports')->group(function () {
-            Route::view('', 'admin.reports');
+            // 服务端渲染双 Tab(材质举报/评论举报分区), 取代原 React 页
+            Route::get('', 'ReportController@adminPage');
             Route::put('{report}', 'ReportController@review');
             Route::get('list', 'ReportController@manage');
         });

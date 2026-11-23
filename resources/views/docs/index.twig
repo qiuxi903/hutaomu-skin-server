@@ -1,0 +1,34 @@
+{% extends 'docs.layout' %}
+
+{% block docscontent %}
+  <div class="content-header">
+    <h1><i class="fas fa-book"></i> 使用文档</h1>
+  </div>
+
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        {% for d in docs %}
+          <div class="col-md-6 col-lg-4">
+            <a class="doc-card" href="{{ url('docs/' ~ d.slug) }}">
+              <div class="doc-card-title">
+                {{ d.title }}
+                {% if not d.published %}<span class="badge badge-warning">未发布</span>{% endif %}
+              </div>
+              <div class="doc-card-excerpt">{{ d.excerpt }}</div>
+              <div class="doc-card-meta">更新于 {{ d.updated }}</div>
+            </a>
+          </div>
+        {% else %}
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body text-center text-muted py-4">
+                文档还在编写中，敬请期待～
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endblock %}

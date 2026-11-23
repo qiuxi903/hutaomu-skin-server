@@ -223,6 +223,9 @@ class SkinlibController extends Controller
         return view('skinlib.show')
             ->with('texture', $texture)
             ->with('grid', $grid)
+            ->with('commentsEnabled', option('comment_enabled', '1') == '1')
+            ->with('commentModeration', option('comment_moderation', '0') == '1')
+            ->with('comments', CommentController::visiblePage($texture, $user, 1))
             ->with('extra', [
                 'download' => option('allow_downloading_texture'),
                 'currentUid' => $user ? $user->uid : 0,
@@ -244,7 +247,7 @@ class SkinlibController extends Controller
     {
         $grid = [
             'layout' => [
-                ['md-6', 'md-6'],
+                ['md-7', 'md-5'],
             ],
             'widgets' => [
                 [

@@ -31,6 +31,10 @@ class OptionsController extends Controller
             $form->textarea('theme_wallpaper_sources', '壁纸图源（每行一个地址）')
                 ->rows(6)
                 ->description('随机抽取并自动切换失效源；全部失败时回退樱粉渐变底色');
+
+            $form->textarea('theme_mobile_wallpaper_sources', '壁纸图源（移动端）')
+                ->rows(3)
+                ->description('手机宽度（≤767px）下随机抽取的图源，每行一个；留空则与桌面端共用同一组图源。移动端换图请求自动带 mobile 标记走这里配置的源');
         })->handle();
 
         $effects = Option::form('themeEffects', '樱花飘落', function ($form) {

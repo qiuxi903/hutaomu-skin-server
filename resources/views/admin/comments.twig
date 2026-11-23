@@ -1,0 +1,110 @@
+{% extends 'admin.base' %}
+
+{% block title %}评论管理{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="callout callout-info">
+        材质评论区（皮肤 / 披风共用详情页）的开关与审核。总开关关闭后前台立即不显示评论区、接口同时拒绝；
+        开启「需要审核」后新评论先进入下方待审队列，通过才会公开。评论正文在输出端转义，直接显示原文。
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-4">
+      {{ form.render()|raw }}
+    </div>
+    <div class="col-md-8">
+      <div class="card card-warning">
+        <div class="card-header">
+          <h3 class="card-title">待审队列（{{ pending|length }}）</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-striped ht-adm-table">
+            <thead>
+              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+              {% for c in pending %}
+                <tr data-id="{{ c['id'] }}">
+                  <td>{{ c['id'] }}</td>
+                  <td><a href="{{ url('skinlib/show/' ~ c['tid']) }}" target="_blank">{{ c['texture_name'] }}</a></td>
+                  <td>{{ c['name'] }} <span class="text-muted small">#{{ c['uid'] }}</span></td>
+                  <td class="ht-adm-content" title="{{ c['time_full'] }}">{{ c['content'] }}</td>
+                  <td class="text-nowrap">{{ c['time_text'] }}</td>
+                  <td class="text-nowrap">
+                    <button type="button" class="btn btn-xs btn-success ht-adm-approve" data-id="{{ c['id'] }}">通过</button>
+                    <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">删除</button>
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-3">没有待审评论</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">最近已通过的评论（最新 20 条）</h3>
+        </div>
+        <div class="card-body table-responsive p-0">
+          <table class="table table-striped ht-adm-table">
+            <thead>
+              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th>操作</th></tr>
+            </thead>
+            <tbody>
+              {% for c in recent %}
+                <tr data-id="{{ c['id'] }}">
+                  <td>{{ c['id'] }}</td>
+                  <td><a href="{{ url('skinlib/show/' ~ c['tid']) }}" target="_blank">{{ c['texture_name'] }}</a></td>
+                  <td>{{ c['name'] }} <span class="text-muted small">#{{ c['uid'] }}</span></td>
+                  <td class="ht-adm-content" title="{{ c['time_full'] }}">{{ c['content'] }}</td>
+                  <td class="text-nowrap">{{ c['time_text'] }}</td>
+                  <td class="text-nowrap">
+                    <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">删除</button>
+                  </td>
+                </tr>
+              {% else %}
+                <tr><td colspan="6" class="text-center text-muted py-3">还没有已通过的评论</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      function act(id, action) {
+        var opt = action === 'approve'
+          ? { method: 'POST', url: {{ url('admin/comments') | json_encode | raw }} + '/' + id + '/approve' }
+          : { method: 'DELETE', url: {{ url('comments') | json_encode | raw }} + '/' + id };
+        fetch(opt.url, {
+          method: opt.method,
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.code === 0) { location.reload(); }
+          else { window.alert(d.message || '操作失败'); }
+        }).catch(function () { window.alert('网络错误'); });
+      }
+      document.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest('.ht-adm-approve, .ht-adm-del') : null;
+        if (!btn) return;
+        if (btn.classList.contains('ht-adm-del') && !window.confirm('确定删除这条评论？删除后不可恢复。')) return;
+        btn.disabled = true;
+        act(btn.dataset.id, btn.classList.contains('ht-adm-approve') ? 'approve' : 'del');
+      });
+    })();
+  </script>
+{% endblock %}

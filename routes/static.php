@@ -14,8 +14,6 @@ Route::prefix('avatar')->name('avatar.')->group(function () {
     Route::get('{tid}', 'TextureController@avatarByTexture')->name('texture');
 });
 
-Route::prefix('preview')->name('preview.')->group(function () {
-    Route::get('{texture}', 'TextureController@preview')->name('texture')
-        ->middleware(Illuminate\Routing\Middleware\SubstituteBindings::class);
-    Route::get('hash/{hash}', 'TextureController@previewByHash')->name('hash');
-});
+/* 材质预览路由已迁往 routes/web.php（web 中间件组带会话）:
+   静态路由无会话, 私密材质的预览图任何人都可拉取（越权泄露）,
+   且无法按观看者校验可见性。迁移后控制器内做可见性校验 + 公开材质读穿静态文件 */

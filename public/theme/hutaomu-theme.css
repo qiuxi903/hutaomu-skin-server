@@ -2059,20 +2059,662 @@ body.dark-mode.ht-skin-show .content-wrapper {
 }
 
 /* 预览卡本体: 与详细信息卡一致的奶白玻璃——壁纸隐约透出,
-   模型浮在柔和磨砂上(画布已真透明, 玻璃浓度即最终观感) */
-body.ht-skin-show .card:has(#previewer) {
+   模型浮在柔和磨砂上(画布已真透明, 玻璃浓度即最终观感)
+   注意: #previewer 是 React portal 的外层挂载点, 在卡片外面(#previewer > div > .card),
+   :has(#previewer) 永远匹配不上 → 卡体 0.5 与卡壳 0.5 叠成 ~0.75 白,
+   画布区比 card-footer 工具条区明显更白(两区底色不一致的根因), 故用后代选择器 */
+body.ht-skin-show #previewer .card {
   background: rgba(255, 252, 253, 0.55) !important;
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
 }
-/* 卡体透明: 卡壳 55% 一层玻璃足够——卡壳+卡体双层叠加会复合成 ~80% 白,
-   等于没有透明效果(此前"没变化"的根因) */
-body.ht-skin-show .card:has(#previewer) .card-body {
+/* 卡体透明: 只留卡壳一层玻璃, 画布区与 card-footer 工具条区同层同色 */
+body.ht-skin-show #previewer .card .card-body {
   background: transparent !important;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
-body.dark-mode.ht-skin-show .card:has(#previewer),
-body.dark-mode.ht-skin-show .card:has(#previewer) .card-body {
+body.dark-mode.ht-skin-show #previewer .card {
   background: rgba(43, 37, 52, 0.55) !important;
+}
+body.dark-mode.ht-skin-show #previewer .card .card-body {
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+/* 预览背景切换行(白/黑/灰圆点+上/下个背景箭头)全站隐藏:
+   详情页用户已要求去掉, 衣柜/角色页预览面板同步(用户要求衣柜同样适配);
+   画布已真透明/主题化, 切纯色背景没有意义。React 渲染, 必须 CSS 隐藏 */
+#previewer .card-footer > .d-flex:has(.btn-color) {
+  display: none !important;
+}
+
+/* ---------- 衣柜 Tab: 胶囊化(与皮肤库筛选 chip 同一设计语言) ----------
+   Bootstrap .nav-tabs 原生是直角+底边线的「文件夹页签」, 与全站胶囊语言冲突;
+   改为圆角胶囊, 选中态同 sl-chip.active(粉渐变+白字) */
+#closet-list .nav-tabs {
+  border-bottom: none;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+#closet-list .nav-tabs .nav-link {
+  border: 1px solid #f0b8cd;
+  border-radius: 999px;
+  background: #fff;
+  color: #7a5566;
+  padding: 5px 16px;
+  font-size: 0.85rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#closet-list .nav-tabs .nav-link:hover {
+  background: var(--ht-pink-soft);
+  color: var(--ht-pink-deep);
+}
+#closet-list .nav-tabs .nav-link.active {
+  background: linear-gradient(135deg, var(--ht-pink), var(--ht-pink-deep));
+  border-color: var(--ht-pink-deep);
+  color: #fff;
+}
+body.dark-mode #closet-list .nav-tabs .nav-link {
+  background: rgba(43, 37, 52, 0.9);
+  border-color: rgba(240, 136, 168, 0.4);
+  color: #d8c8e0;
+}
+body.dark-mode #closet-list .nav-tabs .nav-link:hover {
+  background: rgba(240, 136, 168, 0.2);
+  color: #f0a0bc;
+}
+body.dark-mode #closet-list .nav-tabs .nav-link.active {
+  background: linear-gradient(135deg, var(--ht-pink), var(--ht-pink-deep));
+  color: #fff;
+}
+/* 预览卡底部一排背景切换控件(白/黑/灰圆点+上/下个背景箭头)是 BS6 原生的
+   预览背景切换器——画布已改真透明直接透出壁纸玻璃, 点了反而把画布涂成
+   纯色破坏玻璃观感, 按用户要求整行隐藏(按钮保留)。
+   必须用 :has(.btn-color) 圈定: footer 的直接子元素结构随登录态分叉——
+   未登录是 [圆点行.d-flex, button 衣柜], 登录后按钮排整体包在
+   div.d-flex.justify-content-between 里(编译产物 chunk 512 证实),
+   裸 .d-flex 会把衣柜/设为头像/举报一排全部误伤。
+   这行是 React 渲染(PJAX 重挂载会重新出现), 必须 CSS 隐藏而非 JS 摘除 */
+body.ht-skin-show #previewer .card-footer > .d-flex:has(.btn-color) {
+  display: none !important;
+}
+
+/* ---------- 材质评论区(详情页, 皮肤/披风共用, 服务端渲染首屏) ----------
+   卡片玻璃直接吃 body.ht-skin-show .card 通用规则, 这里只管列表排版/徽章/输入框 */
+#ht-comments .ht-c-item {
+  display: flex;
+  flex-wrap: wrap; /* 回复线容器换行铺满整行 */
+  gap: 10px;
+  padding: 12px 2px;
+  border-bottom: 1px dashed rgba(190, 150, 170, 0.35);
+}
+#ht-comments .ht-c-item:last-child { border-bottom: none; }
+#ht-comments .ht-c-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 4px; /* 与站内头像惯例一致(.bs-avatar 圆角方形), MC 脸是方的 */
+  image-rendering: pixelated;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+#ht-comments .ht-c-main { flex: 1 1 auto; min-width: 0; }
+#ht-comments .ht-c-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+#ht-comments .ht-c-name { font-weight: 600; color: #5f4d68; }
+#ht-comments .ht-c-time { color: #a892a0; font-size: 12px; }
+#ht-comments .ht-c-content {
+  margin-top: 4px;
+  font-size: 14px;
+  color: #4a3d50;
+  white-space: pre-wrap; /* 保留评论换行 */
+  word-break: break-word;
+  overflow-wrap: anywhere; /* 长串字符/链接不撑破卡片 */
+}
+#ht-comments .ht-c-pending-badge {
+  background: rgba(247, 114, 156, 0.15);
+  color: #c2557e;
+  font-weight: 500;
+}
+#ht-comments .ht-c-mini-btn {
+  border: 1px solid rgba(190, 150, 170, 0.45);
+  background: transparent;
+  color: #8d7290;
+  border-radius: 10px;
+  font-size: 12px;
+  padding: 1px 10px;
+  height: 24px;
+  align-self: flex-start;
+  margin-left: 4px;
+  flex: 0 0 auto;
+}
+#ht-comments .ht-c-mini-btn:hover {
+  background: rgba(247, 114, 156, 0.12);
+  color: #c2557e;
+  border-color: rgba(247, 114, 156, 0.5);
+}
+#ht-comments .ht-c-empty {
+  text-align: center;
+  color: #a892a0;
+  padding: 20px 0 8px;
+}
+/* 操作按钮组(通过/删除/回复/举报), 统一挂在右侧 */
+#ht-comments .ht-c-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  flex: 0 0 auto;
+}
+/* 回复线: 缩进 + 左侧虚线, 扁平单层挂顶层评论下 */
+#ht-comments .ht-c-replies {
+  margin: 4px 0 4px 22px;
+  padding-left: 14px;
+  border-left: 2px dashed rgba(190, 150, 170, 0.35);
+  flex-basis: 100%;
+}
+#ht-comments .ht-c-replies:empty { display: none; }
+#ht-comments .ht-c-reply-item { padding: 8px 0; border-bottom: none; }
+#ht-comments .ht-c-reply-item .ht-c-avatar { width: 30px; height: 30px; margin-top: 0; }
+#ht-comments .ht-c-replyto { color: #c2557e; font-size: 12px; }
+#ht-comments .ht-c-reply-form textarea { min-height: 64px; }
+/* 深色模式(回复线) */
+body.dark-mode #ht-comments .ht-c-replies { border-left-color: rgba(240, 136, 168, 0.2); }
+body.dark-mode #ht-comments .ht-c-replyto { color: #f0a0bc; }
+#ht-comments .ht-c-input {
+  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(190, 150, 170, 0.4);
+  resize: vertical;
+}
+#ht-comments .ht-c-input:focus {
+  border-color: var(--ht-pink);
+  box-shadow: 0 0 0 2px rgba(247, 114, 156, 0.15);
+}
+#ht-comments .ht-c-login-hint a { color: var(--ht-pink-deep); font-weight: 600; }
+/* 管理后台评论表格: 长内容不撑破 */
+.ht-adm-table .ht-adm-content {
+  max-width: 420px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+/* 深色模式 */
+body.dark-mode #ht-comments .ht-c-item { border-bottom-color: rgba(240, 136, 168, 0.2); }
+body.dark-mode #ht-comments .ht-c-name { color: #e8dfe8; }
+body.dark-mode #ht-comments .ht-c-content { color: #d8cfe0; }
+body.dark-mode #ht-comments .ht-c-time,
+body.dark-mode #ht-comments .ht-c-empty { color: #9b8ba3; }
+body.dark-mode #ht-comments .ht-c-mini-btn {
+  color: #b8a6c0;
+  border-color: rgba(240, 136, 168, 0.35);
+}
+body.dark-mode #ht-comments .ht-c-input {
+  background: rgba(43, 37, 52, 0.6);
+  border-color: rgba(240, 136, 168, 0.3);
+  color: #e8dfe8;
+}
+
+/* ==================== 移动端专属适配层 (≤767.98px) ====================
+   定位: 手机 = 单列流式布局 + 顶栏即导航。
+   未登录无侧栏 DOM, 登录态/后台侧栏为抽屉(默认收起, 遮罩 + 点空白关闭)。
+   触控目标 ≥38px; 输入框 16px 防 iOS 聚焦自动放大。
+   768-991px 平板沿用既有护栏规则, 不在本层。 */
+@media (max-width: 767.98px) {
+  /* --- 抽屉遮罩: sidebar-open 时铺暗层, 点空白处由主题 JS 关闭 --- */
+  body.sidebar-open::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(51, 38, 46, 0.45);
+    z-index: 1037;
+    animation: ht-fade 0.2s ease backwards;
+  }
+  body.dark-mode.sidebar-open::after { background: rgba(10, 8, 14, 0.58); }
+  /* 抽屉本体: 覆盖顶栏之上, 宽度按屏收窄, 带投影。
+     开合用 transform 全权接管——AdminLTE 原生靠 margin-left:-250px 收纳,
+     与自定义宽度不匹配时会漏出一条边在屏上(实测 30px 粉边) */
+  body.layout-fixed .main-sidebar,
+  .main-sidebar {
+    width: min(78vw, 280px) !important;
+    transform: translateX(calc(-100% - 44px));
+    transition: transform 0.26s ease;
+    box-shadow: 0 0 34px rgba(70, 40, 60, 0.3);
+    z-index: 1039;
+  }
+  body.sidebar-open .main-sidebar { transform: translateX(0); }
+  /* 汉堡按钮: 桌面端隐藏侧栏时它是白色图标不可见(无关紧要),
+     移动端它是唯一导航入口, 必须可见 */
+  .main-header .nav-link[data-widget="pushmenu"] {
+    color: var(--ht-pink-deep) !important;
+    font-size: 1.05rem;
+  }
+  .main-sidebar .brand-link { padding: 0 14px; height: 48px; line-height: 48px; font-size: 0.95rem; }
+
+  /* --- 顶栏: 单行紧凑, 杜绝换行(主站 AdminLTE 顶栏 + 主页独立顶栏都覆盖) --- */
+  .main-header.navbar,
+  .navbar.fixed-top { height: 48px; min-height: 48px; }
+  .main-header .container,
+  .navbar.fixed-top .container { padding: 0 10px; max-width: none; width: 100%; }
+  .main-header .navbar-header,
+  .main-header .navbar-custom-menu,
+  .navbar.fixed-top .navbar-header,
+  .navbar.fixed-top .navbar-custom-menu { display: flex; align-items: center; flex: 0 1 auto; min-width: 0; }
+  .main-header .navbar-brand,
+  .navbar.fixed-top .navbar-brand { font-size: 0.95rem; padding: 0; line-height: 48px; white-space: nowrap; }
+  .main-header .nav-link,
+  .navbar.fixed-top .nav-link { padding: 0 7px !important; font-size: 0.85rem; line-height: 48px; white-space: nowrap; }
+  .main-header .nav-link p { font-size: 0.85rem; }
+  .main-header img,
+  .navbar.fixed-top img {
+    width: auto;
+    height: auto;
+    max-width: 26px;
+    max-height: 26px;
+    object-fit: cover;
+  }
+  .main-header .navbar-badge { font-size: 0.6rem; top: 8px; right: 2px; }
+
+  /* --- 骨架: 内容全宽, 页边距收窄 --- */
+  .content-wrapper { margin-left: 0 !important; }
+  .content-header { padding: 12px 12px 2px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+  .content-header h1 { font-size: 1.15rem; margin: 0; }
+  .content-header .breadcrumb {
+    position: static;
+    float: none;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 0.78rem;
+  }
+  section.content > .container-fluid,
+  section.content > .container,
+  .content > .container-fluid { padding-left: 12px; padding-right: 12px; padding-bottom: 16px; }
+  .card { border-radius: 14px; }
+  .card-header { padding: 10px 12px; }
+  .card-header h3.card-title { font-size: 0.95rem; }
+  .card-body { padding: 12px; }
+
+  /* --- 预览器: 画布改 4:3, 模型比例正常 --- */
+  #previewer canvas {
+    width: 100% !important;
+    height: min(75vw, 380px) !important;
+  }
+  /* 上传材质入口: 原为 d-none d-md-block(手机上整站无上传入口), Tab 行补回 */
+  #closet-list .nav-tabs .nav-item.d-none { display: block !important; }
+  /* 详情页底部按钮排(React): 可换行不挤压 */
+  #previewer .card-footer { padding: 10px 12px; }
+  #previewer .card-footer .d-flex { flex-wrap: wrap; gap: 8px; }
+  #previewer .card-footer .btn { flex: 0 1 auto; min-height: 36px; }
+
+  /* --- 衣柜页头部: 皮肤/披风 Tab 与搜索框竖向堆叠, 不再互相挤压换行 --- */
+  #closet-list .card-header > .d-flex {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 4px;
+  }
+  #closet-list .card-header .nav-tabs { border-bottom: none; }
+  #closet-list .card-header .mr-3 { margin: 0 !important; }
+  #closet-list .card-header input[type="search"] {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* --- 背景: iOS 的 fixed attachment 表现破碎(缩放/错位), 移动端改 scroll;
+     竖屏构图取图上部(人脸上半区), 不再只裁到横图腰腹 --- */
+  #fixed-bg,
+  body {
+    background-attachment: scroll !important;
+  }
+  #fixed-bg,
+  .ht-wp-layer {
+    background-position: center 28% !important;
+  }
+
+  /* --- 评论区 --- */
+  #ht-comments .ht-c-item { padding: 10px 0; gap: 8px; }
+  #ht-comments .ht-c-content { font-size: 13.5px; }
+  #ht-comments .ht-c-replies { margin-left: 14px; padding-left: 10px; }
+  #ht-comments .ht-c-mini-btn { height: 28px; padding: 2px 12px; font-size: 12.5px; }
+  #ht-comments .ht-c-input,
+  #ht-comments textarea.ht-c-input { font-size: 16px; } /* iOS 聚焦不缩放 */
+  #ht-comments .ht-c-form .btn,
+  #ht-comments .ht-c-reply-form .btn { min-height: 38px; }
+
+  /* --- 皮肤库列表 --- */
+  .sl-grid { gap: 10px; padding: 0; }
+  .sl-filter-card .card-body { padding: 10px 12px; }
+  .sl-chip { padding: 5px 13px; }
+  .pagination { justify-content: center; flex-wrap: wrap; }
+
+  /* --- 表单(防 iOS 聚焦缩放)与触控 --- */
+  .form-control { font-size: 16px; }
+  .btn-sm { min-height: 34px; }
+
+  /* --- 文本防溢出 --- */
+  .content pre,
+  .content code,
+  .content blockquote { word-break: break-word; overflow-wrap: anywhere; }
+
+  /* --- 后台表格: 横向滚动兜底(自带 .table-responsive 的不受影响) --- */
+  .card-body > .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .ht-adm-table .ht-adm-content,
+  .ht-rp-table .ht-rp-content { max-width: 240px; white-space: normal; }
+
+  /* --- 底部 Tab 栏: 原生 App 式主导航(主题 JS 注入) --- */
+  #ht-tabbar {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1036; /* 抽屉遮罩(1037)/抽屉(1039)之下, 打开抽屉时底栏一起变暗 */
+    height: calc(54px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(255, 252, 253, 0.9);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    backdrop-filter: blur(16px) saturate(1.3);
+    border-top: 1px solid rgba(240, 184, 205, 0.55);
+    box-shadow: 0 -4px 18px rgba(160, 80, 110, 0.08);
+  }
+  #ht-tabbar a {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: #9c8296;
+    font-size: 0.62rem;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s ease;
+  }
+  #ht-tabbar a i { font-size: 1.15rem; line-height: 1; transition: transform 0.15s ease; }
+  #ht-tabbar a.active { color: var(--ht-pink-deep); font-weight: 600; }
+  #ht-tabbar a.active i { transform: translateY(-1px) scale(1.1); }
+  #ht-tabbar a:active { opacity: 0.7; }
+  body.dark-mode #ht-tabbar {
+    background: rgba(40, 33, 48, 0.92);
+    border-top-color: rgba(240, 136, 168, 0.25);
+  }
+  body.dark-mode #ht-tabbar a { color: #9b8ba3; }
+  body.dark-mode #ht-tabbar a.active { color: #f0a0bc; }
+  /* 内容底部让出底栏高度, 版权页脚不被盖住 */
+  .main-footer { margin-bottom: calc(58px + env(safe-area-inset-bottom)); }
+  /* 登录/注册页与纯享展示模式不显示底栏(模态式页面/全屏壁纸) */
+  body.login-page #ht-tabbar,
+  body.register-page #ht-tabbar,
+  body.ht-showcase #ht-tabbar { display: none !important; }
+}
+
+/* ---------- 上传页主题化(表单为 React 渲染, 挂载于 #file-input) ---------- */
+#file-input .card {
+  /* 材质 = 登录卡同款(用户要求): 白 0.82 + blur18 + 20px 圆角 + 同款投影, 无边框 */
+  border: none;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 40px rgba(180, 70, 120, 0.22);
+}
+#file-input .card-body {
+  padding: 18px;
+  /* 布局重排: 文件拖放区是主操作, flex order 提到最前(React JSX 不动);
+     行距由 gap 统一, form-group 自带 margin 关掉避免叠加 */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+#file-input .card-body > .form-group { margin: 0; flex: 1 1 100%; }
+/* 文件组整体(React 的 FileInput 外层还包了一层 form-group, input-group 不是
+   card-body 直接子元素, order 写在它身上不生效)提到最前 */
+#file-input .card-body > .form-group:has(.input-group) { order: -1; }
+#file-input .card-body > label { color: var(--ht-pink-deep); font-weight: 600; font-size: 0.88rem; }
+/* 材质类型行: 标签与胶囊同行排列 */
+#file-input .form-group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+#file-input .form-group > br { display: none; }
+#file-input .form-group > label[for="texture-name"] { flex: 0 0 auto; }
+/* 名称输入与标签同行: .form-control 自带 width:100% 会被挤到下一行, 显式放开。
+   输入材质不做任何覆盖——直接落回全局(即登录页)的
+   1.5px #f0d3e0 边 / 0.9 白底 / 12px 圆角 / 聚焦 3px 粉环 */
+#file-input .form-control { flex: 1 1 auto; width: auto; min-width: 0; }
+/* 材质类型: 单选按钮 → 胶囊 chip(:has 选中态, 与皮肤库筛选 chip 同语言) */
+#file-input .form-group label.mr-4 {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #f0b8cd;
+  border-radius: 999px;
+  background: #fff;
+  color: #7a5566;
+  padding: 5px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#file-input .form-group label.mr-4 input { position: absolute; opacity: 0; pointer-events: none; }
+#file-input .form-group label.mr-4:has(input:checked) {
+  background: linear-gradient(135deg, var(--ht-pink), var(--ht-pink-deep));
+  border-color: var(--ht-pink-deep);
+  color: #fff;
+}
+/* 文件选择: 虚线拖放区为绝对主角——组标题「选择文件」与区内按钮文案重复, 隐藏;
+   区内图标+提示文字纵向堆叠居中, 未选文件时显示提示(:empty), 选中后显示文件名 */
+#file-input .form-group:has(.input-group) > label { display: none; }
+#file-input .input-group {
+  border: 2px dashed #f0d3e0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+  align-items: center;
+  transition: border-color 0.15s ease;
+}
+#file-input .input-group:hover { border-color: var(--ht-pink); }
+#file-input .custom-file { height: 118px; }
+#file-input .custom-file-label {
+  height: 114px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  color: #a892a0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  line-height: 1.4;
+  font-size: 0.92rem;
+  text-align: center;
+}
+/* 云上传图标: Font Awesome 字形; 未选文件时 ::after 显示操作提示 */
+#file-input .custom-file-label::before {
+  content: '\f382';
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+  font-size: 1.8rem;
+  color: var(--ht-pink);
+}
+#file-input .custom-file-label:empty::after {
+  content: '点击选择或拖拽 png 文件到此处';
+  font-size: 0.9rem;
+}
+#file-input .custom-file-label::after { content: none; } /* BS 自带 Browse 文案关闭 */
+#file-input .input-group-append { margin: 0 14px 0 0; }
+/* 按钮 = 登录按钮同材质: 实色 #f088a8 / 无边框 / 全局胶囊 999px / 软投影,
+   hover #e56e94 + 上浮(全局 btn-primary 同款), 不用渐变 */
+#file-input .input-group-append .btn.btn-default {
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #f088a8;
+  border: none;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(233, 116, 152, 0.28);
+}
+#file-input .input-group-append .btn.btn-default:hover {
+  background: #e56e94;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 116, 152, 0.35);
+}
+/* callout 提示: 圆角软底 */
+#file-input .callout { border-radius: 12px; border-left-width: 3px; }
+/* footer: 透明虚线分隔 */
+#file-input .card-footer {
+  background: transparent;
+  border-top: 1px dashed rgba(240, 184, 205, 0.5);
+  padding: 12px 18px;
+}
+/* 确认上传 = 登录按钮同材质(同上, 不用渐变) */
+#file-input .btn-success {
+  background: #f088a8 !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 999px;
+  padding: 8px 30px;
+  box-shadow: 0 2px 8px rgba(233, 116, 152, 0.28);
+}
+#file-input .btn-success:hover {
+  background: #e56e94 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(233, 116, 152, 0.35);
+}
+#file-input .btn-success:disabled { opacity: 0.55; transform: none; }
+/* 暗色模式 */
+body.dark-mode #file-input .card { background: rgba(40, 33, 48, 0.72); border-color: rgba(240, 136, 168, 0.3); }
+body.dark-mode #file-input .form-group label.mr-4 { background: rgba(43, 37, 52, 0.9); border-color: rgba(240, 136, 168, 0.4); color: #d8c8e0; }
+body.dark-mode #file-input .input-group { background: rgba(30, 25, 38, 0.55); border-color: rgba(240, 136, 168, 0.4); }
+body.dark-mode #file-input .custom-file-label { color: #9b8ba3; }
+body.dark-mode #file-input .card-footer { border-top-color: rgba(240, 136, 168, 0.25); }
+
+/* 上传页预览画布限高: 原生 min-height 500px 比表单卡高出一截, 收到 430 匹配 */
+@media (min-width: 992px) {
+  body:has(#file-input) #previewer canvas { height: 430px !important; }
+}
+
+
+/* 自动切换联动: 关 → 时间档整行隐藏(hidden 属性压不过 flex, 需显式规则) */
+.ts-intervals[hidden] { display: none !important; }
+
+/* ---------- 站点文档(/docs): 卡片索引 + 左目录右正文 + Markdown 排版 ---------- */
+#docs-page .doc-card {
+  display: block;
+  border: 1px solid rgba(240, 184, 205, 0.5);
+  border-radius: 16px;
+  background: rgba(255, 252, 253, 0.82);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+#docs-page .doc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ht-shadow-hover);
+  color: inherit;
+  text-decoration: none;
+}
+#docs-page .doc-card-title { font-weight: 600; font-size: 1.02rem; color: var(--ht-pink-deep); }
+#docs-page .doc-card-excerpt { color: var(--ht-text); font-size: 0.86rem; margin-top: 6px; }
+#docs-page .doc-card-meta { color: var(--ht-text-light); font-size: 0.75rem; margin-top: 8px; }
+#docs-page .doc-side { border-radius: 14px; }
+#docs-page .doc-side-title {
+  font-weight: 600;
+  color: var(--ht-pink-deep);
+  font-size: 0.8rem;
+  padding: 4px 10px 8px;
+}
+#docs-page .doc-side-link {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 9px;
+  color: var(--ht-text);
+  font-size: 0.87rem;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+#docs-page .doc-side-link:hover { background: var(--ht-pink-soft); color: var(--ht-pink-deep); text-decoration: none; }
+#docs-page .doc-side-link.active {
+  background: linear-gradient(135deg, var(--ht-pink), var(--ht-pink-deep));
+  color: #fff;
+}
+body.dark-mode #docs-page .doc-card { background: rgba(40, 33, 48, 0.8); border-color: rgba(240, 136, 168, 0.3); }
+body.dark-mode #docs-page .doc-side-link.active { color: #fff; }
+
+/* Markdown 正文(ht-md, 站内通用): 标题/代码/表格/引用按暖樱白语言排版 */
+.ht-md { line-height: 1.75; font-size: 0.93rem; color: var(--ht-text); overflow-wrap: anywhere; }
+.ht-md h1, .ht-md h2, .ht-md h3, .ht-md h4 {
+  color: var(--ht-pink-deep);
+  font-weight: 700;
+  margin: 1.2em 0 0.5em;
+}
+.ht-md h1 { font-size: 1.35rem; border-bottom: 2px dashed rgba(240, 184, 205, 0.6); padding-bottom: 6px; }
+.ht-md h2 { font-size: 1.18rem; }
+.ht-md h3 { font-size: 1.02rem; }
+.ht-md p { margin: 0.6em 0; }
+.ht-md a { color: var(--ht-pink-deep); text-decoration: underline; }
+.ht-md strong { color: var(--ht-pink-deep); }
+.ht-md code {
+  background: rgba(247, 114, 156, 0.1);
+  border-radius: 6px;
+  padding: 1px 7px;
+  font-size: 0.85em;
+  color: #c2557e;
+  word-break: break-all;
+}
+.ht-md pre {
+  background: rgba(60, 47, 62, 0.94);
+  color: #f4e6ee;
+  border-radius: 12px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  margin: 0.8em 0;
+}
+.ht-md pre code { background: transparent; color: inherit; padding: 0; }
+.ht-md blockquote {
+  border-left: 3px solid var(--ht-pink);
+  background: rgba(247, 114, 156, 0.08);
+  border-radius: 0 10px 10px 0;
+  padding: 8px 14px;
+  margin: 0.8em 0;
+  color: var(--ht-text);
+}
+.ht-md blockquote p { margin: 0.3em 0; }
+.ht-md table { border-collapse: collapse; margin: 0.8em 0; max-width: 100%; display: block; overflow-x: auto; }
+.ht-md th, .ht-md td {
+  border: 1px solid rgba(240, 184, 205, 0.55);
+  padding: 6px 12px;
+  font-size: 0.87em;
+}
+.ht-md th { background: rgba(255, 214, 230, 0.5); color: var(--ht-pink-deep); }
+.ht-md ul, .ht-md ol { padding-left: 1.4em; margin: 0.6em 0; }
+.ht-md img { max-width: 100%; border-radius: 10px; }
+.ht-md hr { border: none; border-top: 1px dashed rgba(240, 184, 205, 0.6); margin: 1.2em 0; }
+/* 管理后台编辑表单的 textarea 也算正文编辑器, 等宽好对齐 */
+#doc-content { font-family: SFMono-Regular, Consolas, 'Courier New', monospace; font-size: 0.85rem; }
+body.dark-mode .ht-md th { background: rgba(240, 136, 168, 0.2); color: #f0a0bc; }
+body.dark-mode .ht-md blockquote { background: rgba(240, 136, 168, 0.12); }
+
+/* 底部 Tab 栏仅移动端存在: PC(>767.98px) 上 JS 注入的元素必须隐藏,
+   否则裸奔成 Bootstrap 默认蓝链接横条压在页尾(实测踩) */
+#ht-tabbar { display: none; }
+
+/* 移动端恢复显示(必须位于上方 hide 之后, 级联后文优先) */
+@media (max-width: 767.98px) {
+  #ht-tabbar { display: flex; }
 }

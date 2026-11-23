@@ -168,7 +168,9 @@
     /* 换新壁纸: 走本站中继随机取一个源的图(同源响应可转 dataURL 落盘)。
        重复图由服务端轮换 + 前端 htRecent 指纹双重规避; 一次请求即换一张 */
     function fetchRandomWallpaper() {
-      var bust = (WALLPAPER_API.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now();
+      /* 移动端宽度段带 mobile=1: 服务端改用「移动端图源」配置(管理面板可配) */
+      var isMobile = window.matchMedia('(max-width: 767.98px)').matches;
+      var bust = (WALLPAPER_API.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now() + (isMobile ? '&mobile=1' : '');
       return fetch(WALLPAPER_API + bust, { cache: 'no-store' })
         .then(function (r) {
           if (!r.ok) throw new Error('http ' + r.status);
@@ -184,6 +186,18 @@
           pfDup = 0;
           return b64;
         });
+    }
+
+    /* 预取推迟到页面自身资源加载完(load + 400ms): php -S 单线程, 壁纸中继
+       (最坏 8s/源)会占住唯一 worker——300ms 就跑会把本页几十张预览图全部
+       堵在队尾(用户反馈「皮肤图片加载非常非常慢」的根因)。首帧壁纸来自
+       localStorage 缓存(setWallpaper(store.bg)), 预取只为下一次换一张瞬时 */
+    function htIdlePrefetch() {
+      if (document.readyState === 'complete') {
+        setTimeout(prefetchNextWallpaper, 400);
+        return;
+      }
+      window.addEventListener('load', function () { setTimeout(prefetchNextWallpaper, 400); }, { once: true });
     }
 
     /* ---------- 樱花 ---------- */
@@ -219,11 +233,11 @@
         if (cfg.petals) spawnPetals();
         if (store.bg) setWallpaper(store.bg); /* 首帧即壁纸, 零闪烁; 空图不动模板兜底 */
       }
-      if (isHome) setTimeout(prefetchNextWallpaper, 300); /* 主页也预取(用户中心可即时换) */
+      if (isHome) htIdlePrefetch(); /* 主页也预取(用户中心可即时换) */
     } else if (acOn) {
       body.classList.add('ht-panel');
       ensureAcWallpaper();
-      setTimeout(prefetchNextWallpaper, 300); /* 静默预取下一张 */
+      htIdlePrefetch(); /* 静默预取下一张 */
     }
 
     /* ---------- 自动切换与预取交换 ---------- */
@@ -332,6 +346,21 @@
       }
     }
 
+    /* 自动切换 ↔ 时间档联动: 关 → 时间档整行隐藏; 开 → 必有有效档位 */
+    function syncAutoUI() {
+      var toggle = document.getElementById('ts-auto-toggle');
+      var row = document.querySelector('.ts-intervals');
+      if (toggle) {
+        toggle.setAttribute('aria-checked', store.auto ? 'true' : 'false');
+        toggle.classList.toggle('active', store.auto);
+      }
+      if (row) row.hidden = !store.auto;
+      var all = document.querySelectorAll('.ts-iv');
+      for (var q = 0; q < all.length; q++) {
+        all[q].classList.toggle('active', store.auto && parseInt(all[q].getAttribute('data-min'), 10) === store.iv);
+      }
+    }
+
     /* ---------- 主题切换器(仅登录用户) ---------- */
     function applyModeButtons() {
       var dark = body.classList.contains('dark-mode');
@@ -342,23 +371,26 @@
       }
     }
 
+    /* ---------- 壁纸收藏: 云端随账号走(另一设备登录同一账号即同步) ----------
+       索引在 users.wallpaper_favorites, 图片字节在服务端私有磁盘;
+       本地 localStorage(ht_fav_bgs) 只作旧数据迁移源, 迁完即删 */
+    var favsCache = [];
     function renderFavs() {
-      var favs = store.favs;
       var box = document.getElementById('ts-favs');
       var empty = document.getElementById('ts-fav-empty');
       var count = document.getElementById('ts-fav-count');
       if (!box) return;
-      if (count) count.textContent = String(favs.length);
-      if (empty) empty.style.display = favs.length ? 'none' : 'block';
+      if (count) count.textContent = String(favsCache.length);
+      if (empty) empty.style.display = favsCache.length ? 'none' : 'block';
       box.innerHTML = '';
-      for (var f = 0; f < favs.length; f++) {
-        (function (b64) {
+      for (var f = 0; f < favsCache.length; f++) {
+        (function (entry) {
           var item = document.createElement('div');
           item.className = 'ts-fav-item';
           item.title = '点击应用';
           var prev = document.createElement('div');
           prev.className = 'ts-fav-preview';
-          prev.style.backgroundImage = 'url("' + b64 + '")';
+          prev.style.backgroundImage = 'url("' + entry.url + '")';
           var del = document.createElement('button');
           del.className = 'ts-fav-remove';
           del.type = 'button';
@@ -366,18 +398,74 @@
           del.title = '删除';
           del.addEventListener('click', function (e) {
             e.stopPropagation();
-            var rest = store.favs.filter(function (x) { return x !== b64; });
-            store.favs = rest;
-            renderFavs();
+            del.disabled = true;
+            fetch('/theme/wallpaper/favorites/' + entry.id, {
+              method: 'DELETE',
+              credentials: 'same-origin',
+              headers: { 'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || '', 'Accept': 'application/json' },
+            })
+              .then(function (r) { return r.json(); })
+              .then(function (d) {
+                if (d.code === 0) {
+                  favsCache = favsCache.filter(function (x) { return x.id !== entry.id; });
+                  renderFavs();
+                } else {
+                  del.disabled = false;
+                }
+              })
+              .catch(function () { del.disabled = false; });
           });
           item.appendChild(prev);
           item.appendChild(del);
+          /* 点击应用: 服务端文件取回转 dataURL, 走唯一变更点(铺图+落盘+下载链接) */
           item.addEventListener('click', function () {
-            setWallpaper(b64);
+            fetch(entry.url, { credentials: 'same-origin' })
+              .then(function (r) { return r.blob(); })
+              .then(blobToDataURL)
+              .then(function (b64) { setWallpaper(b64); })
+              .catch(function () { /* 取图失败保持现状 */ });
           });
           box.appendChild(item);
-        })(favs[f]);
+        })(favsCache[f]);
       }
+    }
+    function loadFavs() {
+      fetch('/theme/wallpaper/favorites', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.code === 0) {
+            favsCache = d.data || [];
+            renderFavs();
+            migrateLegacyFavs();
+          }
+        })
+        .catch(function () { /* 拉取失败保持空态, 面板可用 */ });
+    }
+    function migrateLegacyFavs() {
+      var legacy;
+      try { legacy = JSON.parse(localStorage.getItem(KEY.favs)) || []; } catch (e) { legacy = []; }
+      if (!legacy.length) return;
+      var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      var queue = legacy.slice(0, 9);
+      var idx = 0;
+      /* 顺序慢速上传: POST 走 5 次/分钟限流, 并发会被 429 掐掉;
+         全部传完才删本地键——中途失败下次启动还能续迁 */
+      var step = function () {
+        if (idx >= queue.length) { localStorage.removeItem(KEY.favs); return; }
+        fetch('/theme/wallpaper/favorites', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: queue[idx] }),
+        })
+          .then(function (r) {
+            if (r.status === 429) { setTimeout(step, 6500); return; } /* 限流: 等一个窗口, 不推进 */
+            idx += 1;
+            setTimeout(step, 1300);
+          })
+          .catch(function () { setTimeout(step, 4000); });
+      };
+      step();
     }
 
     function bindSwitcher() {
@@ -457,7 +545,7 @@
 
       refreshDownloadLink();
       applyModeButtons();
-      renderFavs();
+      loadFavs(); /* 收藏随登录态: 启动拉取服务端列表(+旧本地收藏一次性迁移) */
 
       /* 明暗切换: PUT /user/dark-mode 是「翻转」语义, 仅在目标态 != 当前态时调用一次 */
       var modeBtns = document.querySelectorAll('.ts-mode-btn');
@@ -498,23 +586,34 @@
           if (toast) toast.warning('壁纸还没准备好，稍后再收藏');
           return;
         }
-        var favs = store.favs;
-        if (favs.indexOf(store.bg) !== -1) {
-          if (toast) toast.info('这张已经在收藏里了');
-          return;
-        }
-        if (favs.length >= 9) favs = favs.slice(0, 8);
-        favs.push(store.bg);
-        store.favs = favs;
-        renderFavs();
-        if (toast) toast.success('已收藏当前壁纸');
+        favBtn.disabled = true;
+        var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+        fetch('/theme/wallpaper/favorites', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: store.bg }),
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.code !== 0) { if (toast) toast.warning(d.message || '收藏失败'); return; }
+            if (d.duplicate) { if (toast) toast.info('这张已经在收藏里了'); }
+            else {
+              favsCache.push(d.entry);
+              renderFavs();
+              if (toast) toast.success('已收藏当前壁纸');
+            }
+          })
+          .catch(function () { if (toast) toast.warning('网络错误，稍后再试'); })
+          .finally(function () { favBtn.disabled = false; });
       });
 
       var autoToggle = document.getElementById('ts-auto-toggle');
       if (autoToggle) autoToggle.addEventListener('click', function () {
         store.auto = !store.auto;
-        autoToggle.setAttribute('aria-checked', store.auto ? 'true' : 'false');
-        autoToggle.classList.toggle('active', store.auto);
+        /* 联动规则: 开着就必须有有效时间档(默认 15 分), 关着时间档整行隐藏 */
+        if (store.auto && [5, 15, 30, 60].indexOf(store.iv) === -1) store.iv = 15;
+        syncAutoUI();
         setAutoTimer();
       });
 
@@ -523,26 +622,18 @@
         ivs[v].addEventListener('click', function (e) {
           var minutes = parseInt(e.currentTarget.getAttribute('data-min'), 10) || 30;
           store.iv = minutes;
+          /* 选时间 = 自动切换必然开着(时间档只在开着时可见, 双保险) */
+          if (!store.auto) { store.auto = true; }
+          syncAutoUI();
           setAutoTimer();
-          var all = document.querySelectorAll('.ts-iv');
-          for (var q = 0; q < all.length; q++) {
-            all[q].classList.toggle('active', parseInt(all[q].getAttribute('data-min'), 10) === minutes);
-          }
         });
       }
-      var currentIv = root.querySelector('.ts-iv[data-min="' + store.iv + '"]');
-      if (currentIv) currentIv.classList.add('active');
       var acBtnState = document.getElementById('ts-ac-toggle');
       if (acBtnState) {
         acBtnState.setAttribute('aria-checked', acOn ? 'true' : 'false');
         acBtnState.classList.toggle('active', acOn);
       }
-      var autoBtn = document.getElementById('ts-auto-toggle');
-      if (autoBtn) {
-        autoBtn.setAttribute('aria-checked', store.auto ? 'true' : 'false');
-        autoBtn.classList.toggle('active', store.auto);
-      }
-
+      syncAutoUI();
       setAutoTimer();
     }
     bindSwitcher();
@@ -665,6 +756,359 @@
       } catch (e) { /* 注入失败不影响站点 */ }
     }
 
+    /* ---------- 移动端底部 Tab 栏: 原生 App 式主导航(≤767px 显示, CSS 控制) ----------
+       高频目的地进底栏(首页/皮肤库/衣柜/我的), 低频项留抽屉; 游客变体换 关于/登录。
+       追加在 body 上(PJAX 只换 .content-wrapper, 底栏常驻), 高亮随路由更新;
+       登录/注册页与纯享展示模式自动隐藏 */
+    var htTabTabs = [
+      { match: function (p) { return p === '/'; }, link: '/', icon: 'fa-home', label: '首页', auth: null },
+      { match: function (p) { return p.indexOf('/skinlib') === 0; }, link: '/skinlib', icon: 'fa-archive', label: '皮肤库', auth: null },
+      { match: function (p) { return p.indexOf('/user/closet') === 0; }, link: '/user/closet', icon: 'fa-star', label: '衣柜', auth: true },
+      { match: function (p) { return p.indexOf('/user') === 0; }, link: '/user', icon: 'fa-user', label: '我的', auth: true },
+      { match: function (p) { return p.indexOf('/about') === 0; }, link: '/about', icon: 'fa-info-circle', label: '关于', auth: false },
+      { match: function (p) { return p.indexOf('/auth') === 0; }, link: '/auth/login', icon: 'fa-sign-in-alt', label: '登录', auth: false },
+    ];
+    function htUpdateTabbar() {
+      var bar = document.getElementById('ht-tabbar');
+      if (!bar) return;
+      var path = location.pathname.replace(/\/$/, '') || '/';
+      var guest = !document.getElementById('theme-switcher'); /* 与主题 boot 的 authed 判定同源 */
+      /* 登录/注册页隐藏底栏(模态式页面) */
+      bar.style.display = /^\/auth(\/|$)/.test(path) ? 'none' : '';
+      var tabs = bar.children;
+      for (var i = 0; i < tabs.length; i++) {
+        var tab = tabs[i];
+        var def = htTabTabs.filter(function (d) { return d.label === tab.dataset.label; })[0];
+        if (!def) continue;
+        if (def.auth === true && guest) { tab.style.display = 'none'; continue; }
+        if (def.auth === false && !guest) { tab.style.display = 'none'; continue; }
+        tab.style.display = '';
+        if (def.match(path === '/' ? '/' : path)) tab.classList.add('active');
+        else tab.classList.remove('active');
+      }
+    }
+    function htBuildTabbar() {
+      var bar = document.getElementById('ht-tabbar');
+      if (!bar) {
+        bar = document.createElement('nav');
+        bar.id = 'ht-tabbar';
+        htTabTabs.forEach(function (d) {
+          var a = document.createElement('a');
+          a.href = d.link;
+          a.dataset.label = d.label;
+          a.innerHTML = '<i class="fas ' + d.icon + '"></i><span>' + d.label + '</span>';
+          bar.appendChild(a);
+        });
+        document.body.appendChild(bar);
+      }
+      htUpdateTabbar();
+    }
+    document.addEventListener('ht:pjax:navigated', htUpdateTabbar);
+    htBuildTabbar();
+
+    /* ---------- 移动端抽屉: sidebar-open(≤767px) 时点侧栏外任意处收起 ----------
+       捕获阶段拦截, 放行抽屉内部与汉堡按钮自身的点击(AdminLTE 负责开合);
+       桌面端(>767px)不受影响(桌面 pushmenu 走 sidebar-collapse 折叠轨道) */
+    document.addEventListener('click', function (e) {
+      if (!document.body.classList.contains('sidebar-open')) return;
+      if (window.innerWidth > 767.98) return;
+      var t = e.target;
+      if (t && t.closest && (t.closest('.main-sidebar') || t.closest('[data-widget="pushmenu"]'))) return;
+      document.body.classList.remove('sidebar-open');
+    }, true);
+
+    /* ---------- 材质评论区(详情页): 服务端渲染首屏, 本模块负责增量 ----------
+       首屏内容由 shared.comments.twig 输出(twig autoescape 已转义), 增量渲染
+       全部 createElement + textContent, 不拼接任何含用户内容的 HTML(XSS 红线)。
+       按钮事件走 list 上的事件委托(首屏 twig 项与 JS 增量项统一处理);
+       容器 data-ht-init 防重入; PJAX 切页后由 ht:pjax:navigated 重新初始化 */
+    function htInitComments() {
+      var box = document.getElementById('ht-comments');
+      if (!box || box.dataset.htInit) return;
+      box.dataset.htInit = '1';
+      var tid = box.getAttribute('data-tid');
+      var list = box.querySelector('.ht-c-list');
+      var moreBtn = box.querySelector('.ht-c-more');
+      var form = box.querySelector('.ht-c-form');
+      var input = box.querySelector('.ht-c-input');
+      var counter = box.querySelector('.ht-c-counter');
+      var submitBtn = box.querySelector('.ht-c-submit');
+      var toast = (window.blessing && blessing.notify && blessing.notify.toast) || null;
+      var csrf = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      var page = 1;
+
+      function setCount(delta) {
+        var n = box.querySelector('.ht-c-count');
+        if (!n) return;
+        var cur = parseInt(n.textContent.replace(/[^\d-]/g, ''), 10) || 0;
+        n.textContent = '(' + (cur + delta) + ')';
+      }
+      function refreshEmpty() {
+        var empty = list.querySelector('.ht-c-empty');
+        var has = list.querySelector('.ht-c-item');
+        if (has && empty) empty.remove();
+        if (!has && !empty) {
+          var d = document.createElement('div');
+          d.className = 'ht-c-empty';
+          d.textContent = '还没有评论，来说点什么吧～';
+          list.appendChild(d);
+        }
+      }
+      function actionBtn(cls, text) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'ht-c-mini-btn ' + cls;
+        b.textContent = text;
+        return b;
+      }
+      function postComment(payload, btn, onOk) {
+        btn.disabled = true;
+        fetch('/skinlib/show/' + tid + '/comments', {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+          .then(function (r) { return r.json().catch(function () { throw new Error('网络错误'); }); })
+          .then(function (d) {
+            if (d.code !== 0) throw new Error(d.message || '发表失败');
+            onOk(d);
+            if (toast) toast.info(d.message || (d.pending ? '已提交，等待审核' : '发表成功'));
+          })
+          .catch(function (e2) { if (toast) toast.warning(e2.message || '网络错误'); })
+          .finally(function () { btn.disabled = false; });
+      }
+      function appendReply(comment) {
+        /* 回复(含回复的回复)统一挂到其顶层线的 .ht-c-replies 容器 */
+        var topId = comment.parent_id;
+        var topItem = topId ? list.querySelector('.ht-c-item[data-id="' + topId + '"]') : null;
+        if (!topItem) return;
+        var repliesBox = topItem.querySelector(':scope > .ht-c-replies');
+        if (!repliesBox) {
+          repliesBox = document.createElement('div');
+          repliesBox.className = 'ht-c-replies';
+          topItem.appendChild(repliesBox);
+        }
+        repliesBox.appendChild(renderComment(comment));
+        refreshEmpty();
+      }
+      function renderComment(c) {
+        var item = document.createElement('div');
+        item.className = c.parent_id ? 'ht-c-item ht-c-reply-item' : 'ht-c-item';
+        item.id = 'comment-' + c.id;
+        item.setAttribute('data-id', c.id);
+        var img = document.createElement('img');
+        img.className = 'ht-c-avatar';
+        img.src = c.avatar;
+        img.alt = '';
+        img.loading = 'lazy';
+        item.appendChild(img);
+        var main = document.createElement('div');
+        main.className = 'ht-c-main';
+        var meta = document.createElement('div');
+        meta.className = 'ht-c-meta';
+        var name = document.createElement('span');
+        name.className = 'ht-c-name';
+        name.textContent = c.name;
+        meta.appendChild(name);
+        if (c.reply_name) {
+          var rt = document.createElement('span');
+          rt.className = 'ht-c-replyto';
+          rt.textContent = '回复 @' + c.reply_name;
+          meta.appendChild(rt);
+        }
+        if (c.status === 0) {
+          var badge = document.createElement('span');
+          badge.className = 'badge badge-warning ht-c-pending-badge';
+          badge.textContent = '审核中';
+          meta.appendChild(badge);
+        }
+        var time = document.createElement('span');
+        time.className = 'ht-c-time';
+        time.textContent = c.time_text;
+        if (c.time_full) time.title = c.time_full;
+        meta.appendChild(time);
+        main.appendChild(meta);
+        var body = document.createElement('div');
+        body.className = 'ht-c-content';
+        body.textContent = c.content;
+        main.appendChild(body);
+        item.appendChild(main);
+        var actions = document.createElement('div');
+        actions.className = 'ht-c-actions';
+        if (c.can_approve) actions.appendChild(actionBtn('ht-c-approve', '通过'));
+        if (c.can_delete) actions.appendChild(actionBtn('ht-c-del', '删除'));
+        if (c.can_reply) actions.appendChild(actionBtn('ht-c-reply', '回复'));
+        if (c.can_report) actions.appendChild(actionBtn('ht-c-report', '举报'));
+        if (actions.children.length) item.appendChild(actions);
+        /* 顶层评论预挂回复容器(JS 追加回复时直接用; 空容器 CSS 隐藏) */
+        if (!c.parent_id) {
+          var repliesBox = document.createElement('div');
+          repliesBox.className = 'ht-c-replies';
+          item.appendChild(repliesBox);
+        }
+        return item;
+      }
+      function openReplyForm(item, targetId) {
+        var old = box.querySelector('.ht-c-reply-form');
+        if (old) old.remove();
+        var replyForm = document.createElement('form');
+        replyForm.className = 'ht-c-form ht-c-reply-form mt-2';
+        var ta = document.createElement('textarea');
+        ta.className = 'form-control ht-c-input';
+        ta.rows = 2;
+        ta.maxLength = 500;
+        ta.placeholder = '回复…（最多 500 字）';
+        var row = document.createElement('div');
+        row.className = 'd-flex justify-content-end align-items-center mt-2';
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'btn btn-sm btn-outline-secondary mr-2';
+        cancel.textContent = '取消';
+        var submit = document.createElement('button');
+        submit.type = 'submit';
+        submit.className = 'btn btn-sm btn-primary';
+        submit.textContent = '回复';
+        row.appendChild(cancel);
+        row.appendChild(submit);
+        replyForm.appendChild(ta);
+        replyForm.appendChild(row);
+        item.appendChild(replyForm);
+        ta.focus();
+        cancel.addEventListener('click', function () { replyForm.remove(); });
+        replyForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var content = ta.value.trim();
+          if (!content) { if (toast) toast.warning('先写点什么再回复吧'); return; }
+          postComment({ content: content, reply_to: targetId }, submit, function (d) {
+            replyForm.remove();
+            appendReply(d.comment);
+          });
+        });
+      }
+      function reportComment(id) {
+        var doReport = function (reason) {
+          reason = (reason || '').trim();
+          if (!reason) { if (toast) toast.warning('请填写举报理由'); return; }
+          fetch('/comments/' + id + '/report', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reason: reason.slice(0, 200) }),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.code === 0) { if (toast) toast.success(d.message || '举报成功'); }
+              else { if (toast) toast.warning(d.message || '举报失败'); }
+            })
+            .catch(function () { if (toast) toast.warning('网络错误'); });
+        };
+        var notify = window.blessing && blessing.notify;
+        if (notify && typeof notify.showModal === 'function') {
+          try {
+            notify.showModal({ mode: 'prompt', title: '举报评论', text: '请填写举报理由（进入后台「举报管理 · 评论举报」处理）' })
+              .then(function (res) { doReport(res && res.value); }, function () { /* 取消 */ });
+          } catch (err) {
+            doReport(window.prompt('请填写举报理由：'));
+          }
+        } else {
+          doReport(window.prompt('请填写举报理由：'));
+        }
+      }
+
+      /* 事件委托: 首屏 twig 渲染的按钮与 JS 增量项统一处理 */
+      list.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest
+          ? e.target.closest('.ht-c-del, .ht-c-approve, .ht-c-reply, .ht-c-report')
+          : null;
+        if (!btn || !list.contains(btn)) return;
+        var item = btn.closest('.ht-c-item');
+        if (!item) return;
+        var id = btn.dataset.id || item.getAttribute('data-id');
+        if (btn.classList.contains('ht-c-del')) {
+          var isTop = item.parentElement === list;
+          if (!window.confirm(isTop ? '确定删除这条评论？其下回复将一并删除。' : '确定删除这条回复？')) return;
+          btn.disabled = true;
+          fetch('/comments/' + id, {
+            method: 'DELETE', credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.code === 0) {
+                item.remove();
+                if (isTop) setCount(-1); /* 计数只统计顶层评论 */
+                refreshEmpty();
+              } else {
+                if (toast) toast.warning(d.message || '操作失败');
+                btn.disabled = false;
+              }
+            })
+            .catch(function () { btn.disabled = false; });
+        } else if (btn.classList.contains('ht-c-approve')) {
+          btn.disabled = true;
+          fetch('/admin/comments/' + id + '/approve', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.code === 0) {
+                if (toast) toast.success(d.message || '已通过');
+                var badge = item.querySelector('.ht-c-pending-badge');
+                if (badge) badge.remove();
+                btn.remove();
+              } else {
+                if (toast) toast.warning(d.message || '操作失败');
+                btn.disabled = false;
+              }
+            })
+            .catch(function () { btn.disabled = false; });
+        } else if (btn.classList.contains('ht-c-reply')) {
+          openReplyForm(item, id);
+        } else if (btn.classList.contains('ht-c-report')) {
+          reportComment(id);
+        }
+      });
+
+      if (moreBtn) {
+        moreBtn.addEventListener('click', function () {
+          moreBtn.disabled = true;
+          fetch('/skinlib/show/' + tid + '/comments?page=' + (page + 1), {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' },
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              if (d.code !== 0) throw new Error(d.message || '加载失败');
+              page += 1;
+              d.data.items.forEach(function (c) { list.appendChild(renderComment(c)); });
+              refreshEmpty();
+              moreBtn.hidden = !d.data.has_more;
+            })
+            .catch(function (e) { if (toast) toast.warning(e.message || '网络错误'); })
+            .finally(function () { moreBtn.disabled = false; });
+        });
+      }
+
+      if (form) {
+        input.addEventListener('input', function () { counter.textContent = String(input.value.length); });
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var content = input.value.trim();
+          if (!content) { if (toast) toast.warning('先写点什么再发表吧'); return; }
+          if (content.length > 500) { if (toast) toast.warning('评论最多 500 字'); return; }
+          postComment({ content: content }, submitBtn, function (d) {
+            list.insertBefore(renderComment(d.comment), list.firstChild);
+            setCount(1);
+            refreshEmpty();
+            input.value = '';
+            counter.textContent = '0';
+          });
+        });
+      }
+    }
+    document.addEventListener('ht:pjax:navigated', htInitComments);
+    htInitComments();
+
     /* ---------- Bootstrap 弹窗层级修复 ---------- */
     /* 玻璃卡的 backdrop-filter 会成为 fixed 弹窗的包含块+层叠上下文,
        弹窗的 z1050 被困在卡片内部, 画不过 body 级 z1040 的遮罩 →
@@ -706,7 +1150,7 @@
       '/skinlib/upload':  { route: 'skinlib/upload',  chunks: [414],            module: 5414, el: '#file-input' }
     };
     /* 纯服务端渲染页: 只换 DOM 不需要重挂载 */
-    var HT_STATIC = ['/user/config', '/user/reports', '/about', '/skinlib', '/skinlib/upload'];
+    var HT_STATIC = ['/user/config', '/user/reports', '/about', '/skinlib', '/skinlib/upload', '/docs'];
 
     function htWebpackRequire() {
       if (window.__htWR) return window.__htWR;
@@ -771,6 +1215,10 @@
           if (doc.body.classList.contains('dark-mode') !== body.classList.contains('dark-mode')) {
             body.classList.toggle('dark-mode', doc.body.classList.contains('dark-mode'));
           }
+          /* 页面专属 body 类必须在这里显式同步: ht-skin-show 只在整页加载时由
+             启动逻辑添加(约 614 行), PJAX 进/出详情页若不同步, 玻璃化和
+             背景控件隐藏会随访问入口不同时有时无 */
+          body.classList.toggle('ht-skin-show', /^\/skinlib\/show\/\d+$/.test(u.pathname));
           var newTitle = doc.querySelector('title');
           if (newTitle) document.title = newTitle.textContent;
           var newExtra = doc.querySelector('#blessing-extra');
@@ -781,6 +1229,10 @@
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);
           htMarkSidebar(u.pathname);
+          /* 移动端抽屉随导航收起 */
+          document.body.classList.remove('sidebar-open');
+          /* 通知页面级增量模块(评论区等)按新内容重新初始化 */
+          document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
           htPjaxBusy = false;
           var page = HT_PAGES[u.pathname.replace(/\/$/, '')] || HT_PAGES[u.pathname];
           /* 皮肤详情页: 路径带 tid(正则路由), 挂载表用动态条目——

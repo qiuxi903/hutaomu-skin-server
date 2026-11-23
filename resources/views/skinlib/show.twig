@@ -21,6 +21,9 @@
       <section class="content">
         <div class="container-fluid">
           {{ include('shared.grid') }}
+          {% if commentsEnabled %}
+            {{ include('shared.comments') }}
+          {% endif %}
         </div>
       </section>
     </div>

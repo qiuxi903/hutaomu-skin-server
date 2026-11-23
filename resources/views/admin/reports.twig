@@ -1,3 +1,173 @@
 {% extends 'admin.base' %}
 
-{% block title %}{{ trans('general.report-manage') }}{% endblock %}
+{% block title %}举报管理{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="callout callout-info">
+        材质举报与评论举报共用一套举报系统，按下方两个 Tab 分区处理，互不混淆。
+        材质举报的「删除」会删除被举报材质；评论举报的「删除」只删除被举报评论本身（举报记录保留）。
+      </div>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a class="nav-link {{ tab == 'texture' ? 'active' : '' }}" href="{{ url('admin/reports') }}">材质举报</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {{ tab == 'comment' ? 'active' : '' }}" href="{{ url('admin/reports') }}?type=comment">评论举报</a>
+    </li>
+  </ul>
+
+  {% if tab == 'texture' %}
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-warning">
+          <div class="card-header"><h3 class="card-title">材质举报 · 待处理（{{ pending|length }}）</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-striped ht-rp-table">
+              <thead><tr><th>ID</th><th>被举报材质</th><th>材质上传者</th><th>举报人</th><th>理由</th><th>时间</th><th>操作</th></tr></thead>
+              <tbody>
+                {% for r in pending %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{% if r.texture %}<a href="{{ url('skinlib/show/' ~ r.tid) }}" target="_blank">{{ r.texture.name }}</a>{% else %}（材质已删除）{% endif %}</td>
+                    <td>{{ r.textureUploader.nickname ?? '已注销' }} <span class="text-muted small">#{{ r.uploader }}</span></td>
+                    <td>{{ r.informer.nickname ?? '已注销' }} <span class="text-muted small">#{{ r.reporter }}</span></td>
+                    <td class="ht-rp-content" title="{{ r.reason }}">{{ r.reason }}</td>
+                    <td class="text-nowrap">{{ r.report_at|date('Y-m-d H:i') }}</td>
+                    <td class="text-nowrap">
+                      <button type="button" class="btn btn-xs btn-danger ht-rp-act" data-id="{{ r.id }}" data-action="delete">删除材质</button>
+                      <button type="button" class="btn btn-xs btn-outline-danger ht-rp-act" data-id="{{ r.id }}" data-action="ban">封禁上传者</button>
+                      <button type="button" class="btn btn-xs btn-outline-secondary ht-rp-act" data-id="{{ r.id }}" data-action="reject">驳回</button>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="7" class="text-center text-muted py-3">没有待处理的材质举报</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">已处理（最近 20 条）</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-striped ht-rp-table">
+              <thead><tr><th>ID</th><th>被举报材质</th><th>材质上传者</th><th>举报人</th><th>理由</th><th>时间</th><th>状态</th></tr></thead>
+              <tbody>
+                {% for r in recent %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td>{% if r.texture %}<a href="{{ url('skinlib/show/' ~ r.tid) }}" target="_blank">{{ r.texture.name }}</a>{% else %}（材质已删除）{% endif %}</td>
+                    <td>{{ r.textureUploader.nickname ?? '已注销' }} <span class="text-muted small">#{{ r.uploader }}</span></td>
+                    <td>{{ r.informer.nickname ?? '已注销' }} <span class="text-muted small">#{{ r.reporter }}</span></td>
+                    <td class="ht-rp-content" title="{{ r.reason }}">{{ r.reason }}</td>
+                    <td class="text-nowrap">{{ r.report_at|date('Y-m-d H:i') }}</td>
+                    <td>{% if r.status == 1 %}<span class="badge badge-success">已处理</span>{% else %}<span class="badge badge-secondary">已驳回</span>{% endif %}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="7" class="text-center text-muted py-3">暂无记录</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card card-warning">
+          <div class="card-header"><h3 class="card-title">评论举报 · 待处理（{{ pending|length }}）</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-striped ht-rp-table">
+              <thead><tr><th>ID</th><th>被举报评论</th><th>评论作者</th><th>所在材质</th><th>举报人</th><th>理由</th><th>时间</th><th>操作</th></tr></thead>
+              <tbody>
+                {% for r in pending %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td class="ht-rp-content">{{ r.comment ? r.comment.content : '（评论已删除）' }}</td>
+                    <td>{{ r.comment and r.comment.user ? r.comment.user.nickname : '已注销' }} <span class="text-muted small">#{{ r.uploader }}</span></td>
+                    <td><a href="{{ url('skinlib/show/' ~ r.tid) }}" target="_blank">{{ r.texture.name ?? ('#' ~ r.tid) }}</a></td>
+                    <td>{{ r.informer.nickname ?? '已注销' }} <span class="text-muted small">#{{ r.reporter }}</span></td>
+                    <td class="ht-rp-content" title="{{ r.reason }}">{{ r.reason }}</td>
+                    <td class="text-nowrap">{{ r.report_at|date('Y-m-d H:i') }}</td>
+                    <td class="text-nowrap">
+                      <button type="button" class="btn btn-xs btn-danger ht-rp-act" data-id="{{ r.id }}" data-action="delete" data-kind="delete-comment">删除评论</button>
+                      <button type="button" class="btn btn-xs btn-outline-secondary ht-rp-act" data-id="{{ r.id }}" data-action="reject">驳回</button>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="8" class="text-center text-muted py-3">没有待处理的评论举报</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">已处理（最近 20 条）</h3></div>
+          <div class="card-body table-responsive p-0">
+            <table class="table table-striped ht-rp-table">
+              <thead><tr><th>ID</th><th>被举报评论</th><th>评论作者</th><th>所在材质</th><th>举报人</th><th>理由</th><th>时间</th><th>状态</th></tr></thead>
+              <tbody>
+                {% for r in recent %}
+                  <tr>
+                    <td>{{ r.id }}</td>
+                    <td class="ht-rp-content">{{ r.comment ? r.comment.content : '（评论已删除）' }}</td>
+                    <td>{{ r.comment and r.comment.user ? r.comment.user.nickname : '已注销' }} <span class="text-muted small">#{{ r.uploader }}</span></td>
+                    <td><a href="{{ url('skinlib/show/' ~ r.tid) }}" target="_blank">{{ r.texture.name ?? ('#' ~ r.tid) }}</a></td>
+                    <td>{{ r.informer.nickname ?? '已注销' }} <span class="text-muted small">#{{ r.reporter }}</span></td>
+                    <td class="ht-rp-content" title="{{ r.reason }}">{{ r.reason }}</td>
+                    <td class="text-nowrap">{{ r.report_at|date('Y-m-d H:i') }}</td>
+                    <td>{% if r.status == 1 %}<span class="badge badge-success">已处理</span>{% else %}<span class="badge badge-secondary">已驳回</span>{% endif %}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="8" class="text-center text-muted py-3">暂无记录</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <script>
+    (function () {
+      var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      var confirms = {
+        'delete-texture': '确定删除该材质？会同时从所有衣柜移除，不可恢复！',
+        'ban': '确定封禁该材质的上传者？',
+        'delete-comment': '确定删除该评论？删除后不可恢复（举报记录保留）。',
+        'reject': '确定驳回该举报？',
+      };
+      document.addEventListener('click', function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest('.ht-rp-act') : null;
+        if (!btn) return;
+        var action = btn.dataset.action;
+        var key = action === 'delete' ? (btn.dataset.kind || 'delete-texture') : action;
+        if (!window.confirm(confirms[key] || '确定执行该操作？')) return;
+        btn.disabled = true;
+        fetch({{ url('admin/reports') | json_encode | raw }} + '/' + btn.dataset.id, {
+          method: 'PUT',
+          credentials: 'same-origin',
+          headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: action }),
+        }).then(function (r) { return r.json(); }).then(function (d) {
+          if (d.code === 0) { location.reload(); }
+          else { window.alert(d.message || '操作失败'); btn.disabled = false; }
+        }).catch(function () { window.alert('网络错误'); btn.disabled = false; });
+      });
+    })();
+  </script>
+{% endblock %}

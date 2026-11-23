@@ -13,6 +13,7 @@ class ViewServiceProvider extends ServiceProvider
         View::composer([
             'home',
             'about',
+            'docs.*',
             '*.base',
             '*.master',
             'shared.header',
