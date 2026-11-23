@@ -1,36 +1,29 @@
-{% extends 'admin.base' %}
+{% extends 'admin.layout' %}
 
 {% block title %}{{ trans('general.customize') }}{% endblock %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-md-12">
-      <div class="callout callout-info">
-        这是「暖樱白」主题的专属配置，只保留对主题真正有意义的开关；主题本体是源码资产
-        <code>public/theme/</code>，改动保存后刷新页面立即生效，无需清缓存。
+  <div class="ap-settings">
+    <nav class="ap-settings-nav">
+      <div class="ap-banner ap-banner-info" style="margin:0 0 10px;">
+        <i class="fas fa-info-circle"></i>
+        <span>「暖樱白」主题专属配置；主题本体是源码资产 <code>public/theme/</code>，保存后刷新页面立即生效。</span>
       </div>
-    </div>
-  </div>
+      {% for key, form in forms %}
+        <a href="#form-{{ key }}">{{ form.getTitle() }}</a>
+      {% endfor %}
+      <a href="#form-sidebar">侧边栏自定义</a>
+    </nav>
+    <div class="ap-settings-body">
+      {% for key, form in forms %}
+        {{ form.render()|raw }}
+      {% endfor %}
 
-  <div class="row">
-    <div class="col-md-6">
-      {{ forms.wallpaper.render()|raw }}
-    </div>
-    <div class="col-md-6">
-      {{ forms.effects.render()|raw }}
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-6">
-      {{ forms.footer.render()|raw }}
-    </div>
-    <div class="col-md-6">
-      <div class="card card-primary">
-        <div class="card-header">
-          <h3 class="card-title">侧边栏自定义</h3>
-        </div>
-        <div class="card-body">
+      <div class="ap-card" id="form-sidebar">
+        <header class="ap-card-head">
+          <h3 class="ap-card-title">侧边栏自定义</h3>
+        </header>
+        <div class="ap-card-body">
           <p class="text-muted small mb-2">
             拖动 ☰ 排序（大项/子项可跨层级拖动：拖到行中间=变成它的子项，拖到边缘=同级插入）；
             「高级功能」点 ‹ 展开子项；勾「隐藏」前台收起（编辑器里灰显保留，取消勾选即恢复）；
@@ -38,7 +31,7 @@
           </p>
           <div id="sidebar-tree" class="sidebar-editor"></div>
           <div class="border-top pt-2 mt-2">
-            <div class="d-flex flex-wrap align-items-center mb-2">
+            <div class="ap-gap mb-2">
               <strong class="mr-2">添加自定义链接：</strong>
               <input type="text" id="sc-new-title" class="form-control form-control-sm mr-1" style="width: 130px;" placeholder="显示名">
               <input type="text" id="sc-new-link" class="form-control form-control-sm mr-1" style="width: 200px;" placeholder="链接（https:// 或站内路径）">
@@ -385,12 +378,4 @@
       render();
     })();
   </script>
-  <style>
-    .sidebar-editor .sidebar-row { border-bottom: 1px solid rgba(240, 184, 205, 0.4); }
-    .sidebar-editor .sidebar-row > div:first-child { padding: 6px 4px; }
-    .sidebar-editor .sc-chev { display: inline-block; width: 14px; }
-    .sidebar-editor .sc-children { border-left: 2px dashed rgba(240, 136, 168, 0.45); margin-left: 14px; }
-    .sidebar-editor .sc-hidden > div:first-child { opacity: 0.45; }
-    .sidebar-editor .sc-sublist { padding-bottom: 4px; }
-  </style>
 {% endblock %}

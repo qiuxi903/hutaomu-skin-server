@@ -1,40 +1,40 @@
-{% extends 'admin.base' %}
+{% extends 'admin.layout' %}
 
 {% block title %}文档管理{% endblock %}
 
+{% block actions %}
+  <a href="{{ url('admin/docs/create') }}" class="btn btn-primary"><i class="fas fa-plus mr-1"></i>新建文档</a>
+{% endblock %}
+
 {% block content %}
-  <div class="row">
-    <div class="col-md-12">
-      <div class="callout callout-info">
-        站点使用文档（/docs）的管理。文档用 Markdown 书写，保存后在前台立即生效；
-        勾选「发布」才会对玩家可见，未发布文档只有管理员能在文档页预览。
-      </div>
-    </div>
+  <div class="ap-banner ap-banner-info">
+    <i class="fas fa-info-circle"></i>
+    <span>站点使用文档（/docs）的管理。文档用 Markdown 书写，保存后在前台立即生效；勾选「发布」才会对玩家可见，未发布文档只有管理员能在文档页预览。</span>
   </div>
 
   {% if session('message') %}
-    <div class="alert alert-success">{{ session('message') }}</div>
+    <div class="ap-banner ap-banner-success"><i class="fas fa-check-circle"></i><span>{{ session('message') }}</span></div>
   {% endif %}
 
-  <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <h3 class="card-title">文档列表（{{ docs|length }}）</h3>
-      <a href="{{ url('admin/docs/create') }}" class="btn btn-primary btn-sm">新建文档</a>
-    </div>
-    <div class="card-body table-responsive p-0">
+  <div class="ap-card ap-card--flush">
+    <header class="ap-card-head">
+      <h3 class="ap-card-title">文档列表</h3>
+      <span class="badge {{ docs|length ? 'badge-primary' : 'badge-secondary' }}">{{ docs|length }} 篇</span>
+    </header>
+    <div class="ap-card-body">
       <table class="table table-striped">
-        <thead><tr><th>ID</th><th>标题</th><th>slug</th><th>排序</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead>
+        <thead><tr><th>ID</th><th>标题</th><th>slug</th><th>排序</th><th>状态</th><th>更新时间</th><th class="text-right">操作</th></tr></thead>
         <tbody>
           {% for d in docs %}
             <tr>
-              <td>{{ d['id'] }}</td>
+              <td class="ap-muted">{{ d['id'] }}</td>
               <td><a href="{{ url('docs/' ~ d['slug']) }}" target="_blank">{{ d['title'] }}</a></td>
               <td><code>{{ d['slug'] }}</code></td>
-              <td>{{ d['sort'] }}</td>
+              <td class="ap-muted">{{ d['sort'] }}</td>
               <td>{% if d['published'] %}<span class="badge badge-success">已发布</span>{% else %}<span class="badge badge-secondary">未发布</span>{% endif %}</td>
-              <td>{{ d['updated'] }}</td>
-              <td class="text-nowrap">
-                <a class="btn btn-xs btn-outline-primary" href="{{ url('admin/docs/' ~ d['id'] ~ '/edit') }}">编辑</a>
+              <td class="ap-muted">{{ d['updated'] }}</td>
+              <td class="text-nowrap text-right">
+                <a class="btn btn-xs btn-outline-primary" href="{{ url('admin/docs/' ~ d['id'] ~ '/edit') }}"><i class="fas fa-edit mr-1"></i>编辑</a>
                 <button type="button" class="btn btn-xs btn-outline-danger ht-doc-del" data-id="{{ d['id'] }}">删除</button>
               </td>
             </tr>

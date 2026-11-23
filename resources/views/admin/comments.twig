@@ -1,40 +1,40 @@
-{% extends 'admin.base' %}
+{% extends 'admin.layout' %}
 
 {% block title %}评论管理{% endblock %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-md-12">
-      <div class="callout callout-info">
-        材质评论区（皮肤 / 披风共用详情页）的开关与审核。总开关关闭后前台立即不显示评论区、接口同时拒绝；
-        开启「需要审核」后新评论先进入下方待审队列，通过才会公开。评论正文在输出端转义，直接显示原文。
+  <div class="ap-settings">
+    <nav class="ap-settings-nav">
+      <div class="ap-banner ap-banner-info" style="margin:0 0 10px;">
+        <i class="fas fa-info-circle"></i>
+        <span>总开关关闭后前台立即隐藏评论区、接口同时拒绝；开启「需要审核」后新评论先进入待审队列。</span>
       </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-4">
+      <a href="#form-switch">评论开关</a>
+      <a href="#panel-pending">待审队列</a>
+      <a href="#panel-recent">最近已通过</a>
+    </nav>
+    <div class="ap-settings-body">
       {{ form.render()|raw }}
-    </div>
-    <div class="col-md-8">
-      <div class="card card-warning">
-        <div class="card-header">
-          <h3 class="card-title">待审队列（{{ pending|length }}）</h3>
-        </div>
-        <div class="card-body table-responsive p-0">
+
+      <div class="ap-card ap-card--flush" id="panel-pending">
+        <header class="ap-card-head">
+          <h3 class="ap-card-title">待审队列</h3>
+          <span class="badge {{ pending|length ? 'badge-warning' : 'badge-secondary' }}">{{ pending|length }} 条</span>
+        </header>
+        <div class="ap-card-body">
           <table class="table table-striped ht-adm-table">
             <thead>
-              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th>操作</th></tr>
+              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th class="text-right">操作</th></tr>
             </thead>
             <tbody>
               {% for c in pending %}
                 <tr data-id="{{ c['id'] }}">
-                  <td>{{ c['id'] }}</td>
+                  <td class="ap-muted">{{ c['id'] }}</td>
                   <td><a href="{{ url('skinlib/show/' ~ c['tid']) }}" target="_blank">{{ c['texture_name'] }}</a></td>
                   <td>{{ c['name'] }} <span class="text-muted small">#{{ c['uid'] }}</span></td>
                   <td class="ht-adm-content" title="{{ c['time_full'] }}">{{ c['content'] }}</td>
-                  <td class="text-nowrap">{{ c['time_text'] }}</td>
-                  <td class="text-nowrap">
+                  <td class="text-nowrap ap-muted">{{ c['time_text'] }}</td>
+                  <td class="text-nowrap text-right">
                     <button type="button" class="btn btn-xs btn-success ht-adm-approve" data-id="{{ c['id'] }}">通过</button>
                     <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">删除</button>
                   </td>
@@ -46,29 +46,26 @@
           </table>
         </div>
       </div>
-    </div>
-  </div>
 
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">最近已通过的评论（最新 20 条）</h3>
-        </div>
-        <div class="card-body table-responsive p-0">
+      <div class="ap-card ap-card--flush" id="panel-recent">
+        <header class="ap-card-head">
+          <h3 class="ap-card-title">最近已通过的评论</h3>
+          <span class="ap-muted" style="font-size:12px;">最新 20 条</span>
+        </header>
+        <div class="ap-card-body">
           <table class="table table-striped ht-adm-table">
             <thead>
-              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th>操作</th></tr>
+              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th class="text-right">操作</th></tr>
             </thead>
             <tbody>
               {% for c in recent %}
                 <tr data-id="{{ c['id'] }}">
-                  <td>{{ c['id'] }}</td>
+                  <td class="ap-muted">{{ c['id'] }}</td>
                   <td><a href="{{ url('skinlib/show/' ~ c['tid']) }}" target="_blank">{{ c['texture_name'] }}</a></td>
                   <td>{{ c['name'] }} <span class="text-muted small">#{{ c['uid'] }}</span></td>
                   <td class="ht-adm-content" title="{{ c['time_full'] }}">{{ c['content'] }}</td>
-                  <td class="text-nowrap">{{ c['time_text'] }}</td>
-                  <td class="text-nowrap">
+                  <td class="text-nowrap ap-muted">{{ c['time_text'] }}</td>
+                  <td class="text-nowrap text-right">
                     <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">删除</button>
                   </td>
                 </tr>

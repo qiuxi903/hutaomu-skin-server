@@ -89,6 +89,12 @@ class OptionForm
         return $this;
     }
 
+    /** 表单标题读取器: Twig 无法访问 protected 属性, 设置页锚点导航用它渲染标题 */
+    public function getTitle(): string
+    {
+        return (string) $this->title;
+    }
+
     /** Add a hint to option form. */
     public function hint($hintContent = self::AUTO_DETECT): self
     {

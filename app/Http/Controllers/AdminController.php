@@ -18,17 +18,17 @@ class AdminController extends Controller
 {
     public function index(Filter $filter)
     {
+        /* 新面板版式：统计瓦片整行，趋势图(宽)与群发通知(窄)双栏 */
         $grid = [
             'layout' => [
-                ['md-6', 'md-6'],
+                ['md-12'],
+                ['md-8', 'md-4'],
             ],
             'widgets' => [
+                [['admin.widgets.dashboard.usage']],
                 [
-                    [
-                        'admin.widgets.dashboard.usage',
-                        'admin.widgets.dashboard.notification',
-                    ],
                     ['admin.widgets.dashboard.chart'],
+                    ['admin.widgets.dashboard.notification'],
                 ],
             ],
         ];

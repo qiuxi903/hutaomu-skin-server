@@ -1,17 +1,21 @@
-<div class="card card-green">
-  <div class="card-header">
-    <h3 class="card-title">
-      {{ trans('admin.status.plugins', {amount: plugins|length}) }}
-    </h3>
-  </div>
-  <div class="card-body">
-    <table class="table table-bordered table-striped">
+{# 运行状态 · 已启用插件（新面板） #}
+<div class="ap-card">
+  <header class="ap-card-head">
+    <h3 class="ap-card-title">{{ trans('admin.status.plugins', {amount: plugins|length}) }}</h3>
+    <a class="btn btn-sm btn-outline-primary" href="{{ url('admin/plugins/manage') }}">
+      <i class="fas fa-plug mr-1"></i>{{ trans('general.plugin-manage') }}
+    </a>
+  </header>
+  <div class="ap-card-body" style="padding:0;">
+    <table class="table">
       <tbody>
         {% for plugin in plugins %}
           <tr>
             <td>{{ plugin.title }}</td>
-            <td>{{ plugin.version }}</td>
+            <td class="text-right ap-muted"><code>v{{ plugin.version }}</code></td>
           </tr>
+        {% else %}
+          <tr><td class="ap-muted">未启用任何插件</td></tr>
         {% endfor %}
       </tbody>
     </table>

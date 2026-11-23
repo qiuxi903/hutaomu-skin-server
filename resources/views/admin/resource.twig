@@ -1,22 +1,22 @@
-{% extends 'admin.base' %}
+{% extends 'admin.layout' %}
 
 {% block title %}{{ trans('general.res-options') }}{% endblock %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-md-12">
-      <div class="callout callout-warning">
-        {{ trans('options.res-warning') }}
+  <div class="ap-settings">
+    <nav class="ap-settings-nav">
+      <div class="ap-banner ap-banner-warning" style="margin:0 0 10px;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>{{ trans('options.res-warning') }}</span>
       </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-md-6">
-      {{ forms.resources.render()|raw }}
-    </div>
-    <div class="col-md-6">
-      {{ forms.cache.render()|raw }}
+      {% for key, form in forms %}
+        <a href="#form-{{ key }}">{{ form.getTitle() }}</a>
+      {% endfor %}
+    </nav>
+    <div class="ap-settings-body">
+      {% for key, form in forms %}
+        {{ form.render()|raw }}
+      {% endfor %}
     </div>
   </div>
 {% endblock %}

@@ -1,55 +1,40 @@
-<div class="row">
-  <div class="col-md-6">
-    <div class="small-box bg-info">
-      <div class="inner">
-        <h3 class="stats">{{ sum.users }}</h3>
-        <p>{{ trans('admin.index.total-users') }}</p>
-      </div>
-      <div class="icon"><i class="fas fa-users"></i></div>
-      <a href="{{ url('admin/users') }}" class="small-box-footer">
-        {{ trans('general.user-manage') }}&nbsp;
-        <i class="fa fa-arrow-circle-right"></i>
-      </a>
-    </div>
+{# 仪表盘统计块（新面板）：四枚数据瓦片，用户/角色可点击跳转对应管理页 #}
+<div class="ap-stats">
+  <a class="ap-stat" href="{{ url('admin/users') }}">
+    <span class="ap-stat-icon ap-tint-pink"><i class="fas fa-users"></i></span>
+    <span class="ap-stat-meta">
+      <span class="ap-stat-num">{{ sum.users }}</span>
+      <span class="ap-stat-label">{{ trans('admin.index.total-users') }}</span>
+    </span>
+    <span class="ap-stat-foot">{{ trans('general.user-manage') }} <i class="fas fa-angle-right"></i></span>
+  </a>
+
+  <a class="ap-stat" href="{{ url('admin/players') }}">
+    <span class="ap-stat-icon ap-tint-green"><i class="fas fa-gamepad"></i></span>
+    <span class="ap-stat-meta">
+      <span class="ap-stat-num">{{ sum.players }}</span>
+      <span class="ap-stat-label">{{ trans('admin.index.total-players') }}</span>
+    </span>
+    <span class="ap-stat-foot">{{ trans('general.player-manage') }} <i class="fas fa-angle-right"></i></span>
+  </a>
+
+  <div class="ap-stat">
+    <span class="ap-stat-icon ap-tint-violet"><i class="fas fa-file-image"></i></span>
+    <span class="ap-stat-meta">
+      <span class="ap-stat-num">{{ sum.textures }}</span>
+      <span class="ap-stat-label">{{ trans('admin.index.total-textures') }}</span>
+    </span>
   </div>
 
-  <div class="col-md-6">
-    <div class="small-box bg-green">
-      <div class="inner">
-        <h3 class="stats">{{ sum.players }}</h3>
-        <p>{{ trans('admin.index.total-players') }}</p>
-      </div>
-      <div class="icon"><i class="fas fa-gamepad"></i></div>
-      <a href="{{ url('admin/players') }}" class="small-box-footer">
-        {{ trans('general.player-manage') }}&nbsp;
-        <i class="fa fa-arrow-circle-right"></i>
-      </a>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-6">
-    <div class="small-box bg-purple">
-      <div class="inner">
-        <h3 class="stats">{{ sum.textures }}</h3>
-        <p>{{ trans('admin.index.total-textures') }}</p>
-      </div>
-      <div class="icon"><i class="fas fa-file"></i></div>
-    </div>
-  </div>
-
-  <div class="col-md-6">
-    <div class="small-box bg-yellow">
-      <div class="inner">
-        {% if sum.storage > 1024 %}
-          <h3 class="stats">{{ (sum.storage / 1024)|round(1) }}MB</h3>
-        {% else %}
-          <h3 class="stats">{{ sum.storage }}KB</h3>
-        {% endif %}
-        <p>{{ trans('admin.index.disk-usage') }}</p>
-      </div>
-      <div class="icon"><i class="fas fa-hdd"></i></div>
-    </div>
+  <div class="ap-stat">
+    <span class="ap-stat-icon ap-tint-amber"><i class="fas fa-hdd"></i></span>
+    <span class="ap-stat-meta">
+      {% if sum.storage > 1024 %}
+        <span class="ap-stat-num">{{ (sum.storage / 1024)|round(1) }}<small class="ap-muted"> MB</small></span>
+      {% else %}
+        <span class="ap-stat-num">{{ sum.storage }}<small class="ap-muted"> KB</small></span>
+      {% endif %}
+      <span class="ap-stat-label">{{ trans('admin.index.disk-usage') }}</span>
+    </span>
   </div>
 </div>

@@ -1,3 +1,11 @@
-{% extends 'admin.base' %}
+{# 角色管理：React 数据页，挂载点 .content > .container-fluid #}
+{% extends 'admin.layout' %}
 
 {% block title %}{{ trans('general.player-manage') }}{% endblock %}
+
+{% block before_foot %}
+  {% set extra = {'currentUser': auth_user()} %}
+  <script id="blessing-extra" type="application/json">
+    {{ extra|json_encode|raw }}
+  </script>
+{% endblock %}

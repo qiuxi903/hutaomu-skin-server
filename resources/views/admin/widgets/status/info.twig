@@ -1,18 +1,21 @@
-<div class="card card-info">
-  <div class="card-header">
-    <h3 class="card-title">{{ trans('admin.status.info') }}</h3>
-  </div>
-  <div class="card-body">
-    <table class="table table-bordered table-striped">
+{# 运行状态 · 环境信息（新面板） #}
+<div class="ap-card">
+  <header class="ap-card-head">
+    <h3 class="ap-card-title">{{ trans('admin.status.info') }}</h3>
+  </header>
+  <div class="ap-card-body" style="padding:0;">
+    <table class="table">
       <tbody>
         {% for category, info in detail %}
           <tr>
-            <th colspan="2">{{ trans("admin.status.#{category}.name") }}</th>
+            <td colspan="2" style="background:var(--ap-panel-2);font-weight:700;font-size:12px;color:var(--ap-muted);letter-spacing:.05em;">
+              {{ trans("admin.status.#{category}.name") }}
+            </td>
           </tr>
           {% for key, value in info %}
             <tr>
-              <td>{{ trans("admin.status.#{category}.#{key}") }}</td>
-              <td>{{ value }}</td>
+              <td style="width:38%;color:var(--ap-text-2);">{{ trans("admin.status.#{category}.#{key}") }}</td>
+              <td style="word-break:break-all;">{{ value }}</td>
             </tr>
           {% endfor %}
         {% endfor %}

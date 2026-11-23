@@ -15,6 +15,7 @@ class ViewServiceProvider extends ServiceProvider
             'about',
             'docs.*',
             '*.base',
+            'admin.layout',
             '*.master',
             'shared.header',
         ], function ($view) {
@@ -56,7 +57,8 @@ class ViewServiceProvider extends ServiceProvider
             $view->with('sidebar_color', $color);
         });
 
-        View::composer(['shared.side-menu', 'shared.sidebar'], Composers\SideMenuComposer::class);
+        /* admin.nav: 新管理后台导航(2026-11-24 面板重构), 与 shared.sidebar 同源取 items */
+        View::composer(['shared.side-menu', 'shared.sidebar', 'admin.nav'], Composers\SideMenuComposer::class);
 
         View::composer('shared.user-panel', Composers\UserPanelComposer::class);
 

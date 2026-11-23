@@ -1,4 +1,6 @@
-{% extends 'admin.base' %}
+{# 用户管理：React 数据页。content 必须为空——React 以 .content > .container-fluid
+   为挂载点（app bundle 路由表 admin/users），#blessing-extra 经 before_foot 注入。 #}
+{% extends 'admin.layout' %}
 
 {% block title %}{{ trans('general.user-manage') }}{% endblock %}
 

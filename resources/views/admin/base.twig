@@ -1,38 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ locale }}">
-  <head>
-    {{ include('shared.head') }}
-    <title>{% block title %}{% endblock %} - {{ site_name }}</title>
-  </head>
-
-  <body class="{{ dark_mode ? 'dark-mode' : '' }} hold-transition sidebar-mini">
-    <div class="wrapper">
-      {{ include('shared.header') }}
-      {{ include('shared.sidebar', {scope: 'admin'}) }}
-      <div class="content-wrapper">
-        <div class="content-header">
-          <div class="container-fluid">
-            <div class="d-flex justify-content-between flex-wrap">
-              <div>
-                <h1 class="m-0">{{ block('title') }}</h1>
-              </div>
-              <div>
-                <div class="breadcrumb"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <section class="content">
-          <div class="container-fluid">
-            {% block content %}{% endblock %}
-          </div>
-        </section>
-      </div>
-      <footer class="main-footer">
-        {{ include('shared.copyright') }}
-      </footer>
-    </div>
-    {% block before_foot %}{% endblock %}
-    {{ include('shared.foot') }}
-  </body>
-</html>
+{# 旧 admin.base 兼容适配层。
+   插件的配置/管理视图（如 yggdrasil-api、embedded-comment 的 config.twig）
+   extends 'admin.base' 且只使用 title/content/before_foot 三个块——
+   这里把它们逐一映射到新布局 admin.layout 的同名块，插件视图零改动即获得新面板外观。 #}
+{% extends 'admin.layout' %}

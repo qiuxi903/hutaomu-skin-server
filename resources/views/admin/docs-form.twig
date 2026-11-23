@@ -1,64 +1,69 @@
-{% extends 'admin.base' %}
+{% extends 'admin.layout' %}
 
 {% block title %}{{ doc ? '编辑文档' : '新建文档' }}{% endblock %}
 
-{% block content %}
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">{{ doc ? '编辑文档：' ~ doc.title : '新建文档' }}</h3>
-        </div>
-        <div class="card-body">
-          {% if errors.any %}
-            <div class="alert alert-danger">
-              {% for error in errors.all() %}<div>{{ error }}</div>{% endfor %}
-            </div>
-          {% endif %}
-          <form method="POST" action="{{ doc ? url('admin/docs/' ~ doc.id) : url('admin/docs') }}">
-            {{ csrf_field() }}
-            {% if doc %}{{ method_field('PUT') }}{% endif %}
-            <div class="form-group">
-              <label>标题（最长 100 字）</label>
-              <input type="text" name="title" class="form-control" maxlength="100" required
-                     value="{{ old.title ?? (doc ? doc.title : '') }}">
-            </div>
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                <label>slug（URL 的一部分，仅小写字母/数字/中划线）</label>
-                <input type="text" name="slug" class="form-control" pattern="[a-z0-9-]{1,60}" required
-                       placeholder="例如：getting-started"
-                       value="{{ old.slug ?? (doc ? doc.slug : '') }}">
-              </div>
-              <div class="form-group col-md-3">
-                <label>排序（小的在前）</label>
-                <input type="number" name="sort" class="form-control" min="0" max="9999"
-                       value="{{ old.sort ?? (doc ? doc.sort : 0) }}">
-              </div>
-              <div class="form-group col-md-3">
-                <label>发布</label>
-                <div class="custom-control custom-checkbox mt-1">
-                  <input type="checkbox" class="custom-control-input" id="d-published" name="published" value="1"
-                         {% if (old.published ?? ((doc and doc.published) ? '1' : '')) %}checked{% endif %}>
-                  <label class="custom-control-label" for="d-published">勾选后对玩家公开</label>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>正文（Markdown，支持表格/代码块；Raw HTML 会被转义）</label>
-              <textarea name="content" id="doc-content" class="form-control font-weight-normal" rows="18" required
-                        placeholder="# 标题&#10;正文内容…">{{ old.content ?? (doc ? doc.content : '') }}</textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">{{ doc ? '保存修改' : '创建文档' }}</button>
-            <a href="{{ url('admin/docs') }}" class="btn btn-outline-secondary">返回列表</a>
-          </form>
+{% block actions %}
+  <a href="{{ url('admin/docs') }}" class="btn btn-secondary"><i class="fas fa-arrow-left mr-1"></i>返回列表</a>
+{% endblock %}
 
-          <div class="border-top pt-3 mt-3">
-            <button type="button" class="btn btn-outline-info btn-sm" id="doc-preview-btn">预览渲染效果</button>
-            <div id="doc-preview" class="ht-md card mt-2" style="display:none">
-              <div class="card-body"></div>
+{% block content %}
+  <div class="ap-card">
+    <header class="ap-card-head">
+      <h3 class="ap-card-title">{{ doc ? '编辑文档：' ~ doc.title : '新建文档' }}</h3>
+    </header>
+    <div class="ap-card-body">
+      {% if errors.any %}
+        <div class="ap-banner ap-banner-danger">
+          <i class="fas fa-times-circle"></i>
+          <span>{% for error in errors.all() %}{{ error }}{% if not loop.last %}<br>{% endif %}{% endfor %}</span>
+        </div>
+      {% endif %}
+      <form method="POST" action="{{ doc ? url('admin/docs/' ~ doc.id) : url('admin/docs') }}">
+        {{ csrf_field() }}
+        {% if doc %}{{ method_field('PUT') }}{% endif %}
+
+        <div class="form-group">
+          <label>标题（最长 100 字）</label>
+          <input type="text" name="title" class="form-control" maxlength="100" required
+                 value="{{ old.title ?? (doc ? doc.title : '') }}">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label>slug（URL 的一部分，仅小写字母/数字/中划线）</label>
+            <input type="text" name="slug" class="form-control" pattern="[a-z0-9-]{1,60}" required
+                   placeholder="例如：getting-started"
+                   value="{{ old.slug ?? (doc ? doc.slug : '') }}">
+          </div>
+          <div class="form-group col-md-3">
+            <label>排序（小的在前）</label>
+            <input type="number" name="sort" class="form-control" min="0" max="9999"
+                   value="{{ old.sort ?? (doc ? doc.sort : 0) }}">
+          </div>
+          <div class="form-group col-md-3">
+            <label>发布</label>
+            <div class="custom-control custom-checkbox mt-1">
+              <input type="checkbox" class="custom-control-input" id="d-published" name="published" value="1"
+                     {% if (old.published ?? ((doc and doc.published) ? '1' : '')) %}checked{% endif %}>
+              <label class="custom-control-label" for="d-published">勾选后对玩家公开</label>
             </div>
           </div>
+        </div>
+
+        <div class="form-group mb-2">
+          <label>正文（Markdown，支持表格/代码块；Raw HTML 会被转义）</label>
+          <textarea name="content" id="doc-content" class="form-control" rows="18" required
+                    style="font-family: SFMono-Regular, Consolas, 'Courier New', monospace; font-size: 13px;"
+                    placeholder="# 标题&#10;正文内容…">{{ old.content ?? (doc ? doc.content : '') }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">{{ doc ? '保存修改' : '创建文档' }}</button>
+      </form>
+
+      <div class="border-top pt-3 mt-3">
+        <button type="button" class="btn btn-outline-info btn-sm" id="doc-preview-btn">预览渲染效果</button>
+        <div id="doc-preview" class="ht-md ap-card mt-2" style="display:none">
+          <div class="ap-card-body"></div>
         </div>
       </div>
     </div>
@@ -82,7 +87,7 @@
           body: JSON.stringify({ content: ta.value }),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d.code === 0) {
-            box.querySelector('.card-body').innerHTML = d.html;
+            box.querySelector('.ap-card-body').innerHTML = d.html;
             box.style.display = 'block';
             btn.textContent = '刷新预览';
           } else {

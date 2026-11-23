@@ -1,7 +1,26 @@
-{% extends 'admin.base' %}
+{% extends 'admin.layout' %}
 
 {% block title %}{{ trans('general.dashboard') }}{% endblock %}
 
 {% block content %}
   {{ include('shared.grid') }}
+
+  <div class="ap-card">
+    <header class="ap-card-head">
+      <h3 class="ap-card-title">快捷入口</h3>
+    </header>
+    <div class="ap-card-body">
+      <div class="ap-quick">
+        <a href="{{ url('admin/users') }}"><i class="fas fa-users"></i>用户管理</a>
+        <a href="{{ url('admin/players') }}"><i class="fas fa-gamepad"></i>角色管理</a>
+        <a href="{{ url('admin/reports') }}"><i class="fas fa-flag"></i>举报管理</a>
+        <a href="{{ url('admin/comments') }}"><i class="fas fa-comments"></i>评论管理</a>
+        <a href="{{ url('admin/docs') }}"><i class="fas fa-book-open"></i>文档管理</a>
+        <a href="{{ url('admin/theme') }}"><i class="fas fa-paint-brush"></i>个性化</a>
+        <a href="{{ url('admin/plugins/manage') }}"><i class="fas fa-plug"></i>插件管理</a>
+        <a href="{{ url('admin/options') }}"><i class="fas fa-cog"></i>站点设置</a>
+        <a href="{{ url('admin/status') }}"><i class="fas fa-battery-three-quarters"></i>运行状态</a>
+      </div>
+    </div>
+  </div>
 {% endblock %}

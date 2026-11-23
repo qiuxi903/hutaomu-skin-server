@@ -1,61 +1,56 @@
-<div class="card">
-  <div class="card-header">
-    <h3 class="card-title">{{ trans('admin.notifications.send.title') }}</h3>
-  </div>
+{# 仪表盘 · 群发通知（新面板）：收件人 radio + 标题/正文，POST /admin/notifications/send #}
+<div class="ap-card">
+  <header class="ap-card-head">
+    <h3 class="ap-card-title">{{ trans('admin.notifications.send.title') }}</h3>
+  </header>
   <form method="post" action="{{ url('/admin/notifications/send') }}">
     {{ csrf_field() }}
-    <div class="card-body">
+    <div class="ap-card-body">
       {% if errors.any %}
-        <div class="callout callout-danger">{{ errors.first }}</div>
+        <div class="ap-banner ap-banner-danger"><i class="fas fa-times-circle"></i><span>{{ errors.first }}</span></div>
       {% endif %}
       {% set sent_result = session_pull('sentResult') %}
       {% if sent_result %}
-        <div class="callout callout-success">{{ sent_result }}</div>
+        <div class="ap-banner ap-banner-success"><i class="fas fa-check-circle"></i><span>{{ sent_result }}</span></div>
       {% endif %}
+
       <div class="form-group">
         <label>{{ trans('admin.notifications.receiver.title') }}</label>
         <div class="radio">
-        <label>
-          <input type="radio" name="receiver" value="all" required>
-          {{ trans('admin.notifications.receiver.all') }}
-        </label>
+          <label><input type="radio" name="receiver" value="all" required> {{ trans('admin.notifications.receiver.all') }}</label>
         </div>
         <div class="radio">
-          <label>
-            <input type="radio" name="receiver" value="normal" required>
-            {{ trans('admin.notifications.receiver.normal') }}
-          </label>
+          <label><input type="radio" name="receiver" value="normal" required> {{ trans('admin.notifications.receiver.normal') }}</label>
         </div>
         <div class="radio">
           <label>
             <input type="radio" name="receiver" value="uid" required>
-            {{ trans('admin.notifications.receiver.uid') }} &nbsp;
-            <input type="number" name="uid" class="form-control">
+            {{ trans('admin.notifications.receiver.uid') }}
+            <input type="number" name="uid" class="form-control form-control-sm" style="width:110px;display:inline-block;margin-left:6px;">
           </label>
         </div>
         <div class="radio">
           <label>
             <input type="radio" name="receiver" value="email" required>
-            {{ trans('admin.notifications.receiver.email') }} &nbsp;
-            <input type="email" name="email" class="form-control">
+            {{ trans('admin.notifications.receiver.email') }}
+            <input type="email" name="email" class="form-control form-control-sm" style="width:190px;display:inline-block;margin-left:6px;">
           </label>
         </div>
       </div>
+
       <div class="form-group">
         <label>{{ trans('admin.notifications.title') }}</label>
         <input type="text" name="title" class="form-control" required>
       </div>
-      <div class="form-group">
+      <div class="form-group mb-1">
         <label>{{ trans('admin.notifications.content') }}</label>
-        <textarea name="content" class="form-control" rows="3"></textarea>
+        <textarea name="content" class="form-control" rows="4"></textarea>
       </div>
     </div>
-    <div class="card-footer">
-      <input
-        type="submit"
-        value="{{ trans('general.submit') }}"
-        class="btn btn-primary"
-      >
-    </div>
+    <footer class="ap-form-foot">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-paper-plane mr-1"></i>{{ trans('general.submit') }}
+      </button>
+    </footer>
   </form>
 </div>

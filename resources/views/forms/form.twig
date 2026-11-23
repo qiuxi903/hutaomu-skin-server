@@ -1,27 +1,30 @@
-<div class="card card-{{ type }}">
-  <div class="card-header">
-    <h3 class="card-title">{{ title }} {{ hint|raw }}</h3>
-  </div>
+{# OptionForm 渲染模板（2026-11-24 新面板版式）。
+   提交语义与旧版完全一致：POST option={{ id }} + 各字段以 option id 为 name，
+   供 OptionForm::handle() 识别与保存；按钮保留 submit_{{ id }} name。
+   旧版类名（card/card-header/callout/alert）不再输出，改用新面板的
+   ap-form-* / ap-banner 类（样式见 theme/hutaomu-admin.css）。 #}
+<section class="ap-card ap-form-card" id="form-{{ id }}">
+  <header class="ap-form-head">
+    <h3 class="ap-form-title">{{ title }}{% if hint %}<span class="ap-form-hint">{{ hint|raw }}</span>{% endif %}</h3>
+  </header>
   <form method="post">
     {{ csrf_field() }}
     <input type="hidden" name="option" value="{{ id }}">
-    <div class="card-body">
+    <div class="ap-form-body">
       {% for message in messages %}
-        <div class="callout callout-{{ message.type }}">
-          {{ message.content|raw }}
-        </div>
+        <div class="ap-banner ap-banner-{{ message.type }}">{{ message.content|raw }}</div>
       {% endfor %}
 
       {% for alert in alerts %}
-        <div class="alert alert-{{ alert.type }}">
+        <div class="ap-banner ap-banner-{{ alert.type }}">
           {% if alert.type == 'success' %}
-            <i class="fas fa-check icon"></i>
+            <i class="fas fa-check-circle"></i>
           {% elseif alert.type == 'info' %}
-            <i class="fas fa-info icon"></i>
+            <i class="fas fa-info-circle"></i>
           {% elseif alert.type == 'warning' %}
-            <i class="fas fa-exclamation-triangle icon"></i>
+            <i class="fas fa-exclamation-triangle"></i>
           {% elseif alert.type == 'danger' %}
-            <i class="fas fa-times-circle icon"></i>
+            <i class="fas fa-times-circle"></i>
           {% endif %}
           <span>{{ alert.content }}</span>
         </div>
@@ -31,30 +34,29 @@
         {% for item in items %}
           {{ item.render()|raw }}
           {% if item.description %}
-            <p class="description">{{ item.description|raw }}</p>
+            <p class="ap-field-desc">{{ item.description|raw }}</p>
           {% endif %}
         {% endfor %}
       {% else %}
-        <div class="container-fluid">
-          {% for item in items %}
-            <div class="row {{ loop.index == 1 ? 'mb-3' : (loop.index == loop.length ? 'mt-3' : 'my-3') }}">
-              {% if not renderInputTagsOnly %}
-                <div class="col-sm-4">
-                  {{ item.name }} {{ item.hint|raw }}
-                </div>
-              {% endif %}
-              <div class="col-sm-{{ renderInputTagsOnly ? '12' : '8' }}">
-                {{ item.render()|raw }}
-                {% if item.description %}
-                  <p class="description">{{ item.description|raw }}</p>
-                {% endif %}
+        {% for item in items %}
+          <div class="ap-field">
+            {% if not renderInputTagsOnly %}
+              <div class="ap-field-label">
+                <label for="{{ item.id }}">{{ item.name }}</label>
+                {{ item.hint|raw }}
               </div>
+            {% endif %}
+            <div class="ap-field-control">
+              {{ item.render()|raw }}
+              {% if item.description %}
+                <p class="ap-field-desc">{{ item.description|raw }}</p>
+              {% endif %}
             </div>
-          {% endfor %}
-        </div>
+          </div>
+        {% endfor %}
       {% endif %}
     </div>
-    <div class="card-footer">
+    <footer class="ap-form-foot">
       {% for button in buttons %}
         {% if button.href %}
           <a href="{{ button.href }}" class="{{ button.class|join(' ') }}">
@@ -70,6 +72,6 @@
           </button>
         {% endif %}
       {% endfor %}
-    </div>
+    </footer>
   </form>
-</div>
+</section>
