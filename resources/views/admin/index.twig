@@ -11,15 +11,42 @@
     </header>
     <div class="ap-card-body">
       <div class="ap-quick">
-        <a href="{{ url('admin/users') }}"><i class="fas fa-users"></i>用户管理</a>
-        <a href="{{ url('admin/players') }}"><i class="fas fa-gamepad"></i>角色管理</a>
-        <a href="{{ url('admin/reports') }}"><i class="fas fa-flag"></i>举报管理</a>
-        <a href="{{ url('admin/comments') }}"><i class="fas fa-comments"></i>评论管理</a>
-        <a href="{{ url('admin/docs') }}"><i class="fas fa-book-open"></i>文档管理</a>
-        <a href="{{ url('admin/theme') }}"><i class="fas fa-paint-brush"></i>个性化</a>
-        <a href="{{ url('admin/plugins/manage') }}"><i class="fas fa-plug"></i>插件管理</a>
-        <a href="{{ url('admin/options') }}"><i class="fas fa-cog"></i>站点设置</a>
-        <a href="{{ url('admin/status') }}"><i class="fas fa-battery-three-quarters"></i>运行状态</a>
+        <a href="{{ url('admin/users') }}">
+          <span class="ap-quick-icon"><i class="fas fa-users"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">用户管理</span><span class="ap-quick-desc">账号 / 邮箱 / 积分 / 权限</span></span>
+        </a>
+        <a href="{{ url('admin/players') }}">
+          <span class="ap-quick-icon"><i class="fas fa-gamepad"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">角色管理</span><span class="ap-quick-desc">角色名 / 所属 / 材质</span></span>
+        </a>
+        <a href="{{ url('admin/reports') }}">
+          <span class="ap-quick-icon"><i class="fas fa-flag"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">举报管理</span><span class="ap-quick-desc">材质举报 / 评论举报</span></span>
+        </a>
+        <a href="{{ url('admin/comments') }}">
+          <span class="ap-quick-icon"><i class="fas fa-comments"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">评论管理</span><span class="ap-quick-desc">开关 / 审核 / 待审队列</span></span>
+        </a>
+        <a href="{{ url('admin/docs') }}">
+          <span class="ap-quick-icon"><i class="fas fa-book-open"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">文档管理</span><span class="ap-quick-desc">撰写 /docs 使用文档</span></span>
+        </a>
+        <a href="{{ url('admin/theme') }}">
+          <span class="ap-quick-icon"><i class="fas fa-paint-brush"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">个性化</span><span class="ap-quick-desc">壁纸 / 图源 / 页尾 / 侧栏</span></span>
+        </a>
+        <a href="{{ url('admin/plugins/manage') }}">
+          <span class="ap-quick-icon"><i class="fas fa-plug"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">插件管理</span><span class="ap-quick-desc">启用 / 禁用 / 上传安装</span></span>
+        </a>
+        <a href="{{ url('admin/options') }}">
+          <span class="ap-quick-icon"><i class="fas fa-cog"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">站点设置</span><span class="ap-quick-desc">站名 / 注册 / 上传限制</span></span>
+        </a>
+        <a href="{{ url('admin/status') }}">
+          <span class="ap-quick-icon"><i class="fas fa-battery-three-quarters"></i></span>
+          <span class="ap-quick-meta"><span class="ap-quick-name">运行状态</span><span class="ap-quick-desc">环境 / 数据库 / 插件</span></span>
+        </a>
       </div>
     </div>
   </div>

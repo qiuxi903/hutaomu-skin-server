@@ -234,8 +234,8 @@
         if (store.bg) setWallpaper(store.bg); /* 首帧即壁纸, 零闪烁; 空图不动模板兜底 */
       }
       if (isHome) htIdlePrefetch(); /* 主页也预取(用户中心可即时换) */
-    } else if (acOn && location.pathname.indexOf('/admin') !== 0) {
-      /* 管理后台(2026-11-24 新面板)是干净工作台, 不铺壁纸不加面板遮罩 */
+    } else if (acOn) {
+      /* 管理后台(v2 无侧栏布局)与前台同一套壁纸+柔光管线, 不再跳过 */
       body.classList.add('ht-panel');
       ensureAcWallpaper();
       htIdlePrefetch(); /* 静默预取下一张 */

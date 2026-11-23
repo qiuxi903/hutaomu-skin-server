@@ -1,7 +1,9 @@
-{# 管理后台导航（新面板）。
+{# 管理后台导航（无侧栏 v2）。
    items 由 SideMenuComposer(scope=admin) 注入：config/menu.php + ConfigureAdminMenu
    事件(插件可挂) + collectPluginConfigs(插件配置子项)。分组是视图层概念：
-   按 link 归入下述分区，插件后挂的未知项自动落入「其他」，保证兼容。 #}
+   按 link 归入下述分区，插件后挂的未知项自动落入「其他」。
+   mode='bar'    桌面顶栏：分组按钮 + 悬停/点击展开玻璃下拉面板
+   mode='drawer' 移动端：全屏抽屉内的完整分组列表 #}
 
 {% set sections = [
     {label: '概览',       links: ['admin', 'admin/status', 'admin/update']},
@@ -27,13 +29,8 @@
   {% endif %}
 {% endfor %}
 
-{% macro navlink(item) %}
-  <a class="ap-nav-link {{ item.active ? 'is-active' }}" href="{{ url(item.link) }}" title="{{ trans(item.title) }}">
-    <i class="ap-nav-icon {{ item.icon == 'fa-circle' ? 'far' : 'fas' }} {{ item.icon }}"></i>
-    <span class="ap-nav-label">{{ trans(item.title) }}</span>
-  </a>
-{% endmacro %}
-
+{# 组装渲染结构: 每组 {label, links[], current} + 插件配置子组挂在「系统」组内 #}
+{% set groups = [] %}
 {% for section in sections %}
   {% set sectionItems = [] %}
   {% set pluginConfigs = none %}
@@ -44,39 +41,73 @@
       {% set pluginConfigs = item %}
     {% endif %}
   {% endfor %}
-
+  {% set current = false %}
+  {% for item in sectionItems %}
+    {% if item.active %}{% set current = true %}{% endif %}
+  {% endfor %}
+  {% if pluginConfigs and pluginConfigs.active %}{% set current = true %}{% endif %}
   {% if sectionItems|length or pluginConfigs %}
-    <div class="ap-nav-section">
-      <div class="ap-nav-heading"><span class="ap-nav-label">{{ section.label }}</span></div>
-      {% for item in sectionItems %}
-        {{ _self.navlink(item) }}
-      {% endfor %}
-      {% if pluginConfigs %}
-        <div class="ap-nav-group {{ pluginConfigs.active ? 'is-open' : '' }}" id="ap-plugin-configs">
-          <button type="button" class="ap-nav-link ap-nav-group-toggle {{ pluginConfigs.active ? 'is-active' }}" aria-expanded="{{ pluginConfigs.active ? 'true' : 'false' }}">
-            <i class="ap-nav-icon fas fa-cogs"></i>
-            <span class="ap-nav-label">{{ trans(pluginConfigs.title) }}</span>
-            <i class="ap-nav-caret fas fa-angle-left"></i>
-          </button>
-          <div class="ap-nav-sublist">
-            {% for child in pluginConfigs.children %}
-              <a class="ap-nav-link ap-nav-sublink {{ child.active ? 'is-active' }}" href="{{ url(child.link) }}" title="{{ trans(child.title) }}">
-                <i class="ap-nav-icon far {{ child.icon == 'fa-circle' ? 'fa-circle' : child.icon }}"></i>
-                <span class="ap-nav-label">{{ trans(child.title) }}</span>
-              </a>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
-    </div>
+    {% set groups = groups|merge([{label: section.label, items: sectionItems, plugins: pluginConfigs, current: current}]) %}
   {% endif %}
 {% endfor %}
-
 {% if others|length %}
-  <div class="ap-nav-section">
-    <div class="ap-nav-heading"><span class="ap-nav-label">其他</span></div>
-    {% for item in others %}
-      {{ _self.navlink(item) }}
+  {% set groups = groups|merge([{label: '其他', items: others, plugins: none, current: others|filter(i => i.active)|length > 0}]) %}
+{% endif %}
+
+{% if mode == 'bar' %}
+  <nav class="ap-nav" aria-label="管理导航">
+    {% for group in groups %}
+      <div class="ap-nav-item {{ group.current ? 'is-current' : '' }}" data-ap-dropdown>
+        <button type="button" class="ap-nav-btn" aria-haspopup="true" aria-expanded="false">
+          {{ group.label }}
+          <i class="fas fa-angle-down ap-nav-caret"></i>
+        </button>
+        <div class="ap-dd">
+          {% for item in group.items %}
+            <a class="ap-dd-link {{ item.active ? 'is-active' }}" href="{{ url(item.link) }}">
+              <i class="ap-dd-icon {{ item.icon == 'fa-circle' ? 'far' : 'fas' }} {{ item.icon }}"></i>
+              <span>{{ trans(item.title) }}</span>
+            </a>
+          {% endfor %}
+          {% if group.plugins %}
+            <div class="ap-dd-divider"></div>
+            <div class="ap-dd-heading">插件配置</div>
+            {% for child in group.plugins.children %}
+              <a class="ap-dd-link {{ child.active ? 'is-active' }}" href="{{ url(child.link) }}">
+                <i class="ap-dd-icon fas fa-cog"></i>
+                <span>{{ trans(child.title) }}</span>
+              </a>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
     {% endfor %}
+  </nav>
+{% elseif mode == 'drawer' %}
+  <div class="ap-drawer-body">
+    {% for group in groups %}
+      <div class="ap-drawer-group">
+        <div class="ap-drawer-heading">{{ group.label }}</div>
+        {% for item in group.items %}
+          <a class="ap-drawer-link {{ item.active ? 'is-active' }}" href="{{ url(item.link) }}">
+            <i class="ap-dd-icon {{ item.icon == 'fa-circle' ? 'far' : 'fas' }} {{ item.icon }}"></i>
+            <span>{{ trans(item.title) }}</span>
+          </a>
+        {% endfor %}
+        {% if group.plugins %}
+          {% for child in group.plugins.children %}
+            <a class="ap-drawer-link ap-drawer-sub {{ child.active ? 'is-active' }}" href="{{ url(child.link) }}">
+              <i class="ap-dd-icon fas fa-cog"></i>
+              <span>{{ trans(child.title) }}</span>
+            </a>
+          {% endfor %}
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="ap-drawer-group">
+      <div class="ap-drawer-heading">前往前台</div>
+      <a class="ap-drawer-link" href="{{ url('user') }}"><i class="ap-dd-icon fas fa-user"></i><span>用户中心</span></a>
+      <a class="ap-drawer-link" href="{{ url('skinlib') }}"><i class="ap-dd-icon fas fa-archive"></i><span>皮肤库</span></a>
+    </div>
   </div>
 {% endif %}

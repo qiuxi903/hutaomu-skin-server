@@ -1,96 +1,89 @@
 {# ============================================================
-   管理后台全新基座（2026-11-24 重构）
-   与旧 AdminLTE 骨架完全无关的独立设计系统（样式在 theme/hutaomu-admin.css）。
-   约定（重构兼容性红线，勿破坏）：
-   - .content > .container-fluid 保留：React 数据页(admin/users、players、
-     plugins manage/market)以该选择器为挂载点，页面 content 为空时由 React 填充；
-   - {% block before_foot %} 保留在 app bundle 加载之前：users/players 等页
-     通过它注入 #blessing-extra JSON（React 启动数据）；
-   - shared.head / shared.foot 照常 include（blessing-globals、i18n、SW、主题 JS）。
-   旧 admin.base.twig 现在是本布局的兼容适配层（插件配置页 extends admin.base）。
+   管理后台基座 v2（2026-11-24 二次重构）
+   布局：无侧栏。毛玻璃顶栏（logo + 分组导航下拉 + 用户区），内容全宽居中，
+   后台延续主站「暖樱白」的壁纸 + 玻璃质感（壁纸由主题 JS 统一铺设，
+   柔光浓度跟随后台「个性化」的 --ht-panel-dim 变量）。
+   约定（兼容红线，勿破坏）：
+   - .content > .container-fluid 是 React 数据页挂载点（content_shell 块输出）；
+   - {% block before_foot %} 在 app bundle 之前（React 数据页注入 #blessing-extra）；
+   - shared.head / shared.foot 照常 include；
+   - admin.base.twig 是适配层（插件配置视图 extends 它）。
    ============================================================ #}
 <!DOCTYPE html>
 <html lang="{{ locale }}">
   <head>
     {{ include('shared.head') }}
     <title>{% block title %}{% endblock %} - {{ site_name }}</title>
-    <link rel="stylesheet" href="{{ asset('theme/hutaomu-admin.css?v=20261124a') }}">
+    <link rel="stylesheet" href="{{ asset('theme/hutaomu-admin.css?v=20261124b') }}">
   </head>
 
   <body class="ap-body {{ dark_mode ? 'dark-mode' : '' }}">
-    <div class="ap-shell">
-      <aside class="ap-sidebar" id="ap-sidebar">
-        <div class="ap-brand">
-          <span class="ap-brand-mark">
-            <i class="fas fa-seedling"></i>
-          </span>
+    <header class="ap-topbar">
+      <div class="ap-topbar-inner">
+        <a class="ap-brand" href="{{ url('admin') }}" title="管理后台首页">
+          <span class="ap-brand-mark"><i class="fas fa-seedling"></i></span>
           <span class="ap-brand-text">
             <span class="ap-brand-name">{{ site_name }}</span>
-            <span class="ap-brand-sub">管理控制台</span>
+            <span class="ap-brand-sub">管理后台</span>
           </span>
-        </div>
+        </a>
 
-        <nav class="ap-nav" aria-label="管理导航">
-          {{ include('admin.nav', {scope: 'admin'}) }}
-        </nav>
+        {{ include('admin.nav', {scope: 'admin', mode: 'bar'}) }}
 
-        <div class="ap-side-foot">
-          <a class="ap-side-link" href="{{ url('user') }}">
-            <i class="fas fa-user"></i><span class="ap-nav-label">用户中心</span>
-          </a>
-          <a class="ap-side-link" href="{{ url('skinlib') }}">
-            <i class="fas fa-archive"></i><span class="ap-nav-label">皮肤库</span>
-          </a>
-        </div>
-      </aside>
-
-      <div class="ap-scrim" id="ap-scrim" aria-hidden="true"></div>
-
-      <div class="ap-column">
-        <header class="ap-topbar">
-          <div class="ap-topbar-left">
-            <button type="button" class="ap-iconbtn ap-burger" id="ap-drawer-toggle" aria-label="打开导航">
-              <i class="fas fa-bars"></i>
-            </button>
-            <button type="button" class="ap-iconbtn ap-collapse-toggle" id="ap-collapse-toggle" aria-label="收起导航">
-              <i class="fas fa-bars"></i>
-            </button>
-            <div class="ap-topbar-title">
-              <span class="ap-topbar-crumb">管理后台</span>
-              <h2 class="ap-topbar-page" id="ap-page-title">{% block pagehead %}{{ block('title') }}{% endblock %}</h2>
-            </div>
-          </div>
+        <div class="ap-topbar-right">
           <ul class="navbar-nav ap-topbar-menu">
             {{ include('shared.dark-mode') }}
             {{ include('shared.notifications') }}
             {{ include('shared.languages') }}
             {{ include('shared.user-menu') }}
           </ul>
-        </header>
-
-        <main class="ap-main">
-          {# 页头动作区：块为空时由 CSS 隐藏（.ap-pagehead-actions:empty）#}
-          <div class="ap-pagehead"><div class="ap-pagehead-actions">{% block actions %}{% endblock %}</div></div>
-          <div class="ap-content">
-            {% block content_shell %}
-              {# 默认外壳: .content > .container-fluid 是 React 数据页(users/players/plugins/
-                 market/i18n)的挂载点选择器, 勿改名 #}
-              <div class="content">
-                <div class="container-fluid">
-                  {% block content %}{% endblock %}
-                </div>
-              </div>
-            {% endblock %}
-          </div>
-          <footer class="ap-footer">
-            {{ include('shared.copyright') }}
-          </footer>
-        </main>
+          <button type="button" class="ap-iconbtn ap-burger" id="ap-drawer-toggle" aria-label="打开菜单">
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
       </div>
+    </header>
+
+    <div class="ap-drawer" id="ap-drawer" aria-hidden="true">
+      <div class="ap-drawer-head">
+        <span class="ap-drawer-title">{{ site_name }} · 管理后台</span>
+        <button type="button" class="ap-iconbtn" id="ap-drawer-close" aria-label="关闭">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      {{ include('admin.nav', {scope: 'admin', mode: 'drawer'}) }}
     </div>
+    <div class="ap-scrim" id="ap-scrim" aria-hidden="true"></div>
+
+    <main class="ap-main">
+      {% block pagehead %}
+        <div class="ap-pagehead">
+          <div class="ap-pagehead-text">
+            <h1 class="ap-pagehead-title">{{ block('title') }}</h1>
+          </div>
+          <div class="ap-pagehead-actions">{% block actions %}{% endblock %}</div>
+        </div>
+      {% endblock %}
+
+      <div class="ap-content">
+        {% block content_shell %}
+          {# 默认外壳: .content > .container-fluid 是 React 数据页(users/players/plugins/
+             market/i18n)的挂载点选择器, 勿改名 #}
+          <div class="content">
+            <div class="container-fluid">
+              {% block content %}{% endblock %}
+            </div>
+          </div>
+        {% endblock %}
+      </div>
+
+      <footer class="ap-footer">
+        {{ include('shared.copyright') }}
+      </footer>
+    </main>
 
     {% block before_foot %}{% endblock %}
     {{ include('shared.foot') }}
-    <script src="{{ asset('theme/hutaomu-admin.js?v=20261124a') }}"></script>
+    <script src="{{ asset('theme/hutaomu-admin.js?v=20261124b') }}"></script>
   </body>
 </html>
