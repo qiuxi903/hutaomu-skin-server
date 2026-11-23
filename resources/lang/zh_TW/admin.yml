@@ -136,3 +136,190 @@ download:
     shasum: 文件驗證失敗。 請重新下載。
     unzip: 解壓檔案失敗。
 invalid-action: 非法的操作
+
+
+# 管理後台面板(2026-11-24 v2 重構)界面文案
+panel:
+  brand: 管理後台
+  open-menu: 打開選單
+  close-menu: 關閉
+  nav:
+    overview: 概覽
+    community: 用戶與社群
+    content: 內容
+    appearance: 外觀
+    system: 系統
+    others: 其他
+    plugins-heading: 擴展軟體設定
+    to-front: 前往前台
+  dashboard:
+    quick: 快捷入口
+    last-days: 近 31 天
+    quick-desc-users: 帳號 / 郵箱 / 積分 / 權限
+    quick-desc-players: 角色名 / 持有者 / 材質
+    quick-desc-reports: 材質檢舉 / 留言檢舉
+    quick-desc-comments: 開關 / 審核 / 待審佇列
+    quick-desc-docs: 撰寫 /docs 使用說明
+    quick-desc-theme: 壁紙 / 圖源 / 頁尾 / 側欄
+    quick-desc-plugins: 啟用 / 停用 / 上載安裝
+    quick-desc-options: 站名 / 註冊 / 上載限制
+    quick-desc-status: 環境 / 資料庫 / 擴展軟體
+  comments:
+    title: 留言管理
+    notice: 材質留言區（皮膚 / 披風共用詳情頁）的開關與審核。總開關關閉後前台立即不顯示留言區、介面同時拒絕；開啟「需要審核」後新留言先進入下方待審佇列，通過才會公開。留言正文在輸出端轉義，直接顯示原文。
+    nav-switch: 留言開關
+    nav-pending: 待審佇列
+    nav-recent: 最近已通過
+    pending: 待審佇列
+    recent: 最近已通過的留言
+    latest-20: 最新 20 則
+    count: ":count 則"
+    texture: 材質
+    commenter: 留言人
+    content: 內容
+    time: 時間
+    actions: 操作
+    approve: 通過
+    delete: 刪除
+    no-pending: 沒有待審留言
+    no-recent: 還沒有已通過的留言
+    confirm-delete: 確定刪除這則留言？刪除後不可復原。
+    deleted: 已刪除
+    not-pending: 該留言不在待審狀態
+    failed: 操作失敗
+    network-error: 網路錯誤
+  reports:
+    title: 檢舉管理
+    notice: 材質檢舉與留言檢舉共用一套檢舉系統，按下方兩個分頁處理。材質檢舉的「刪除」會刪除被檢舉材質；留言檢舉的「刪除」只刪除被檢舉留言本身（檢舉紀錄保留）。
+    tab-texture: 材質檢舉
+    tab-comment: 留言檢舉
+    pending-texture: 材質檢舉 · 待處理
+    pending-comment: 留言檢舉 · 待處理
+    resolved: 已處理
+    recent-20: 最近 20 筆
+    texture: 被檢舉材質
+    uploader: 材質上載者
+    reporter: 檢舉人
+    reason: 理由
+    time: 時間
+    actions: 操作
+    status: 狀態
+    comment: 被檢舉留言
+    comment-author: 留言作者
+    texture-page: 所在材質
+    delete-texture: 刪除材質
+    ban: 封禁上載者
+    reject: 駁回
+    delete-comment: 刪除留言
+    badge-resolved: 已處理
+    badge-rejected: 已駁回
+    texture-deleted: （材質已刪除）
+    comment-deleted: （留言已刪除）
+    user-deleted: 已註銷
+    no-pending-texture: 沒有待處理的材質檢舉
+    no-pending-comment: 沒有待處理的留言檢舉
+    no-records: 暫無紀錄
+    count: ":count 筆"
+    confirm-delete-texture: 確定刪除該材質？會同時從所有衣櫃移除，不可復原！
+    confirm-ban: 確定封禁該材質的上載者？
+    confirm-delete-comment: 確定刪除該留言？刪除後不可復原（檢舉紀錄保留）。
+    confirm-reject: 確定駁回該檢舉？
+    confirm-default: 確定執行該操作？
+    failed: 操作失敗
+    network-error: 網路錯誤
+  docs:
+    title: 文件管理
+    create: 新建文件
+    edit-title: "編輯文件：:title"
+    notice: 站點使用文件（/docs）的管理。文件以 Markdown 書寫，儲存後在前台立即生效；勾選「發布」才會對玩家可見，未發布文件只有管理員能在文件頁預覽。
+    list: 文件列表
+    count: ":count 篇"
+    col-id: ID
+    col-title: 標題
+    col-sort: 排序
+    col-status: 狀態
+    col-updated: 更新時間
+    col-actions: 操作
+    edit: 編輯
+    delete: 刪除
+    published: 已發布
+    unpublished: 未發布
+    empty: 還沒有文件，點右上角「新建文件」寫第一篇
+    back: 返回列表
+    title-label: 標題（最長 100 字）
+    slug-label: slug（URL 的一部分，僅小寫字母/數字/中劃線）
+    slug-placeholder: "例如：getting-started"
+    sort-label: 排序（小的在前）
+    publish: 發布
+    publish-hint: 勾選後對玩家公開
+    content-label: 正文（Markdown，支援表格/程式碼區塊；Raw HTML 會被轉義）
+    content-placeholder: "# 標題\n正文內容…"
+    save: 儲存修改
+    create-submit: 建立文件
+    preview: 預覽渲染效果
+    preview-refresh: 重新整理預覽
+    preview-empty: 先寫點正文再預覽
+    preview-rendering: 渲染中…
+    preview-failed: 渲染失敗
+    network-error: 網路錯誤
+    confirm-delete: 確定刪除這篇文件？前台將立即不可見，刪除後不可復原。
+    failed: 操作失敗
+    created: 文件已建立
+    updated: 文件已更新
+    deleted: 已刪除
+    slug-taken: 該 slug 已被其他文件佔用
+  theme:
+    notice: 「暖櫻白」主題專屬設定；主題本體是源碼資產 public/theme/，儲存後重新整理頁面立即生效。
+    sidebar-editor: 側欄自訂
+    sidebar-help: 拖動 ☰ 排序（大項/子項可跨層級拖動：拖到行中間=變成它的子項，拖到邊緣=同級插入）；「高級功能」點 ‹ 展開子項；勾「隱藏」前台收起（編輯器裡灰顯保留，取消勾選即恢復）；自訂連結項可刪除；儲存後重新整理前台生效。
+    add-link: 新增自訂連結：
+    title-placeholder: 顯示名
+    link-placeholder: 連結（https:// 或站內路徑）
+    icon-placeholder: 圖示 fa-xxx
+    add: 新增
+    save: 儲存側欄
+    drag: 拖動排序
+    toggle: 展开/收起子項
+    rename: 顯示名（留空用預設）
+    add-child: "＋子項"
+    add-child-title: 新增自訂子連結（沒有子項時會建立）
+    delete: 刪除
+    delete-title: 刪除此自訂項
+    hide: 隱藏
+    new-link: 新連結
+    unnamed: 未命名
+    saving: 儲存中…
+    saved-reload: 已儲存，正在重新整理…
+    save-failed: 儲存失敗
+    network-error: 網路錯誤
+  status:
+    no-plugins: 未啟用任何擴展軟體
+  forms:
+    theme-wallpaper-title: 壁紙與柔光
+    theme-wallpaper-enabled: 面板壁紙開關
+    theme-wallpaper-enabled-desc: 關閉後登入後的頁面只保留櫻粉底色
+    theme-dim: 內容區柔光濃度
+    theme-dim-light: 輕（壁紙更通透）
+    theme-dim-medium: 中（推薦）
+    theme-dim-heavy: 重（文字更易讀）
+    theme-dim-desc: 濃度越高壁紙越淡、文字越清晰
+    theme-sources: 壁紙圖源（每行一個地址）
+    theme-sources-desc: 隨機抽取並自動切換失效源；全部失敗時回退櫻粉漸層底色
+    theme-sources-mobile: 壁紙圖源（行動端）
+    theme-sources-mobile-desc: 手機寬度（≤767px）下隨機抽取的圖源，每行一個；留空則與桌面端共用同一組圖源。行動端換圖請求自動帶 mobile 標記走這裡設定的源
+    theme-effects-title: 櫻花飄落
+    theme-petals: 櫻花開關
+    theme-petals-desc: 關閉後主頁與登入頁不再飄櫻花
+    theme-footer-title: 頁尾
+    theme-footer-text: 版權文字
+    theme-footer-text-desc: 支援 {year} 當前年份（跨年自動更新）、{site_name} 站點名、{site_url} 站點地址
+    theme-icp: 備案號
+    theme-icp-desc: "例如：京ICP备2026000000号-1；留空不顯示，顯示時自動連結到工信部備案網站"
+    comment-settings-title: 留言區設定
+    comment-enabled: 啟用留言區
+    comment-enabled-desc: 關閉後詳情頁不再顯示留言區，留言介面同時拒絕存取
+    comment-moderation: 發表留言需要審核
+    comment-moderation-desc: 開啟後新留言與回覆先進入待審佇列，審核通過才會公開；作者自己能在詳情頁看到「審核中」標記
+  sidebar:
+    updated: 側欄已更新
+    invalid: 無效資料

@@ -1,15 +1,15 @@
 {% extends 'admin.layout' %}
 
-{% block title %}文档管理{% endblock %}
+{% block title %}{{ trans('admin.panel.docs.title') }}{% endblock %}
 
 {% block actions %}
-  <a href="{{ url('admin/docs/create') }}" class="btn btn-primary"><i class="fas fa-plus mr-1"></i>新建文档</a>
+  <a href="{{ url('admin/docs/create') }}" class="btn btn-primary"><i class="fas fa-plus mr-1"></i>{{ trans('admin.panel.docs.create') }}</a>
 {% endblock %}
 
 {% block content %}
   <div class="ap-banner ap-banner-info">
     <i class="fas fa-info-circle"></i>
-    <span>站点使用文档（/docs）的管理。文档用 Markdown 书写，保存后在前台立即生效；勾选「发布」才会对玩家可见，未发布文档只有管理员能在文档页预览。</span>
+    <span>{{ trans('admin.panel.docs.notice') }}</span>
   </div>
 
   {% if session('message') %}
@@ -18,12 +18,20 @@
 
   <div class="ap-card ap-card--flush">
     <header class="ap-card-head">
-      <h3 class="ap-card-title">文档列表</h3>
-      <span class="badge {{ docs|length ? 'badge-primary' : 'badge-secondary' }}">{{ docs|length }} 篇</span>
+      <h3 class="ap-card-title">{{ trans('admin.panel.docs.list') }}</h3>
+      <span class="badge {{ docs|length ? 'badge-primary' : 'badge-secondary' }}">{{ trans('admin.panel.docs.count', {'count': docs|length}) }}</span>
     </header>
     <div class="ap-card-body">
       <table class="table table-striped">
-        <thead><tr><th>ID</th><th>标题</th><th>slug</th><th>排序</th><th>状态</th><th>更新时间</th><th class="text-right">操作</th></tr></thead>
+        <thead><tr>
+          <th>ID</th>
+          <th>{{ trans('admin.panel.docs.col-title') }}</th>
+          <th>slug</th>
+          <th>{{ trans('admin.panel.docs.col-sort') }}</th>
+          <th>{{ trans('admin.panel.docs.col-status') }}</th>
+          <th>{{ trans('admin.panel.docs.col-updated') }}</th>
+          <th class="text-right">{{ trans('admin.panel.docs.col-actions') }}</th>
+        </tr></thead>
         <tbody>
           {% for d in docs %}
             <tr>
@@ -31,15 +39,15 @@
               <td><a href="{{ url('docs/' ~ d['slug']) }}" target="_blank">{{ d['title'] }}</a></td>
               <td><code>{{ d['slug'] }}</code></td>
               <td class="ap-muted">{{ d['sort'] }}</td>
-              <td>{% if d['published'] %}<span class="badge badge-success">已发布</span>{% else %}<span class="badge badge-secondary">未发布</span>{% endif %}</td>
+              <td>{% if d['published'] %}<span class="badge badge-success">{{ trans('admin.panel.docs.published') }}</span>{% else %}<span class="badge badge-secondary">{{ trans('admin.panel.docs.unpublished') }}</span>{% endif %}</td>
               <td class="ap-muted">{{ d['updated'] }}</td>
               <td class="text-nowrap text-right">
-                <a class="btn btn-xs btn-outline-primary" href="{{ url('admin/docs/' ~ d['id'] ~ '/edit') }}"><i class="fas fa-edit mr-1"></i>编辑</a>
-                <button type="button" class="btn btn-xs btn-outline-danger ht-doc-del" data-id="{{ d['id'] }}">删除</button>
+                <a class="btn btn-xs btn-outline-primary" href="{{ url('admin/docs/' ~ d['id'] ~ '/edit') }}"><i class="fas fa-edit mr-1"></i>{{ trans('admin.panel.docs.edit') }}</a>
+                <button type="button" class="btn btn-xs btn-outline-danger ht-doc-del" data-id="{{ d['id'] }}">{{ trans('admin.panel.docs.delete') }}</button>
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="7" class="text-center text-muted py-3">还没有文档，点右上角「新建文档」写第一篇</td></tr>
+            <tr><td colspan="7" class="text-center text-muted py-3">{{ trans('admin.panel.docs.empty') }}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -49,10 +57,15 @@
   <script>
     (function () {
       var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      var t = {
+        confirmDelete: {{ trans('admin.panel.docs.confirm-delete')|json_encode|raw }},
+        failed: {{ trans('admin.panel.docs.failed')|json_encode|raw }},
+        networkError: {{ trans('admin.panel.docs.network-error')|json_encode|raw }},
+      };
       document.addEventListener('click', function (e) {
         var btn = e.target && e.target.closest ? e.target.closest('.ht-doc-del') : null;
         if (!btn) return;
-        if (!window.confirm('确定删除这篇文档？前台将立即不可见，删除后不可恢复。')) return;
+        if (!window.confirm(t.confirmDelete)) return;
         btn.disabled = true;
         fetch({{ url('admin/docs') | json_encode | raw }} + '/' + btn.dataset.id, {
           method: 'DELETE',
@@ -60,8 +73,8 @@
           headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d.code === 0) { location.reload(); }
-          else { window.alert(d.message || '操作失败'); btn.disabled = false; }
-        }).catch(function () { window.alert('网络错误'); btn.disabled = false; });
+          else { window.alert(d.message || t.failed); btn.disabled = false; }
+        }).catch(function () { window.alert(t.networkError); btn.disabled = false; });
       });
     })();
   </script>

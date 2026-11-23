@@ -136,3 +136,189 @@ download:
     shasum: 文件校验失败，请重新下载。
     unzip: 解压失败。
 invalid-action: 无效的操作名
+
+# 管理后台面板(2026-11-24 v2 重构)界面文案
+panel:
+  brand: 管理后台
+  open-menu: 打开菜单
+  close-menu: 关闭
+  nav:
+    overview: 概览
+    community: 用户与社区
+    content: 内容
+    appearance: 外观
+    system: 系统
+    others: 其他
+    plugins-heading: 插件配置
+    to-front: 前往前台
+  dashboard:
+    quick: 快捷入口
+    last-days: 近 31 天
+    quick-desc-users: 账号 / 邮箱 / 积分 / 权限
+    quick-desc-players: 角色名 / 所属 / 材质
+    quick-desc-reports: 材质举报 / 评论举报
+    quick-desc-comments: 开关 / 审核 / 待审队列
+    quick-desc-docs: 撰写 /docs 使用文档
+    quick-desc-theme: 壁纸 / 图源 / 页尾 / 侧栏
+    quick-desc-plugins: 启用 / 禁用 / 上传安装
+    quick-desc-options: 站名 / 注册 / 上传限制
+    quick-desc-status: 环境 / 数据库 / 插件
+  comments:
+    title: 评论管理
+    notice: 材质评论区（皮肤 / 披风共用详情页）的开关与审核。总开关关闭后前台立即不显示评论区、接口同时拒绝；开启「需要审核」后新评论先进入下方待审队列，通过才会公开。评论正文在输出端转义，直接显示原文。
+    nav-switch: 评论开关
+    nav-pending: 待审队列
+    nav-recent: 最近已通过
+    pending: 待审队列
+    recent: 最近已通过的评论
+    latest-20: 最新 20 条
+    count: ":count 条"
+    texture: 材质
+    commenter: 评论人
+    content: 内容
+    time: 时间
+    actions: 操作
+    approve: 通过
+    delete: 删除
+    no-pending: 没有待审评论
+    no-recent: 还没有已通过的评论
+    confirm-delete: 确定删除这条评论？删除后不可恢复。
+    deleted: 已删除
+    not-pending: 该评论不在待审状态
+    failed: 操作失败
+    network-error: 网络错误
+  reports:
+    title: 举报管理
+    notice: 材质举报与评论举报共用一套举报系统，按下方两个 Tab 分区处理。材质举报的「删除」会删除被举报材质；评论举报的「删除」只删除被举报评论本身（举报记录保留）。
+    tab-texture: 材质举报
+    tab-comment: 评论举报
+    pending-texture: 材质举报 · 待处理
+    pending-comment: 评论举报 · 待处理
+    resolved: 已处理
+    recent-20: 最近 20 条
+    texture: 被举报材质
+    uploader: 材质上传者
+    reporter: 举报人
+    reason: 理由
+    time: 时间
+    actions: 操作
+    status: 状态
+    comment: 被举报评论
+    comment-author: 评论作者
+    texture-page: 所在材质
+    delete-texture: 删除材质
+    ban: 封禁上传者
+    reject: 驳回
+    delete-comment: 删除评论
+    badge-resolved: 已处理
+    badge-rejected: 已驳回
+    texture-deleted: （材质已删除）
+    comment-deleted: （评论已删除）
+    user-deleted: 已注销
+    no-pending-texture: 没有待处理的材质举报
+    no-pending-comment: 没有待处理的评论举报
+    no-records: 暂无记录
+    count: ":count 条"
+    confirm-delete-texture: 确定删除该材质？会同时从所有衣柜移除，不可恢复！
+    confirm-ban: 确定封禁该材质的上传者？
+    confirm-delete-comment: 确定删除该评论？删除后不可恢复（举报记录保留）。
+    confirm-reject: 确定驳回该举报？
+    confirm-default: 确定执行该操作？
+    failed: 操作失败
+    network-error: 网络错误
+  docs:
+    title: 文档管理
+    create: 新建文档
+    edit-title: "编辑文档：:title"
+    notice: 站点使用文档（/docs）的管理。文档用 Markdown 书写，保存后在前台立即生效；勾选「发布」才会对玩家可见，未发布文档只有管理员能在文档页预览。
+    list: 文档列表
+    count: ":count 篇"
+    col-id: ID
+    col-title: 标题
+    col-sort: 排序
+    col-status: 状态
+    col-updated: 更新时间
+    col-actions: 操作
+    edit: 编辑
+    delete: 删除
+    published: 已发布
+    unpublished: 未发布
+    empty: 还没有文档，点右上角「新建文档」写第一篇
+    back: 返回列表
+    title-label: 标题（最长 100 字）
+    slug-label: slug（URL 的一部分，仅小写字母/数字/中划线）
+    slug-placeholder: "例如：getting-started"
+    sort-label: 排序（小的在前）
+    publish: 发布
+    publish-hint: 勾选后对玩家公开
+    content-label: 正文（Markdown，支持表格/代码块；Raw HTML 会被转义）
+    content-placeholder: "# 标题\n正文内容…"
+    save: 保存修改
+    create-submit: 创建文档
+    preview: 预览渲染效果
+    preview-refresh: 刷新预览
+    preview-empty: 先写点正文再预览
+    preview-rendering: 渲染中…
+    preview-failed: 渲染失败
+    network-error: 网络错误
+    confirm-delete: 确定删除这篇文档？前台将立即不可见，删除后不可恢复。
+    failed: 操作失败
+    created: 文档已创建
+    updated: 文档已更新
+    deleted: 已删除
+    slug-taken: 该 slug 已被其他文档占用
+  theme:
+    notice: "「暖樱白」主题专属配置；主题本体是源码资产 public/theme/，保存后刷新页面立即生效。"
+    sidebar-editor: 侧边栏自定义
+    sidebar-help: 拖动 ☰ 排序（大项/子项可跨层级拖动：拖到行中间=变成它的子项，拖到边缘=同级插入）；「高级功能」点 ‹ 展开子项；勾「隐藏」前台收起（编辑器里灰显保留，取消勾选即恢复）；自定义链接项可删除；保存后刷新前台生效。
+    add-link: 添加自定义链接：
+    title-placeholder: 显示名
+    link-placeholder: 链接（https:// 或站内路径）
+    icon-placeholder: 图标 fa-xxx
+    add: 添加
+    save: 保存侧边栏
+    drag: 拖动排序
+    toggle: 展开/收起子项
+    rename: 显示名（留空用默认）
+    add-child: "＋子项"
+    add-child-title: 添加自定义子链接（没有子项时会创建）
+    delete: 删除
+    delete-title: 删除此自定义项
+    hide: 隐藏
+    new-link: 新链接
+    unnamed: 未命名
+    saving: 保存中…
+    saved-reload: 已保存，正在刷新…
+    save-failed: 保存失败
+    network-error: 网络错误
+  status:
+    no-plugins: 未启用任何插件
+  forms:
+    theme-wallpaper-title: 壁纸与柔光
+    theme-wallpaper-enabled: 面板壁纸开关
+    theme-wallpaper-enabled-desc: 关闭后登录后的页面只保留樱粉底色
+    theme-dim: 内容区柔光浓度
+    theme-dim-light: 轻（壁纸更通透）
+    theme-dim-medium: 中（推荐）
+    theme-dim-heavy: 重（文字更易读）
+    theme-dim-desc: 浓度越高壁纸越淡、文字越清晰
+    theme-sources: 壁纸图源（每行一个地址）
+    theme-sources-desc: 随机抽取并自动切换失效源；全部失败时回退樱粉渐变底色
+    theme-sources-mobile: 壁纸图源（移动端）
+    theme-sources-mobile-desc: 手机宽度（≤767px）下随机抽取的图源，每行一个；留空则与桌面端共用同一组图源。移动端换图请求自动带 mobile 标记走这里配置的源
+    theme-effects-title: 樱花飘落
+    theme-petals: 樱花开关
+    theme-petals-desc: 关闭后主页与登录页不再飘樱花
+    theme-footer-title: 页尾
+    theme-footer-text: 版权文字
+    theme-footer-text-desc: 支持 {year} 当前年份（跨年自动更新）、{site_name} 站点名、{site_url} 站点地址
+    theme-icp: 备案号
+    theme-icp-desc: "例如：京ICP备2026000000号-1；留空不显示，显示时自动链接到工信部备案网站"
+    comment-settings-title: 评论区设置
+    comment-enabled: 启用评论区
+    comment-enabled-desc: 关闭后详情页不再显示评论区，评论接口同时拒绝访问
+    comment-moderation: 发表评论需要审核
+    comment-moderation-desc: 开启后新评论与回复先进入待审队列，审核通过才会公开；作者自己能在详情页看到「审核中」标记
+  sidebar:
+    updated: 侧边栏已更新
+    invalid: 无效数据

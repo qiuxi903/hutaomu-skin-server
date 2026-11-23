@@ -153,3 +153,190 @@ download:
     unzip: Failed to unpack files.
 
 invalid-action: Invalid action
+
+
+# Admin panel UI strings (2026-11-24 v2 rebuild)
+panel:
+  brand: Admin Panel
+  open-menu: Open menu
+  close-menu: Close
+  nav:
+    overview: Overview
+    community: Users & Community
+    content: Content
+    appearance: Appearance
+    system: System
+    others: Others
+    plugins-heading: Plugin Settings
+    to-front: Front Site
+  dashboard:
+    quick: Quick Links
+    last-days: Last 31 days
+    quick-desc-users: Accounts / Email / Score / Permissions
+    quick-desc-players: Names / Owners / Textures
+    quick-desc-reports: Texture & comment reports
+    quick-desc-comments: Toggles / Moderation / Queue
+    quick-desc-docs: Write /docs articles
+    quick-desc-theme: Wallpaper / Sources / Footer / Sidebar
+    quick-desc-plugins: Enable / Disable / Upload
+    quick-desc-options: Site name / Registration / Upload limits
+    quick-desc-status: Environment / Database / Plugins
+  comments:
+    title: Comment Management
+    notice: Toggles and moderation for the texture comment area (shared by skins and capes). Turning off the master switch hides the comment area on the front site and the API rejects requests immediately; with moderation enabled, new comments enter the pending queue below and go public after approval. Comment content is escaped on output and shown as-is.
+    nav-switch: Comment Toggles
+    nav-pending: Pending Queue
+    nav-recent: Recently Approved
+    pending: Pending Queue
+    recent: Recently Approved Comments
+    latest-20: Latest 20
+    count: ":count"
+    texture: Texture
+    commenter: Author
+    content: Content
+    time: Time
+    actions: Actions
+    approve: Approve
+    delete: Delete
+    no-pending: No pending comments
+    no-recent: No approved comments yet
+    confirm-delete: Delete this comment? This cannot be undone.
+    deleted: Deleted
+    not-pending: This comment is not pending approval
+    failed: Operation failed
+    network-error: Network error
+  reports:
+    title: Report Management
+    notice: Texture reports and comment reports share one report system, separated by the two tabs below. "Delete" on a texture report deletes the reported texture; "Delete" on a comment report only deletes the comment itself (the report record is kept).
+    tab-texture: Texture Reports
+    tab-comment: Comment Reports
+    pending-texture: Texture Reports · Pending
+    pending-comment: Comment Reports · Pending
+    resolved: Resolved
+    recent-20: Latest 20
+    texture: Reported Texture
+    uploader: Texture Uploader
+    reporter: Reporter
+    reason: Reason
+    time: Time
+    actions: Actions
+    status: Status
+    comment: Reported Comment
+    comment-author: Comment Author
+    texture-page: Texture
+    delete-texture: Delete Texture
+    ban: Ban Uploader
+    reject: Reject
+    delete-comment: Delete Comment
+    badge-resolved: Resolved
+    badge-rejected: Rejected
+    texture-deleted: (texture deleted)
+    comment-deleted: (comment deleted)
+    user-deleted: Deleted user
+    no-pending-texture: No pending texture reports
+    no-pending-comment: No pending comment reports
+    no-records: No records
+    count: ":count"
+    confirm-delete-texture: Delete this texture? It will also be removed from all closets. This cannot be undone!
+    confirm-ban: Ban the uploader of this texture?
+    confirm-delete-comment: Delete this comment? This cannot be undone (the report record is kept).
+    confirm-reject: Reject this report?
+    confirm-default: Are you sure to perform this action?
+    failed: Operation failed
+    network-error: Network error
+  docs:
+    title: Docs Management
+    create: New Article
+    edit-title: "Edit Article: :title"
+    notice: Management for site docs (/docs). Articles are written in Markdown and take effect on the front site immediately once saved; tick "Publish" to make them visible to players, otherwise only admins can preview them on the docs page.
+    list: Articles
+    count: ":count"
+    col-id: ID
+    col-title: Title
+    col-sort: Sort
+    col-status: Status
+    col-updated: Updated
+    col-actions: Actions
+    edit: Edit
+    delete: Delete
+    published: Published
+    unpublished: Unpublished
+    empty: No articles yet. Click "New Article" to write the first one.
+    back: Back to List
+    title-label: Title (max 100 characters)
+    slug-label: slug (part of the URL; lowercase letters, digits and hyphens only)
+    slug-placeholder: "e.g. getting-started"
+    sort-label: Sort (smaller comes first)
+    publish: Publish
+    publish-hint: Visible to players when ticked
+    content-label: Body (Markdown; tables and code blocks supported; raw HTML will be escaped)
+    content-placeholder: "# Title\nBody text…"
+    save: Save Changes
+    create-submit: Create Article
+    preview: Preview Rendering
+    preview-refresh: Refresh Preview
+    preview-empty: Write some content before previewing
+    preview-rendering: Rendering…
+    preview-failed: Rendering failed
+    network-error: Network error
+    confirm-delete: Delete this article? It becomes invisible on the front site immediately and cannot be restored.
+    failed: Operation failed
+    created: Article created
+    updated: Article updated
+    deleted: Deleted
+    slug-taken: This slug is already taken by another article
+  theme:
+    notice: Exclusive settings of the "Warm Sakura" theme; the theme itself lives in the source asset public/theme/, and changes take effect immediately after saving and refreshing.
+    sidebar-editor: Sidebar Customization
+    sidebar-help: "Drag ☰ to reorder (top items and children can be dragged across levels: drop onto the middle of a row to nest it, near the edges to insert as a sibling); click ‹ on \"Advanced\" to expand children; tick \"Hide\" to collapse it on the front site (kept greyed out in this editor — untick to restore); custom links can be deleted; refresh the front site after saving."
+    add-link: "Add custom link:"
+    title-placeholder: Label
+    link-placeholder: Link (https:// or site path)
+    icon-placeholder: Icon fa-xxx
+    add: Add
+    save: Save Sidebar
+    drag: Drag to reorder
+    toggle: Expand/collapse children
+    rename: Label (leave empty to use default)
+    add-child: ＋ Child
+    add-child-title: Add a custom child link (creates the list if absent)
+    delete: Delete
+    delete-title: Delete this custom item
+    hide: Hide
+    new-link: New link
+    unnamed: Unnamed
+    saving: Saving…
+    saved-reload: Saved, reloading…
+    save-failed: Save failed
+    network-error: Network error
+  status:
+    no-plugins: No enabled plugins
+  forms:
+    theme-wallpaper-title: Wallpaper & Soft Light
+    theme-wallpaper-enabled: Panel wallpaper
+    theme-wallpaper-enabled-desc: When off, logged-in pages keep only the soft sakura background
+    theme-dim: Soft light density
+    theme-dim-light: Light (wallpaper clearer)
+    theme-dim-medium: Medium (recommended)
+    theme-dim-heavy: Heavy (text more readable)
+    theme-dim-desc: Higher density fades the wallpaper and sharpens the text
+    theme-sources: Wallpaper sources (one URL per line)
+    theme-sources-desc: Sources are picked randomly and dead ones are skipped automatically; when all fail it falls back to the sakura gradient
+    theme-sources-mobile: Wallpaper sources (mobile)
+    theme-sources-mobile-desc: Sources used at mobile width (≤767px), one per line; leave empty to share the desktop sources. Mobile wallpaper requests carry a mobile flag and pick from this list
+    theme-effects-title: Sakura Petals
+    theme-petals: Sakura petals
+    theme-petals-desc: When off, the home page and login page no longer show falling petals
+    theme-footer-title: Footer
+    theme-footer-text: Copyright text
+    theme-footer-text-desc: Supports {year} for the current year (auto-updated), {site_name} for the site name, {site_url} for the site address
+    theme-icp: ICP number
+    theme-icp-desc: "e.g. 京ICP备2026000000号-1; leave empty to hide; when shown it links to the MIIT filing site automatically"
+    comment-settings-title: Comment Settings
+    comment-enabled: Enable comments
+    comment-enabled-desc: When off, the detail page no longer shows the comment area and the comment API rejects access
+    comment-moderation: Moderate new comments
+    comment-moderation-desc: When on, new comments and replies enter the pending queue first and go public after approval; the author sees an "under review" mark on the detail page
+  sidebar:
+    updated: Sidebar updated
+    invalid: Invalid data

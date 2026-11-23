@@ -7,12 +7,12 @@
     <nav class="ap-settings-nav">
       <div class="ap-banner ap-banner-info" style="margin:0 0 10px;">
         <i class="fas fa-info-circle"></i>
-        <span>「暖樱白」主题专属配置；主题本体是源码资产 <code>public/theme/</code>，保存后刷新页面立即生效。</span>
+        <span>{{ trans('admin.panel.theme.notice') }}</span>
       </div>
       {% for key, form in forms %}
         <a href="#form-{{ key }}">{{ form.getTitle() }}</a>
       {% endfor %}
-      <a href="#form-sidebar">侧边栏自定义</a>
+      <a href="#form-sidebar">{{ trans('admin.panel.theme.sidebar-editor') }}</a>
     </nav>
     <div class="ap-settings-body">
       {% for key, form in forms %}
@@ -21,29 +21,25 @@
 
       <div class="ap-card" id="form-sidebar">
         <header class="ap-card-head">
-          <h3 class="ap-card-title">侧边栏自定义</h3>
+          <h3 class="ap-card-title">{{ trans('admin.panel.theme.sidebar-editor') }}</h3>
         </header>
         <div class="ap-card-body">
-          <p class="text-muted small mb-2">
-            拖动 ☰ 排序（大项/子项可跨层级拖动：拖到行中间=变成它的子项，拖到边缘=同级插入）；
-            「高级功能」点 ‹ 展开子项；勾「隐藏」前台收起（编辑器里灰显保留，取消勾选即恢复）；
-            自定义链接项可删除；保存后刷新前台生效。
-          </p>
+          <p class="text-muted small mb-2">{{ trans('admin.panel.theme.sidebar-help') }}</p>
           <div id="sidebar-tree" class="sidebar-editor"></div>
           <div class="border-top pt-2 mt-2">
             <div class="ap-gap mb-2">
-              <strong class="mr-2">添加自定义链接：</strong>
-              <input type="text" id="sc-new-title" class="form-control form-control-sm mr-1" style="width: 130px;" placeholder="显示名">
-              <input type="text" id="sc-new-link" class="form-control form-control-sm mr-1" style="width: 200px;" placeholder="链接（https:// 或站内路径）">
-              <input type="text" id="sc-new-icon" class="form-control form-control-sm mr-1" style="width: 110px;" placeholder="图标 fa-xxx">
+              <strong class="mr-2">{{ trans('admin.panel.theme.add-link') }}</strong>
+              <input type="text" id="sc-new-title" class="form-control form-control-sm mr-1" style="width: 130px;" placeholder="{{ trans('admin.panel.theme.title-placeholder') }}">
+              <input type="text" id="sc-new-link" class="form-control form-control-sm mr-1" style="width: 200px;" placeholder="{{ trans('admin.panel.theme.link-placeholder') }}">
+              <input type="text" id="sc-new-icon" class="form-control form-control-sm mr-1" style="width: 110px;" placeholder="{{ trans('admin.panel.theme.icon-placeholder') }}">
               <select id="sc-new-group" class="form-control form-control-sm mr-2" style="width: auto;">
                 {% for g in sidebarGroups %}
                   <option value="{{ g }}">{{ g }}</option>
                 {% endfor %}
               </select>
-              <button type="button" class="btn btn-sm btn-outline-primary" id="sc-add">添加</button>
+              <button type="button" class="btn btn-sm btn-outline-primary" id="sc-add">{{ trans('admin.panel.theme.add') }}</button>
             </div>
-            <button type="button" class="btn btn-primary" id="sidebar-save">保存侧边栏</button>
+            <button type="button" class="btn btn-primary" id="sidebar-save">{{ trans('admin.panel.theme.save') }}</button>
             <span class="text-muted small ml-2" id="sidebar-save-tip"></span>
           </div>
         </div>
@@ -58,6 +54,22 @@
       var groups = {{ sidebarGroups|json_encode|raw }};
       var list = document.getElementById('sidebar-tree');
       var uid = 0;
+      var I18N = {
+        drag: {{ trans('admin.panel.theme.drag')|json_encode|raw }},
+        toggle: {{ trans('admin.panel.theme.toggle')|json_encode|raw }},
+        rename: {{ trans('admin.panel.theme.rename')|json_encode|raw }},
+        addChild: {{ trans('admin.panel.theme.add-child')|json_encode|raw }},
+        addChildTitle: {{ trans('admin.panel.theme.add-child-title')|json_encode|raw }},
+        delete: {{ trans('admin.panel.theme.delete')|json_encode|raw }},
+        deleteTitle: {{ trans('admin.panel.theme.delete-title')|json_encode|raw }},
+        hide: {{ trans('admin.panel.theme.hide')|json_encode|raw }},
+        newLink: {{ trans('admin.panel.theme.new-link')|json_encode|raw }},
+        unnamed: {{ trans('admin.panel.theme.unnamed')|json_encode|raw }},
+        saving: {{ trans('admin.panel.theme.saving')|json_encode|raw }},
+        savedReload: {{ trans('admin.panel.theme.saved-reload')|json_encode|raw }},
+        saveFailed: {{ trans('admin.panel.theme.save-failed')|json_encode|raw }},
+        networkError: {{ trans('admin.panel.theme.network-error')|json_encode|raw }},
+      };
 
       function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
@@ -79,7 +91,7 @@
         var handle = document.createElement('span');
         handle.className = 'text-muted mr-2';
         handle.textContent = '☰';
-        handle.title = '拖动排序';
+        handle.title = I18N.drag;
         handle.style.cursor = 'grab';
         row.appendChild(handle);
 
@@ -87,7 +99,7 @@
           var chev = document.createElement('span');
           chev.className = 'sc-chev mr-1';
           chev.textContent = '‹';
-          chev.title = '展开/收起子项';
+          chev.title = I18N.toggle;
           chev.style.cursor = 'pointer';
           chev.style.fontWeight = '700';
           chev.addEventListener('click', function () {
@@ -107,7 +119,7 @@
         title.style.width = depth > 0 ? '150px' : '170px';
         title.value = esc(node.title || '');
         title.placeholder = esc(node.baseTitle || '');
-        title.title = '显示名（留空用默认）';
+        title.title = I18N.rename;
         title.addEventListener('input', function () { node.title = title.value.trim(); });
         row.appendChild(title);
 
@@ -137,20 +149,20 @@
           wrap.classList.toggle('sc-hidden', node.hidden);
         });
         hideWrap.appendChild(hide);
-        hideWrap.appendChild(document.createTextNode(' 隐藏'));
+        hideWrap.appendChild(document.createTextNode(' ' + I18N.hide));
         row.appendChild(hideWrap);
 
         {
           var addChild = document.createElement('button');
           addChild.type = 'button';
           addChild.className = 'btn btn-sm btn-outline-secondary mr-1';
-          addChild.textContent = '＋子项';
-          addChild.title = '添加自定义子链接（没有子项时会创建）';
+          addChild.textContent = I18N.addChild;
+          addChild.title = I18N.addChildTitle;
           addChild.addEventListener('click', function () {
             if (!node.children) node.children = [];
             node.expanded = true;
             node.children.push({
-              custom: true, id: 'custom-' + (++uid), title: '新链接', link: 'https://',
+              custom: true, id: 'custom-' + (++uid), title: I18N.newLink, link: 'https://',
               icon: 'fa-link', hidden: false,
             });
             render();
@@ -162,8 +174,8 @@
           var del = document.createElement('button');
           del.type = 'button';
           del.className = 'btn btn-sm btn-outline-danger';
-          del.textContent = '删除';
-          del.title = '删除此自定义项';
+          del.textContent = I18N.delete;
+          del.title = I18N.deleteTitle;
           del.addEventListener('click', function () {
             var idx = listRef.nodes.indexOf(node);
             if (idx !== -1) listRef.nodes.splice(idx, 1);
@@ -330,7 +342,7 @@
               o.custom = true;
               o.link = n.link;
               o.icon = n.icon;
-              o.title = n.title || '未命名';
+              o.title = n.title || I18N.unnamed;
             } else if (n.title && n.title !== n.baseTitle) {
               o.title = n.title;
             }
@@ -339,7 +351,7 @@
           });
         }
         var tip = document.getElementById('sidebar-save-tip');
-        tip.textContent = '保存中…';
+        tip.textContent = I18N.saving;
         tip.className = 'text-muted small ml-2';
         fetch('{{ url('admin/theme/sidebar') }}', {
           method: 'POST',
@@ -352,17 +364,17 @@
           body: JSON.stringify({ items: serialize(data) }),
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d.code === 0) {
-            tip.textContent = '已保存，正在刷新…';
+            tip.textContent = I18N.savedReload;
             tip.className = 'text-success small ml-2';
             /* 整页刷新: 侧栏是整页渲染的, PJAX 页间切换不会重绘它——
                只有整页加载才能看到新结构 */
             setTimeout(function () { location.reload(); }, 600);
           } else {
-            tip.textContent = d.message || '保存失败';
+            tip.textContent = d.message || I18N.saveFailed;
             tip.className = 'text-danger small ml-2';
           }
         }).catch(function () {
-          tip.textContent = '网络错误';
+          tip.textContent = I18N.networkError;
           tip.className = 'text-danger small ml-2';
         });
       });

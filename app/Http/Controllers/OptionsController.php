@@ -18,36 +18,37 @@ class OptionsController extends Controller
      */
     public function theme()
     {
-        $wallpaper = Option::form('themeWallpaper', '壁纸与柔光', function ($form) {
-            $form->checkbox('theme_panel_wallpaper', '面板壁纸开关')
-                ->description('关闭后登录后的页面只保留樱粉底色');
+        /* 文案走 admin.panel.forms 翻译组(四语言), 见 resources/lang 下的 admin.yml */
+        $wallpaper = Option::form('themeWallpaper', trans('admin.panel.forms.theme-wallpaper-title'), function ($form) {
+            $form->checkbox('theme_panel_wallpaper', trans('admin.panel.forms.theme-wallpaper-enabled'))
+                ->description(trans('admin.panel.forms.theme-wallpaper-enabled-desc'));
 
-            $form->select('theme_panel_dim', '内容区柔光浓度')
-                ->option('0.35', '轻（壁纸更通透）')
-                ->option('0.5', '中（推荐）')
-                ->option('0.65', '重（文字更易读）')
-                ->description('浓度越高壁纸越淡、文字越清晰');
+            $form->select('theme_panel_dim', trans('admin.panel.forms.theme-dim'))
+                ->option('0.35', trans('admin.panel.forms.theme-dim-light'))
+                ->option('0.5', trans('admin.panel.forms.theme-dim-medium'))
+                ->option('0.65', trans('admin.panel.forms.theme-dim-heavy'))
+                ->description(trans('admin.panel.forms.theme-dim-desc'));
 
-            $form->textarea('theme_wallpaper_sources', '壁纸图源（每行一个地址）')
+            $form->textarea('theme_wallpaper_sources', trans('admin.panel.forms.theme-sources'))
                 ->rows(6)
-                ->description('随机抽取并自动切换失效源；全部失败时回退樱粉渐变底色');
+                ->description(trans('admin.panel.forms.theme-sources-desc'));
 
-            $form->textarea('theme_mobile_wallpaper_sources', '壁纸图源（移动端）')
+            $form->textarea('theme_mobile_wallpaper_sources', trans('admin.panel.forms.theme-sources-mobile'))
                 ->rows(3)
-                ->description('手机宽度（≤767px）下随机抽取的图源，每行一个；留空则与桌面端共用同一组图源。移动端换图请求自动带 mobile 标记走这里配置的源');
+                ->description(trans('admin.panel.forms.theme-sources-mobile-desc'));
         })->handle();
 
-        $effects = Option::form('themeEffects', '樱花飘落', function ($form) {
-            $form->checkbox('theme_petals', '樱花开关')
-                ->description('关闭后主页与登录页不再飘樱花');
+        $effects = Option::form('themeEffects', trans('admin.panel.forms.theme-effects-title'), function ($form) {
+            $form->checkbox('theme_petals', trans('admin.panel.forms.theme-petals'))
+                ->description(trans('admin.panel.forms.theme-petals-desc'));
         })->handle();
 
-        $footer = Option::form('themeFooter', '页尾', function ($form) {
-            $form->text('theme_footer_text', '版权文字')
-                ->description('支持 {year} 当前年份（跨年自动更新）、{site_name} 站点名、{site_url} 站点地址');
+        $footer = Option::form('themeFooter', trans('admin.panel.forms.theme-footer-title'), function ($form) {
+            $form->text('theme_footer_text', trans('admin.panel.forms.theme-footer-text'))
+                ->description(trans('admin.panel.forms.theme-footer-text-desc'));
 
-            $form->text('theme_icp', '备案号')
-                ->description('例如：京ICP备2026000000号-1；留空不显示，显示时自动链接到工信部备案网站');
+            $form->text('theme_icp', trans('admin.panel.forms.theme-icp'))
+                ->description(trans('admin.panel.forms.theme-icp-desc'));
         })->handle();
 
         /* 侧边栏自定义编辑器: 应用自定义后的完整嵌套树(翻译标题) */
@@ -66,14 +67,14 @@ class OptionsController extends Controller
     {
         $items = $request->input('items');
         if (!is_array($items)) {
-            return json('无效数据', 1);
+            return json(trans('admin.panel.sidebar.invalid'), 1);
         }
         option(['sidebar_custom' => json_encode(
             $this->sanitizeSidebarItems($items),
             JSON_UNESCAPED_UNICODE
         )]);
 
-        return json('侧边栏已更新', 0);
+        return json(trans('admin.panel.sidebar.updated'), 0);
     }
 
     /* 递归校验: 只保留白名单字段, 文本 strip_tags; 自定义项必须有链接 */

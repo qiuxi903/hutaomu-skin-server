@@ -136,3 +136,190 @@ download:
     shasum: ファイルの検証に失敗しました。もう一度ダウンロードしてください。
     unzip: ファイルの展開に失敗しました。
 invalid-action: 無効な操作です
+
+
+# 管理画面（2026-11-24 v2 再構築）の表示文言
+panel:
+  brand: 管理画面
+  open-menu: メニューを開く
+  close-menu: 閉じる
+  nav:
+    overview: 概要
+    community: ユーザーと交流
+    content: 内容
+    appearance: 外観
+    system: システム
+    others: その他
+    plugins-heading: プラグイン設定
+    to-front: ユーザーページへ
+  dashboard:
+    quick: よく使う機能
+    last-days: 直近 31 日
+    quick-desc-users: アカウント / メール / スコア / 権限
+    quick-desc-players: 名前 / 所有者 / スキン
+    quick-desc-reports: スキンとコメントの通報
+    quick-desc-comments: 設定 / 審査 / 承認待ち
+    quick-desc-docs: 使い方ページの執筆
+    quick-desc-theme: 壁紙 / 画像元 / フッター / サイドバー
+    quick-desc-plugins: 有効化 / 無効化 / 手動追加
+    quick-desc-options: サイト名 / 登録 /容量制限
+    quick-desc-status: 環境 / 資料庫 / プラグイン
+  comments:
+    title: コメント管理
+    notice: スキンとマントの詳細ページ共用コメント機能の設定です。本体のスイッチを切るとフロント側の表示がすぐ消え、仲介も拒否されます。「審査が必要」を有効にすると、新しいコメントは下の承認待ちリストに入り、承認後に公開されます。本文は出力時に保護され、そのまま表示されます。
+    nav-switch: コメント設定
+    nav-pending: 承認待ち
+    nav-recent: 承認済み
+    pending: 承認待ち
+    recent: 承認済みのコメント
+    latest-20: 直近 20 件
+    count: ":count 件"
+    texture: スキン
+    commenter: 投稿者
+    content: 内容
+    time: 日時
+    actions: 操作
+    approve: 承認
+    delete: 削除
+    no-pending: 承認待ちのコメントはありません
+    no-recent: 承認済みのコメントはまだありません
+    confirm-delete: このコメントを削除しますか？元に戻せません。
+    deleted: 削除しました
+    not-pending: このコメントは承認待ちではありません
+    failed: 操作に失敗しました
+    network-error: 通信エラー
+  reports:
+    title: 通報管理
+    notice: スキンの通報とコメントの通報は同じ通報システムを共有し、下の 2 つのタブで分けて処理します。スキンの通報で「削除」すると通報対象のスキンを削除し、コメントの通報で「削除」するとコメント本文だけを削除します（通報記録は残ります）。
+    tab-texture: スキンの通報
+    tab-comment: コメントの通報
+    pending-texture: スキンの通報 · 未処理
+    pending-comment: コメントの通報 · 未処理
+    resolved: 処理済み
+    recent-20: 直近 20 件
+    texture: 通報されたスキン
+    uploader: 投稿者
+    reporter: 通報者
+    reason: 理由
+    time: 日時
+    actions: 操作
+    status: 状態
+    comment: 通報されたコメント
+    comment-author: コメントの投稿者
+    texture-page: 対象スキン
+    delete-texture: スキンを削除
+    ban: 投稿者を停止
+    reject: 却下
+    delete-comment: コメントを削除
+    badge-resolved: 処理済み
+    badge-rejected: 却下済み
+    texture-deleted: （スキンは削除済み）
+    comment-deleted: （コメントは削除済み）
+    user-deleted: 退会済み
+    no-pending-texture: 未処理のスキン通報はありません
+    no-pending-comment: 未処理のコメント通報はありません
+    no-records: 記録はありません
+    count: ":count 件"
+    confirm-delete-texture: このスキンを削除しますか？全ユーザーのクローゼットからも取り除かれ、元に戻せません！
+    confirm-ban: このスキンの投稿者を停止しますか？
+    confirm-delete-comment: このコメントを削除しますか？元に戻せません（通報記録は残ります）。
+    confirm-reject: この通報を却下しますか？
+    confirm-default: この操作を実行しますか？
+    failed: 操作に失敗しました
+    network-error: 通信エラー
+  docs:
+    title: 使い方ページ管理
+    create: 新規作成
+    edit-title: "編集：:title"
+    notice: 使い方ページ（/docs）の管理です。記事は Markdown で書き、保存するとすぐ公開側に反映されます。「公開」に印を付けるとユーザーに見え、未公開の記事は管理者だけがページで確認できます。
+    list: 記事一覧
+    count: ":count 件"
+    col-id: ID
+    col-title: 題名
+    col-sort: 並び順
+    col-status: 状態
+    col-updated: 更新日時
+    col-actions: 操作
+    edit: 編集
+    delete: 削除
+    published: 公開中
+    unpublished: 非公開
+    empty: まだ記事がありません。右上の「新規作成」から最初の一枚を書きましょう
+    back: 一覧に戻る
+    title-label: 題名（100 字以内）
+    slug-label: slug（URL の一部。半角小文字・数字・ハイフンのみ）
+    slug-placeholder: "例：getting-started"
+    sort-label: 並び順（小さいほど前）
+    publish: 公開
+    publish-hint: 印を付けるとユーザーに公開
+    content-label: 本文（Markdown。表やコードブロック対応、HTML は自動保護されます）
+    content-placeholder: "# 題名\n本文…"
+    save: 変更を保存
+    create-submit: 作成
+    preview: 表示を確認
+    preview-refresh: 確認を更新
+    preview-empty: まず本文を書いてから確認してください
+    preview-rendering: 生成中…
+    preview-failed: 生成に失敗しました
+    network-error: 通信エラー
+    confirm-delete: この記事を削除しますか？公開側からすぐ消え、元に戻せません。
+    failed: 操作に失敗しました
+    created: 記事を作成しました
+    updated: 記事を更新しました
+    deleted: 削除しました
+    slug-taken: その slug は他の記事で使われています
+  theme:
+    notice: 「暖桜白」テーマ専用の設定です。テーマ本体は public/theme/ のソース資産で、保存後にページを再読み込みするとすぐ反映されます。
+    sidebar-editor: サイドバー編集
+    sidebar-help: ☰ を動かして並べ替え（大項目と子項目は階層をまたいで移動できます。行の中央へ置くと子項目に、端へ置くと同じ階層に挿入）。「高度な機能」の ‹ で子項目を開閉。「隠す」に印を付けると公開側で折りたたまれます（編集画面では灰色で残り、印を外せば復元）。自作リンクは削除可能。保存後は公開側を再読み込みしてください。
+    add-link: 自作リンクを追加：
+    title-placeholder: 表示名
+    link-placeholder: リンク（https:// またはサイト内パス）
+    icon-placeholder: アイコン fa-xxx
+    add: 追加
+    save: サイドバーを保存
+    drag: 動かして並べ替え
+    toggle: 子項目を開閉
+    rename: 表示名（空欄なら既定の名前）
+    add-child: "＋子項目"
+    add-child-title: 自作の子リンクを追加（ない場合は作成されます）
+    delete: 削除
+    delete-title: この自作項目を削除
+    hide: 隠す
+    new-link: 新しいリンク
+    unnamed: 無題
+    saving: 保存中…
+    saved-reload: 保存しました。再読み込みします…
+    save-failed: 保存に失敗しました
+    network-error: 通信エラー
+  status:
+    no-plugins: 有効なプラグインはありません
+  forms:
+    theme-wallpaper-title: 壁紙と柔光
+    theme-wallpaper-enabled: 壁紙の表示
+    theme-wallpaper-enabled-desc: 切るとログイン後のページは桜色の背景だけになります
+    theme-dim: 柔光の濃さ
+    theme-dim-light: 薄め（壁紙が透けやすい）
+    theme-dim-medium: 中（推奨）
+    theme-dim-heavy: 濃いめ（文字が読みやすい）
+    theme-dim-desc: 濃いほど壁紙が薄まり、文字がくっきりします
+    theme-sources: 壁紙の画像元（1 行に 1 つ）
+    theme-sources-desc: 無作為に選び、使えない画像元は自動で外します。すべて失敗すると桜色の背景に戻ります
+    theme-sources-mobile: 壁紙の画像元（携帯）
+    theme-sources-mobile-desc: 携帯の幅（≤767px）で使う画像元。1 行に 1 つ。空欄なら PC と同じ画像元を使い、携帯の壁紙交換は mobile 印付きでここの設定を使います
+    theme-effects-title: 桜吹雪
+    theme-petals: 桜の花びら
+    theme-petals-desc: 切るとホームとログイン画面に花びらは舞いません
+    theme-footer-title: フッター
+    theme-footer-text: 著作権表記
+    theme-footer-text-desc: "{year} は今年（年越しで自動更新）、{site_name} はサイト名、{site_url} はサイトのアドレスに置き換わります"
+    theme-icp: ICP 番号
+    theme-icp-desc: "例：京ICP备2026000000号-1。空欄なら非表示、表示時は工信部の備案サイトへ自動リンクします"
+    comment-settings-title: コメント設定
+    comment-enabled: コメントを有効にする
+    comment-enabled-desc: 切ると詳細ページにコメント欄が表示されなくなり、仲介も拒否します
+    comment-moderation: 投稿に審査を必要とする
+    comment-moderation-desc: 有効にすると新しいコメントと返信はまず承認待ちに入り、承認後に公開されます。投稿者本人には詳細ページに「審査中」の印が見えます
+  sidebar:
+    updated: サイドバーを更新しました
+    invalid: 無効なデータです

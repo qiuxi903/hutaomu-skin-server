@@ -15,7 +15,7 @@
             <td class="text-right ap-muted"><code>v{{ plugin.version }}</code></td>
           </tr>
         {% else %}
-          <tr><td class="ap-muted">未启用任何插件</td></tr>
+          <tr><td class="ap-muted">{{ trans('admin.panel.status.no-plugins') }}</td></tr>
         {% endfor %}
       </tbody>
     </table>

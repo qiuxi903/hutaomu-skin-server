@@ -125,7 +125,7 @@ class DocsController extends Controller
             ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
             ->exists();
         if ($exists) {
-            abort(422, '该 slug 已被其他文档占用');
+            abort(422, trans('admin.panel.docs.slug-taken'));
         }
 
         return $data;
@@ -143,7 +143,7 @@ class DocsController extends Controller
             'updated_by' => optional(Auth::user())->uid,
         ]);
 
-        return redirect('/admin/docs')->with('message', '文档已创建');
+        return redirect('/admin/docs')->with('message', trans('admin.panel.docs.created'));
     }
 
     public function edit(Request $request, Doc $doc)
@@ -165,14 +165,14 @@ class DocsController extends Controller
             'updated_by' => optional(Auth::user())->uid,
         ]);
 
-        return redirect('/admin/docs')->with('message', '文档已更新');
+        return redirect('/admin/docs')->with('message', trans('admin.panel.docs.updated'));
     }
 
     public function destroy(Doc $doc)
     {
         $doc->delete();
 
-        return response()->json(['code' => 0, 'message' => '已删除']);
+        return response()->json(['code' => 0, 'message' => trans('admin.panel.docs.deleted')]);
     }
 
     /* 编辑器实时预览: 返回渲染后的 HTML(与前台同一转义管线) */

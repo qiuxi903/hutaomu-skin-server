@@ -1,30 +1,37 @@
 {% extends 'admin.layout' %}
 
-{% block title %}评论管理{% endblock %}
+{% block title %}{{ trans('admin.panel.comments.title') }}{% endblock %}
 
 {% block content %}
   <div class="ap-settings">
     <nav class="ap-settings-nav">
       <div class="ap-banner ap-banner-info" style="margin:0 0 10px;">
         <i class="fas fa-info-circle"></i>
-        <span>总开关关闭后前台立即隐藏评论区、接口同时拒绝；开启「需要审核」后新评论先进入待审队列。</span>
+        <span>{{ trans('admin.panel.comments.notice') }}</span>
       </div>
-      <a href="#form-switch">评论开关</a>
-      <a href="#panel-pending">待审队列</a>
-      <a href="#panel-recent">最近已通过</a>
+      <a href="#form-switch">{{ trans('admin.panel.comments.nav-switch') }}</a>
+      <a href="#panel-pending">{{ trans('admin.panel.comments.nav-pending') }}</a>
+      <a href="#panel-recent">{{ trans('admin.panel.comments.nav-recent') }}</a>
     </nav>
     <div class="ap-settings-body">
       {{ form.render()|raw }}
 
       <div class="ap-card ap-card--flush" id="panel-pending">
         <header class="ap-card-head">
-          <h3 class="ap-card-title">待审队列</h3>
-          <span class="badge {{ pending|length ? 'badge-warning' : 'badge-secondary' }}">{{ pending|length }} 条</span>
+          <h3 class="ap-card-title">{{ trans('admin.panel.comments.pending') }}</h3>
+          <span class="badge {{ pending|length ? 'badge-warning' : 'badge-secondary' }}">{{ trans('admin.panel.comments.count', {'count': pending|length}) }}</span>
         </header>
         <div class="ap-card-body">
           <table class="table table-striped ht-adm-table">
             <thead>
-              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th class="text-right">操作</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>{{ trans('admin.panel.comments.texture') }}</th>
+                <th>{{ trans('admin.panel.comments.commenter') }}</th>
+                <th>{{ trans('admin.panel.comments.content') }}</th>
+                <th>{{ trans('admin.panel.comments.time') }}</th>
+                <th class="text-right">{{ trans('admin.panel.comments.actions') }}</th>
+              </tr>
             </thead>
             <tbody>
               {% for c in pending %}
@@ -35,12 +42,12 @@
                   <td class="ht-adm-content" title="{{ c['time_full'] }}">{{ c['content'] }}</td>
                   <td class="text-nowrap ap-muted">{{ c['time_text'] }}</td>
                   <td class="text-nowrap text-right">
-                    <button type="button" class="btn btn-xs btn-success ht-adm-approve" data-id="{{ c['id'] }}">通过</button>
-                    <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">删除</button>
+                    <button type="button" class="btn btn-xs btn-success ht-adm-approve" data-id="{{ c['id'] }}">{{ trans('admin.panel.comments.approve') }}</button>
+                    <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">{{ trans('admin.panel.comments.delete') }}</button>
                   </td>
                 </tr>
               {% else %}
-                <tr><td colspan="6" class="text-center text-muted py-3">没有待审评论</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-3">{{ trans('admin.panel.comments.no-pending') }}</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -49,13 +56,20 @@
 
       <div class="ap-card ap-card--flush" id="panel-recent">
         <header class="ap-card-head">
-          <h3 class="ap-card-title">最近已通过的评论</h3>
-          <span class="ap-muted" style="font-size:12px;">最新 20 条</span>
+          <h3 class="ap-card-title">{{ trans('admin.panel.comments.recent') }}</h3>
+          <span class="ap-muted" style="font-size:12px;">{{ trans('admin.panel.comments.latest-20') }}</span>
         </header>
         <div class="ap-card-body">
           <table class="table table-striped ht-adm-table">
             <thead>
-              <tr><th>ID</th><th>材质</th><th>评论人</th><th>内容</th><th>时间</th><th class="text-right">操作</th></tr>
+              <tr>
+                <th>ID</th>
+                <th>{{ trans('admin.panel.comments.texture') }}</th>
+                <th>{{ trans('admin.panel.comments.commenter') }}</th>
+                <th>{{ trans('admin.panel.comments.content') }}</th>
+                <th>{{ trans('admin.panel.comments.time') }}</th>
+                <th class="text-right">{{ trans('admin.panel.comments.actions') }}</th>
+              </tr>
             </thead>
             <tbody>
               {% for c in recent %}
@@ -66,11 +80,11 @@
                   <td class="ht-adm-content" title="{{ c['time_full'] }}">{{ c['content'] }}</td>
                   <td class="text-nowrap ap-muted">{{ c['time_text'] }}</td>
                   <td class="text-nowrap text-right">
-                    <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">删除</button>
+                    <button type="button" class="btn btn-xs btn-outline-danger ht-adm-del" data-id="{{ c['id'] }}">{{ trans('admin.panel.comments.delete') }}</button>
                   </td>
                 </tr>
               {% else %}
-                <tr><td colspan="6" class="text-center text-muted py-3">还没有已通过的评论</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-3">{{ trans('admin.panel.comments.no-recent') }}</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -82,6 +96,11 @@
   <script>
     (function () {
       var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
+      var t = {
+        confirmDelete: {{ trans('admin.panel.comments.confirm-delete')|json_encode|raw }},
+        failed: {{ trans('admin.panel.comments.failed')|json_encode|raw }},
+        networkError: {{ trans('admin.panel.comments.network-error')|json_encode|raw }},
+      };
       function act(id, action) {
         var opt = action === 'approve'
           ? { method: 'POST', url: {{ url('admin/comments') | json_encode | raw }} + '/' + id + '/approve' }
@@ -92,13 +111,13 @@
           headers: { 'X-CSRF-TOKEN': token, 'Accept': 'application/json' },
         }).then(function (r) { return r.json(); }).then(function (d) {
           if (d.code === 0) { location.reload(); }
-          else { window.alert(d.message || '操作失败'); }
-        }).catch(function () { window.alert('网络错误'); });
+          else { window.alert(d.message || t.failed); }
+        }).catch(function () { window.alert(t.networkError); });
       }
       document.addEventListener('click', function (e) {
         var btn = e.target && e.target.closest ? e.target.closest('.ht-adm-approve, .ht-adm-del') : null;
         if (!btn) return;
-        if (btn.classList.contains('ht-adm-del') && !window.confirm('确定删除这条评论？删除后不可恢复。')) return;
+        if (btn.classList.contains('ht-adm-del') && !window.confirm(t.confirmDelete)) return;
         btn.disabled = true;
         act(btn.dataset.id, btn.classList.contains('ht-adm-approve') ? 'approve' : 'del');
       });

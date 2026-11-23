@@ -24,7 +24,7 @@
           <span class="ap-brand-mark"><i class="fas fa-seedling"></i></span>
           <span class="ap-brand-text">
             <span class="ap-brand-name">{{ site_name }}</span>
-            <span class="ap-brand-sub">管理后台</span>
+            <span class="ap-brand-sub">{{ trans('admin.panel.brand') }}</span>
           </span>
         </a>
 
@@ -37,7 +37,7 @@
             {{ include('shared.languages') }}
             {{ include('shared.user-menu') }}
           </ul>
-          <button type="button" class="ap-iconbtn ap-burger" id="ap-drawer-toggle" aria-label="打开菜单">
+          <button type="button" class="ap-iconbtn ap-burger" id="ap-drawer-toggle" aria-label="{{ trans('admin.panel.open-menu') }}">
             <i class="fas fa-bars"></i>
           </button>
         </div>
@@ -46,8 +46,8 @@
 
     <div class="ap-drawer" id="ap-drawer" aria-hidden="true">
       <div class="ap-drawer-head">
-        <span class="ap-drawer-title">{{ site_name }} · 管理后台</span>
-        <button type="button" class="ap-iconbtn" id="ap-drawer-close" aria-label="关闭">
+        <span class="ap-drawer-title">{{ site_name }} · {{ trans('admin.panel.brand') }}</span>
+        <button type="button" class="ap-iconbtn" id="ap-drawer-close" aria-label="{{ trans('admin.panel.close-menu') }}">
           <i class="fas fa-times"></i>
         </button>
       </div>

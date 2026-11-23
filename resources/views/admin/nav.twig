@@ -6,11 +6,11 @@
    mode='drawer' 移动端：全屏抽屉内的完整分组列表 #}
 
 {% set sections = [
-    {label: '概览',       links: ['admin', 'admin/status', 'admin/update']},
-    {label: '用户与社区', links: ['admin/users', 'admin/players', 'admin/reports', 'admin/comments']},
-    {label: '内容',       links: ['admin/docs', 'admin/i18n']},
-    {label: '外观',       links: ['admin/theme']},
-    {label: '系统',       links: ['admin/options', 'admin/score', 'admin/resource', 'admin/plugins/manage', 'admin/plugins/market', '__plugin_configs__']},
+    {label: trans('admin.panel.nav.overview'),    links: ['admin', 'admin/status', 'admin/update']},
+    {label: trans('admin.panel.nav.community'),   links: ['admin/users', 'admin/players', 'admin/reports', 'admin/comments']},
+    {label: trans('admin.panel.nav.content'),     links: ['admin/docs', 'admin/i18n']},
+    {label: trans('admin.panel.nav.appearance'),  links: ['admin/theme']},
+    {label: trans('admin.panel.nav.system'),      links: ['admin/options', 'admin/score', 'admin/resource', 'admin/plugins/manage', 'admin/plugins/market', '__plugin_configs__']},
 ] %}
 
 {% set claimed = [] %}
@@ -51,7 +51,7 @@
   {% endif %}
 {% endfor %}
 {% if others|length %}
-  {% set groups = groups|merge([{label: '其他', items: others, plugins: none, current: others|filter(i => i.active)|length > 0}]) %}
+  {% set groups = groups|merge([{label: trans('admin.panel.nav.others'), items: others, plugins: none, current: others|filter(i => i.active)|length > 0}]) %}
 {% endif %}
 
 {% if mode == 'bar' %}
@@ -71,7 +71,7 @@
           {% endfor %}
           {% if group.plugins %}
             <div class="ap-dd-divider"></div>
-            <div class="ap-dd-heading">插件配置</div>
+            <div class="ap-dd-heading">{{ trans('admin.panel.nav.plugins-heading') }}</div>
             {% for child in group.plugins.children %}
               <a class="ap-dd-link {{ child.active ? 'is-active' }}" href="{{ url(child.link) }}">
                 <i class="ap-dd-icon fas fa-cog"></i>
@@ -105,9 +105,9 @@
       </div>
     {% endfor %}
     <div class="ap-drawer-group">
-      <div class="ap-drawer-heading">前往前台</div>
-      <a class="ap-drawer-link" href="{{ url('user') }}"><i class="ap-dd-icon fas fa-user"></i><span>用户中心</span></a>
-      <a class="ap-drawer-link" href="{{ url('skinlib') }}"><i class="ap-dd-icon fas fa-archive"></i><span>皮肤库</span></a>
+      <div class="ap-drawer-heading">{{ trans('admin.panel.nav.to-front') }}</div>
+      <a class="ap-drawer-link" href="{{ url('user') }}"><i class="ap-dd-icon fas fa-user"></i><span>{{ trans('general.user-center') }}</span></a>
+      <a class="ap-drawer-link" href="{{ url('skinlib') }}"><i class="ap-dd-icon fas fa-archive"></i><span>{{ trans('general.skinlib') }}</span></a>
     </div>
   </div>
 {% endif %}

@@ -245,19 +245,20 @@ class CommentController extends Controller
 
         $comment->delete();
 
-        return response()->json(['code' => 0, 'message' => '已删除']);
+        return response()->json(['code' => 0, 'message' => trans('admin.panel.comments.deleted')]);
     }
 
     /* ---------- 管理后台 ---------- */
 
     public function adminPage()
     {
-        $settings = Option::form('commentSettings', '评论区设置', function ($form) {
-            $form->checkbox('comment_enabled', '启用评论区')
-                ->description('关闭后详情页不再显示评论区，评论接口同时拒绝访问');
+        /* 文案走 admin.panel.forms 翻译组(四语言) */
+        $settings = Option::form('commentSettings', trans('admin.panel.forms.comment-settings-title'), function ($form) {
+            $form->checkbox('comment_enabled', trans('admin.panel.forms.comment-enabled'))
+                ->description(trans('admin.panel.forms.comment-enabled-desc'));
 
-            $form->checkbox('comment_moderation', '发表评论需要审核')
-                ->description('开启后新评论与回复先进入待审队列，审核通过才会公开；作者自己能在详情页看到「审核中」标记');
+            $form->checkbox('comment_moderation', trans('admin.panel.forms.comment-moderation'))
+                ->description(trans('admin.panel.forms.comment-moderation-desc'));
         })->handle();
 
         $nameMap = [];
@@ -285,7 +286,7 @@ class CommentController extends Controller
     public function approve(Request $request, Comment $comment)
     {
         if ($comment->status !== Comment::STATUS_PENDING) {
-            return response()->json(['code' => 1, 'message' => '该评论不在待审状态'], 422);
+            return response()->json(['code' => 1, 'message' => trans('admin.panel.comments.not-pending')], 422);
         }
 
         $comment->update(['status' => Comment::STATUS_APPROVED]);
