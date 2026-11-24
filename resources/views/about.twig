@@ -59,6 +59,13 @@
                     全站「暖樱白」樱花粉玻璃拟态主题、主题设置面板、服务端多源随机壁纸、
                     侧边栏可视化自定义、PJAX 无缝导航等（详见下方改动清单）。
                   </p>
+                  <p class="mb-2">
+                    <i class="fas fa-globe mr-1"></i>站点地址：
+                    <a href="https://skin.hutaomu.cn" target="_blank" rel="noopener">skin.hutaomu.cn</a>
+                    <span class="text-muted">（主站
+                      <a href="https://hutaomu.cn" target="_blank" rel="noopener">hutaomu.cn</a>）
+                    </span>
+                  </p>
                   <p class="mb-0">
                     <i class="fab fa-github mr-1"></i>本站项目开源仓库：
                     <a href="https://github.com/qiuxi903/hutaomu-skin-server"
@@ -100,7 +107,33 @@
                   >接入教程</a>
                   <p class="text-muted small mb-0 mt-2">
                     支持拖入 authlib-injector 系启动器（HMCL、PCL2 等）快速添加认证服务器；
-                    其他启动器可手动填写上方 API 地址。
+                    其他启动器可手动填写上方 API 地址——也可以直接填
+                    <code>{{ url('/') }}</code>（站点根地址），两种写法等效。
+                  </p>
+                </div>
+              </div>
+
+              <div class="card card-success card-outline">
+                <div class="card-header">
+                  <h3 class="card-title"><i class="fas fa-book mr-1"></i>使用文档</h3>
+                </div>
+                <div class="card-body">
+                  <p class="mb-2">
+                    站内配有使用文档（由管理面板「文档管理」撰写维护，Markdown 书写、保存即生效），
+                    覆盖从注册登录、上传皮肤到启动器外置登录的完整指引：
+                  </p>
+                  <ul class="mb-2 pl-3">
+                    <li>
+                      <a href="{{ url('docs') }}" target="_blank" rel="noopener">文档目录（/docs）</a>
+                      —— 全部文档的索引页
+                    </li>
+                    <li>
+                      <a href="{{ url('docs/getting-started') }}" target="_blank" rel="noopener">快速上手</a>
+                      —— 注册 / 上传皮肤 / 外置登录接入，三步走
+                    </li>
+                  </ul>
+                  <p class="text-muted small mb-0">
+                    遇到问题先翻文档；文档没覆盖的问题欢迎在注册后通过站内通知或评论区反馈。
                   </p>
                 </div>
               </div>
