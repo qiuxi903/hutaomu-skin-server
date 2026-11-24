@@ -38,6 +38,18 @@
 
       <div class="content-wrapper">
         <div class="container" id="about-page">
+          <style>
+            /* 双列等高：两列各自撑满行高，卡内 body 自适应填充——
+               左右列卡片高度不同导致的裸空档消除 */
+            #about-page .row { display: flex; flex-wrap: wrap; }
+            #about-page .row > [class*='col-'] { display: flex; flex-direction: column; }
+            #about-page .row > [class*='col-'] > .card {
+              display: flex;
+              flex-direction: column;
+              flex: 1 1 auto;
+            }
+            #about-page .row > [class*='col-'] > .card > .card-body { flex: 1 1 auto; }
+          </style>
           <div class="content-header">
             <h1><i class="fas fa-info-circle"></i> {{ trans('general.about') }}</h1>
           </div>
@@ -84,6 +96,10 @@
                     <li><i class="fab fa-github mr-1"></i>GitHub：<a href="https://github.com/qiuxi903" target="_blank" rel="noopener">github.com/qiuxi903</a></li>
                     <li><i class="fab fa-bilibili mr-1"></i>B 站：<a href="https://space.bilibili.com/1563899799" target="_blank" rel="noopener">@邱息</a></li>
                   </ul>
+                  <p class="text-muted small mb-2">
+                    最近在追：玉子市场 · 银魂 · 魔法少女小圆 · 紫罗兰永恒花园 · 间谍过家家
+                    （更多日常在博客的「追番」板块）。
+                  </p>
                   <p class="text-muted small mb-0">皮肤站相关问题：评论区 / 站内通知都能找到我。</p>
                 </div>
               </div>
