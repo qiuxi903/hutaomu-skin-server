@@ -20,7 +20,7 @@
   <body class="ap-body {{ dark_mode ? 'dark-mode' : '' }}">
     <header class="ap-topbar">
       <div class="ap-topbar-inner">
-        <a class="ap-brand" href="{{ url('admin') }}" title="管理后台首页">
+        <a class="ap-brand" href="{{ url('admin') }}" title="{{ trans('admin.panel.brand') }}">
           <span class="ap-brand-mark"><i class="fas fa-seedling"></i></span>
           <span class="ap-brand-text">
             <span class="ap-brand-name">{{ site_name }}</span>

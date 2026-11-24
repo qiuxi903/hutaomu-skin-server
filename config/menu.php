@@ -30,10 +30,10 @@ $menu['admin'] = [
     ['title' => 'general.user-manage',    'link' => 'admin/users',          'icon' => 'fa-users'],
     ['title' => 'general.player-manage',  'link' => 'admin/players',        'icon' => 'fa-gamepad'],
     ['title' => 'general.report-manage',  'link' => 'admin/reports',        'icon' => 'fa-flag'],
-    // 材质评论区管理(总开关/审核开关/待审队列); 标题为中文原文, trans() 缺键时原样返回
-    ['title' => '评论管理',               'link' => 'admin/comments',       'icon' => 'fa-comments'],
+    // 材质评论区管理(总开关/审核开关/待审队列); 标题用翻译键(四语言)
+    ['title' => 'admin.panel.comments.title', 'link' => 'admin/comments',   'icon' => 'fa-comments'],
     // 站点文档管理(撰写教程/更新文档, Markdown + 预览)
-    ['title' => '文档管理',               'link' => 'admin/docs',           'icon' => 'fa-book-open'],
+    ['title' => 'admin.panel.docs.title',     'link' => 'admin/docs',       'icon' => 'fa-book-open'],
     // 个性化(暖樱白主题专属): 配置壁纸/柔光/樱花, 主题本体是源码资产 public/theme/
     ['title' => 'general.customize',      'link' => 'admin/theme',          'icon' => 'fa-paint-brush'],
     ['title' => 'general.i18n',           'link' => 'admin/i18n',           'icon' => 'fa-globe'],
@@ -48,9 +48,9 @@ $menu['admin'] = [
 ];
 
 $menu['explore'] = [
-    ['title' => 'general.skinlib',         'link' => 'skinlib',              'icon' => 'fa-archive'],
+    ['title' => 'general.skinlib',  'link' => 'skinlib', 'icon' => 'fa-archive'],
     // 站点使用文档(/docs): 公开读已发布, 管理员后台撰写
-    ['title' => '使用文档',                'link' => 'docs',                 'icon' => 'fa-book'],
+    ['title' => 'general.docs',     'link' => 'docs',    'icon' => 'fa-book'],
 ];
 
 return $menu;

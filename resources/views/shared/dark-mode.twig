@@ -1,36 +1,36 @@
 {% if auth_check() %}
   <li class="nav-item" id="theme-switcher">
-    <a class="nav-link" href="#" role="button" id="ts-trigger" title="主题设置" aria-haspopup="true" aria-expanded="false">
+    <a class="nav-link" href="#" role="button" id="ts-trigger" title="{{ trans('front-end.ht.sw-title') }}" aria-haspopup="true" aria-expanded="false">
       <i class="fas fa-palette"></i>
     </a>
     <div class="ts-panel" id="ts-panel" aria-hidden="true">
       <div class="ts-panel-header">
-        <span class="ts-panel-title">主题设置</span>
-        <button class="ts-panel-close" id="ts-close" type="button" aria-label="关闭">✕</button>
+        <span class="ts-panel-title">{{ trans('front-end.ht.sw-title') }}</span>
+        <button class="ts-panel-close" id="ts-close" type="button" aria-label="{{ trans('front-end.ht.sw-close') }}">✕</button>
       </div>
       <div class="ts-panel-content">
-        <div class="ts-section-title">外观</div>
+        <div class="ts-section-title">{{ trans('front-end.ht.sw-appearance') }}</div>
         <div class="ts-modes">
           <button class="ts-btn ts-mode-btn" data-mode="light" type="button">
             <svg class="ts-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            亮色 · 暖樱白
+            {{ trans('front-end.ht.sw-mode-light') }}
           </button>
           <button class="ts-btn ts-mode-btn" data-mode="dark" type="button">
             <svg class="ts-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            暗色 · 暗夜樱
+            {{ trans('front-end.ht.sw-mode-dark') }}
           </button>
         </div>
 
         <div class="ts-row">
-          <span class="ts-label">纯享展示（只看壁纸）</span>
+          <span class="ts-label">{{ trans('front-end.ht.sw-showcase') }}</span>
           <button class="ts-switch" id="ts-showcase-toggle" type="button" role="switch" aria-checked="false">
             <span class="ts-thumb"></span>
           </button>
         </div>
 
-        <div class="ts-section-title">二次元主题</div>
+        <div class="ts-section-title">{{ trans('front-end.ht.sw-acg') }}</div>
         <div class="ts-row">
-          <span class="ts-label">随机壁纸 + 樱花</span>
+          <span class="ts-label">{{ trans('front-end.ht.sw-acg-desc') }}</span>
           <button class="ts-switch" id="ts-ac-toggle" type="button" role="switch" aria-checked="true">
             <span class="ts-thumb"></span>
           </button>
@@ -38,35 +38,35 @@
         <div class="ts-actions">
           <button class="ts-btn" id="ts-refresh" type="button">
             <svg class="ts-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            换一张
+            {{ trans('front-end.ht.sw-refresh') }}
           </button>
           <button class="ts-btn" id="ts-fav-current" type="button">
             <svg class="ts-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            收藏当前
+            {{ trans('front-end.ht.sw-fav') }}
           </button>
           <a class="ts-btn" id="ts-download" type="button">
             <svg class="ts-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            下载壁纸
+            {{ trans('front-end.ht.sw-download') }}
           </a>
         </div>
         <div class="ts-row">
-          <span class="ts-label">自动切换</span>
+          <span class="ts-label">{{ trans('front-end.ht.sw-auto') }}</span>
           <button class="ts-switch" id="ts-auto-toggle" type="button" role="switch" aria-checked="true">
             <span class="ts-thumb"></span>
           </button>
         </div>
         <div class="ts-intervals">
-          <button class="ts-btn ts-iv" data-min="5" type="button">5 分</button>
-          <button class="ts-btn ts-iv" data-min="15" type="button">15 分</button>
-          <button class="ts-btn ts-iv" data-min="30" type="button">30 分</button>
-          <button class="ts-btn ts-iv" data-min="60" type="button">60 分</button>
+          <button class="ts-btn ts-iv" data-min="5" type="button">{{ trans('front-end.ht.sw-iv-5') }}</button>
+          <button class="ts-btn ts-iv" data-min="15" type="button">{{ trans('front-end.ht.sw-iv-15') }}</button>
+          <button class="ts-btn ts-iv" data-min="30" type="button">{{ trans('front-end.ht.sw-iv-30') }}</button>
+          <button class="ts-btn ts-iv" data-min="60" type="button">{{ trans('front-end.ht.sw-iv-60') }}</button>
         </div>
 
-        <div class="ts-section-title">我的收藏 (<span id="ts-fav-count">0</span>/9)</div>
+        <div class="ts-section-title">{{ trans('front-end.ht.sw-favs') }} (<span id="ts-fav-count">0</span>/9)</div>
         <div class="ts-favs" id="ts-favs"></div>
-        <div class="ts-empty" id="ts-fav-empty">暂无收藏</div>
+        <div class="ts-empty" id="ts-fav-empty">{{ trans('front-end.ht.sw-no-favs') }}</div>
 
-        <div class="ts-panel-footer">壁纸由 LoliAPI / Paugram 等公共图源提供</div>
+        <div class="ts-panel-footer">{{ trans('front-end.ht.sw-credits') }}</div>
       </div>
     </div>
   </li>

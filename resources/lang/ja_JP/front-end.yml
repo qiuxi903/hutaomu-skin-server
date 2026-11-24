@@ -272,3 +272,84 @@ vendor:
     search: 検索
     prev: 前
     next: 次
+
+
+# 暖桜白テーマ拡張 UI（パレット / 携帯下部バー / コメント / 使い方ページ）、hutaomu-theme.js と関連ビューで使用
+ht:
+  tab-home: ホーム
+  tab-skinlib: スキン
+  tab-closet: クローゼット
+  tab-me: マイページ
+  tab-about: 概要
+  tab-login: ログイン
+  sw-title: テーマ設定
+  sw-close: 閉じる
+  sw-appearance: 外観
+  sw-mode-light: ライト · 暖桜白
+  sw-mode-dark: ダーク · 暗夜桜
+  sw-showcase: 壁紙だけの鑑賞モード
+  sw-acg: アニメ壁紙テーマ
+  sw-acg-desc: ランダム壁紙 + 桜
+  sw-refresh: 別の壁紙
+  sw-fav: 現在を保存
+  sw-download: 壁紙をダウンロード
+  sw-auto: 自動切替
+  sw-iv-5: 5 分
+  sw-iv-15: 15 分
+  sw-iv-30: 30 分
+  sw-iv-60: 60 分
+  sw-favs: お気に入り
+  sw-no-favs: まだありません
+  sw-credits: 壁紙は LoliAPI / Paugram などの公共画像源から
+  sources-down: "画像元がどれも使えません。後ほどお試しください"
+  click-apply: クリックで適用
+  delete: 削除
+  fav-not-ready: 壁紙がまだ準備できていません。後ほど保存してください
+  fav-failed: 保存に失敗しました
+  fav-dup: すでにお気に入りです
+  fav-done: 現在の壁紙を保存しました
+  net-error: 通信エラーです。後ほどお試しください
+  net-err: 通信エラー
+  confirm-privacy: "このスキンを「:type」に変更しますか？サイトの規則に応じてスコアが増減します。"
+  privacy-public: 公開
+  privacy-private: 非公開
+  failed: 操作に失敗しました
+  confirm-logout: ログアウトしますか？
+  desc-public: 公開 · 全員に見えます
+  desc-private-owner: 非公開 · 自分だけに見えます
+  desc-private-admin: "非公開 · 投稿者と管理人だけに見えます"
+  set-public: 公開にする
+  set-private: 非公開にする
+  c-title: コメント
+  c-pending: 審査中
+  c-approve: 承認
+  c-delete: 削除
+  c-reply: 返信
+  c-report: 通報
+  c-empty: まだコメントはありません。最初の一枚を書きましょう
+  c-more: もっと読む
+  c-placeholder: "コメントを書く…（500 字以内）"
+  c-submit: コメントを書き込む
+  c-reply-prefix: "返信 @"
+  c-reply-ph: "返信を書く…（500 字以内）"
+  c-cancel: キャンセル
+  c-empty-reply: まず本文を書いてから返信してください
+  c-report-empty: 通報の理由を書いてください
+  c-report-done: 通報しました
+  c-report-failed: 通報に失敗しました
+  c-report-title: コメントを通報
+  c-report-ph: "理由を書いてください（管理画面の「通報管理 · コメントの通報」で処理されます）"
+  c-report-prompt: "通報の理由を書いてください："
+  c-confirm-del-thread: このコメントを削除しますか？下の返信も一緒に削除されます。
+  c-confirm-del-reply: この返信を削除しますか？
+  c-approved: 承認済み
+  c-posted: 書き込みました
+  c-post-pending: 送信しました。審査待ちです
+  c-empty-comment: まず本文を書いてから書き込んでください
+  c-too-long: コメントは 500 字以内です
+  c-load-fail: 読み込みに失敗しました
+  d-toc: 目次
+  d-unpublished: 非公開
+  d-unpublished-notice: この記事はまだ非公開で、管理人だけが見えます。管理画面の「使い方ページ管理」で公開に印を付けると公開されます。
+  d-empty: "記事は準備中です。もうしばらくお待ちください"
+  d-updated: 更新

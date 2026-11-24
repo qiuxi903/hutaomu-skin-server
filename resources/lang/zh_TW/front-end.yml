@@ -271,3 +271,84 @@ vendor:
     search: 搜索
     prev: 上一頁
     next: 下一頁
+
+
+# 暖櫻白主題擴展 UI(調色盤/行動端底欄/留言區/文件頁), 由 hutaomu-theme.js 與相關視圖使用
+ht:
+  tab-home: 首頁
+  tab-skinlib: 皮膚庫
+  tab-closet: 衣櫃
+  tab-me: 我的
+  tab-about: 關於
+  tab-login: 登入
+  sw-title: 主題設定
+  sw-close: 關閉
+  sw-appearance: 外觀
+  sw-mode-light: 亮色 · 暖櫻白
+  sw-mode-dark: 暗色 · 暗夜櫻
+  sw-showcase: 純享展示（只看壁紙）
+  sw-acg: 二次元主題
+  sw-acg-desc: 隨機壁紙 + 櫻花
+  sw-refresh: 換一張
+  sw-fav: 收藏當前
+  sw-download: 下載壁紙
+  sw-auto: 自動切換
+  sw-iv-5: 5 分
+  sw-iv-15: 15 分
+  sw-iv-30: 30 分
+  sw-iv-60: 60 分
+  sw-favs: 我的收藏
+  sw-no-favs: 暫無收藏
+  sw-credits: 壁紙由 LoliAPI / Paugram 等公共圖源提供
+  sources-down: "圖源暫時都掛了，稍後再試"
+  click-apply: 點擊應用
+  delete: 刪除
+  fav-not-ready: 壁紙還沒準備好，稍後再收藏
+  fav-failed: 收藏失敗
+  fav-dup: 這張已經在收藏裡了
+  fav-done: 已收藏當前壁紙
+  net-error: 網路錯誤，稍後再試
+  net-err: 網路錯誤
+  confirm-privacy: "確定將此材質設為「:type」？切換會按站點規則增減積分。"
+  privacy-public: 公開
+  privacy-private: 私密
+  failed: 操作失敗
+  confirm-logout: 確定要登出嗎？
+  desc-public: 公開 · 所有人可見
+  desc-private-owner: 私密 · 僅自己可見
+  desc-private-admin: "私密 · 僅上載者與管理員可見"
+  set-public: 設為公開
+  set-private: 設為私密
+  c-title: 留言
+  c-pending: 審核中
+  c-approve: 通過
+  c-delete: 刪除
+  c-reply: 回覆
+  c-report: 檢舉
+  c-empty: 還沒有留言，來說點什麼吧～
+  c-more: 載入更多
+  c-placeholder: "寫下你的留言…（最多 500 字）"
+  c-submit: 發表留言
+  c-reply-prefix: "回覆 @"
+  c-reply-ph: "回覆…（最多 500 字）"
+  c-cancel: 取消
+  c-empty-reply: 先寫點什麼再回覆吧
+  c-report-empty: 請填寫檢舉理由
+  c-report-done: 檢舉成功
+  c-report-failed: 檢舉失敗
+  c-report-title: 檢舉留言
+  c-report-ph: "請填寫檢舉理由（進入後台「檢舉管理 · 留言檢舉」處理）"
+  c-report-prompt: "請填寫檢舉理由："
+  c-confirm-del-thread: 確定刪除這則留言？其下回覆將一併刪除。
+  c-confirm-del-reply: 確定刪除這則回覆？
+  c-approved: 已通過
+  c-posted: 發表成功
+  c-post-pending: 已提交，等待審核
+  c-empty-comment: 先寫點什麼再發表吧
+  c-too-long: 留言最多 500 字
+  c-load-fail: 載入失敗
+  d-toc: 目錄
+  d-unpublished: 未發布
+  d-unpublished-notice: 這篇文件目前是「未發布」狀態，只有管理員能看到。到後台「文件管理」勾選發布後公開。
+  d-empty: "文件還在編寫中，敬請期待～"
+  d-updated: 更新於

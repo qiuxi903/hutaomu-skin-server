@@ -12,6 +12,8 @@
 (function () {
   try {
     var body = document.body;
+    /* 翻译: app bundle 已把 blessing.t 挂到 window.trans(本脚本在 foot 中晚于其加载); 缺失时回退键名 */
+    var T = typeof window.trans === 'function' ? window.trans : function (k) { return k; };
     if (!body) return;
 
     /* ---------- 本地存储 ---------- */
@@ -303,7 +305,7 @@
         /* 中继失败(全部源挂): 立即恢复按钮并提示, 不留死窗口 */
         wpBusy = false;
         if (btn) btn.classList.remove('busy');
-        if (toast) toast.warning('图源暂时都挂了，稍后再试');
+        if (toast) toast.warning(T('ht.sources-down'));
         setTimeout(prefetchNextWallpaper, 3000);
       });
     }
@@ -388,7 +390,7 @@
         (function (entry) {
           var item = document.createElement('div');
           item.className = 'ts-fav-item';
-          item.title = '点击应用';
+          item.title = T('ht.click-apply');
           var prev = document.createElement('div');
           prev.className = 'ts-fav-preview';
           prev.style.backgroundImage = 'url("' + entry.url + '")';
@@ -396,7 +398,7 @@
           del.className = 'ts-fav-remove';
           del.type = 'button';
           del.textContent = '✕';
-          del.title = '删除';
+          del.title = T('ht.delete');
           del.addEventListener('click', function (e) {
             e.stopPropagation();
             del.disabled = true;
@@ -535,7 +537,7 @@
       floatBtn.id = 'ts-trigger-float';
       floatBtn.className = 'ts-float-trigger';
       floatBtn.type = 'button';
-      floatBtn.title = '主题设置';
+      floatBtn.title = T('ht.sw-title');
       floatBtn.innerHTML = '<i class="fas fa-palette"></i>';
       floatBtn.addEventListener('click', function (e) {
         e.preventDefault();
@@ -584,7 +586,7 @@
         var toast = (window.blessing && blessing.notify && blessing.notify.toast) || null;
         if (!store.bg) {
           /* 开机还没取到任何壁纸: 无可收藏对象 */
-          if (toast) toast.warning('壁纸还没准备好，稍后再收藏');
+          if (toast) toast.warning(T('ht.fav-not-ready'));
           return;
         }
         favBtn.disabled = true;
@@ -597,15 +599,15 @@
         })
           .then(function (r) { return r.json(); })
           .then(function (d) {
-            if (d.code !== 0) { if (toast) toast.warning(d.message || '收藏失败'); return; }
-            if (d.duplicate) { if (toast) toast.info('这张已经在收藏里了'); }
+            if (d.code !== 0) { if (toast) toast.warning(d.message || T('ht.fav-failed')); return; }
+            if (d.duplicate) { if (toast) toast.info(T('ht.fav-dup')); }
             else {
               favsCache.push(d.entry);
               renderFavs();
-              if (toast) toast.success('已收藏当前壁纸');
+              if (toast) toast.success(T('ht.fav-done'));
             }
           })
-          .catch(function () { if (toast) toast.warning('网络错误，稍后再试'); })
+          .catch(function () { if (toast) toast.warning(T('ht.net-error')); })
           .finally(function () { favBtn.disabled = false; });
       });
 
@@ -644,7 +646,7 @@
       var btn = e.target && e.target.closest ? e.target.closest('.sl-privacy-toggle') : null;
       if (!btn || btn.disabled) return;
       var toPublic = btn.dataset.public !== '1';
-      if (!window.confirm('确定将此材质设为「' + (toPublic ? '公开' : '私密') + '」？切换会按站点规则增减积分。')) return;
+      if (!window.confirm(window.trans('ht.confirm-privacy', { type: toPublic ? window.trans('ht.privacy-public') : window.trans('ht.privacy-private') }))) return;
       btn.disabled = true;
       fetch(btn.dataset.base + '/' + btn.dataset.tid + '/privacy', {
         method: 'PUT',
@@ -655,8 +657,8 @@
         },
       }).then(function (r) { return r.json(); }).then(function (d) {
         if (d.code === 0) { location.reload(); }
-        else { window.alert(d.message || '操作失败'); btn.disabled = false; }
-      }).catch(function () { window.alert('网络错误'); btn.disabled = false; });
+        else { window.alert(d.message || T('ht.failed')); btn.disabled = false; }
+      }).catch(function () { window.alert(T('ht.net-err')); btn.disabled = false; });
     });
     document.addEventListener('change', function (e) {
       var sel = e.target && e.target.closest ? e.target.closest('.sl-sort') : null;
@@ -691,11 +693,11 @@
       var notify = window.blessing && blessing.notify;
       if (notify && typeof notify.showModal === 'function') {
         try {
-          notify.showModal({ text: '确定要退出登录吗？', center: true }).then(doLogout, function () { /* 取消 */ });
+          notify.showModal({ text: T('ht.confirm-logout'), center: true }).then(doLogout, function () { /* 取消 */ });
         } catch (err) {
-          if (window.confirm('确定要退出登录吗？')) doLogout();
+          if (window.confirm(T('ht.confirm-logout'))) doLogout();
         }
-      } else if (window.confirm('确定要退出登录吗？')) {
+      } else if (window.confirm(T('ht.confirm-logout'))) {
         doLogout();
       }
     }, true);
@@ -724,15 +726,15 @@
               var badge = document.createElement('span');
               badge.className = 'ht-privacy-badge' + (info.public ? ' pub' : ' pri');
               badge.innerHTML = info.public
-                ? '<i class="fas fa-globe mr-1"></i>公开 · 所有人可见'
-                : '<i class="fas fa-lock mr-1"></i>私密 · 仅' + (isAdmin && !isOwner ? '上传者与管理员' : '自己') + '可见';
+                ? '<i class="fas fa-globe mr-1"></i>' + T('ht.desc-public')
+                : '<i class="fas fa-lock mr-1"></i>' + (isAdmin && !isOwner ? T('ht.desc-private-admin') : T('ht.desc-private-owner'));
               var t = document.createElement('button');
               t.className = 'btn btn-sm ht-privacy-toggle-btn';
               t.type = 'button';
-              t.textContent = info.public ? '设为私密' : '设为公开';
+              t.textContent = info.public ? T('ht.set-private') : T('ht.set-public');
               t.addEventListener('click', function () {
                 var toPublic = !info.public;
-                if (!window.confirm('确定设为「' + (toPublic ? '公开' : '私密') + '」？切换会按站点规则增减积分。')) return;
+                if (!window.confirm(window.trans('ht.confirm-privacy', { type: toPublic ? window.trans('ht.privacy-public') : window.trans('ht.privacy-private') }))) return;
                 t.disabled = true;
                 fetch('/texture/' + tid + '/privacy', {
                   method: 'PUT',
@@ -743,9 +745,9 @@
                   },
                 }).then(function (r) { return r.json(); }).then(function (d) {
                   if (d.code === 0) { info.public = toPublic; draw(); }
-                  else { window.alert(d.message || '操作失败'); }
+                  else { window.alert(d.message || T('ht.failed')); }
                   t.disabled = false;
-                }).catch(function () { window.alert('网络错误'); t.disabled = false; });
+                }).catch(function () { window.alert(T('ht.net-err')); t.disabled = false; });
               });
               box.appendChild(badge);
               box.appendChild(t);
@@ -762,12 +764,12 @@
        追加在 body 上(PJAX 只换 .content-wrapper, 底栏常驻), 高亮随路由更新;
        登录/注册页与纯享展示模式自动隐藏 */
     var htTabTabs = [
-      { match: function (p) { return p === '/'; }, link: '/', icon: 'fa-home', label: '首页', auth: null },
-      { match: function (p) { return p.indexOf('/skinlib') === 0; }, link: '/skinlib', icon: 'fa-archive', label: '皮肤库', auth: null },
-      { match: function (p) { return p.indexOf('/user/closet') === 0; }, link: '/user/closet', icon: 'fa-star', label: '衣柜', auth: true },
-      { match: function (p) { return p.indexOf('/user') === 0; }, link: '/user', icon: 'fa-user', label: '我的', auth: true },
-      { match: function (p) { return p.indexOf('/about') === 0; }, link: '/about', icon: 'fa-info-circle', label: '关于', auth: false },
-      { match: function (p) { return p.indexOf('/auth') === 0; }, link: '/auth/login', icon: 'fa-sign-in-alt', label: '登录', auth: false },
+      { match: function (p) { return p === '/'; }, link: '/', icon: 'fa-home', label: T('ht.tab-home'), auth: null },
+      { match: function (p) { return p.indexOf('/skinlib') === 0; }, link: '/skinlib', icon: 'fa-archive', label: T('ht.tab-skinlib'), auth: null },
+      { match: function (p) { return p.indexOf('/user/closet') === 0; }, link: '/user/closet', icon: 'fa-star', label: T('ht.tab-closet'), auth: true },
+      { match: function (p) { return p.indexOf('/user') === 0; }, link: '/user', icon: 'fa-user', label: T('ht.tab-me'), auth: true },
+      { match: function (p) { return p.indexOf('/about') === 0; }, link: '/about', icon: 'fa-info-circle', label: T('ht.tab-about'), auth: false },
+      { match: function (p) { return p.indexOf('/auth') === 0; }, link: '/auth/login', icon: 'fa-sign-in-alt', label: T('ht.tab-login'), auth: false },
     ];
     function htUpdateTabbar() {
       var bar = document.getElementById('ht-tabbar');
@@ -851,7 +853,7 @@
         if (!has && !empty) {
           var d = document.createElement('div');
           d.className = 'ht-c-empty';
-          d.textContent = '还没有评论，来说点什么吧～';
+          d.textContent = T('ht.c-empty');
           list.appendChild(d);
         }
       }
@@ -869,13 +871,13 @@
           headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
-          .then(function (r) { return r.json().catch(function () { throw new Error('网络错误'); }); })
+          .then(function (r) { return r.json().catch(function () { throw new Error(T('ht.net-err')); }); })
           .then(function (d) {
-            if (d.code !== 0) throw new Error(d.message || '发表失败');
+            if (d.code !== 0) throw new Error(d.message || T('ht.c-post-failed'));
             onOk(d);
-            if (toast) toast.info(d.message || (d.pending ? '已提交，等待审核' : '发表成功'));
+            if (toast) toast.info(d.message || (d.pending ? T('ht.c-post-pending') : T('ht.c-posted')));
           })
-          .catch(function (e2) { if (toast) toast.warning(e2.message || '网络错误'); })
+          .catch(function (e2) { if (toast) toast.warning(e2.message || T('ht.net-err')); })
           .finally(function () { btn.disabled = false; });
       }
       function appendReply(comment) {
@@ -914,13 +916,13 @@
         if (c.reply_name) {
           var rt = document.createElement('span');
           rt.className = 'ht-c-replyto';
-          rt.textContent = '回复 @' + c.reply_name;
+          rt.textContent = T('ht.c-reply-prefix') + c.reply_name;
           meta.appendChild(rt);
         }
         if (c.status === 0) {
           var badge = document.createElement('span');
           badge.className = 'badge badge-warning ht-c-pending-badge';
-          badge.textContent = '审核中';
+          badge.textContent = T('ht.c-pending');
           meta.appendChild(badge);
         }
         var time = document.createElement('span');
@@ -936,10 +938,10 @@
         item.appendChild(main);
         var actions = document.createElement('div');
         actions.className = 'ht-c-actions';
-        if (c.can_approve) actions.appendChild(actionBtn('ht-c-approve', '通过'));
-        if (c.can_delete) actions.appendChild(actionBtn('ht-c-del', '删除'));
-        if (c.can_reply) actions.appendChild(actionBtn('ht-c-reply', '回复'));
-        if (c.can_report) actions.appendChild(actionBtn('ht-c-report', '举报'));
+        if (c.can_approve) actions.appendChild(actionBtn('ht-c-approve', T('ht.c-approve')));
+        if (c.can_delete) actions.appendChild(actionBtn('ht-c-del', T('ht.c-delete')));
+        if (c.can_reply) actions.appendChild(actionBtn('ht-c-reply', T('ht.c-reply')));
+        if (c.can_report) actions.appendChild(actionBtn('ht-c-report', T('ht.c-report')));
         if (actions.children.length) item.appendChild(actions);
         /* 顶层评论预挂回复容器(JS 追加回复时直接用; 空容器 CSS 隐藏) */
         if (!c.parent_id) {
@@ -958,17 +960,17 @@
         ta.className = 'form-control ht-c-input';
         ta.rows = 2;
         ta.maxLength = 500;
-        ta.placeholder = '回复…（最多 500 字）';
+        ta.placeholder = T('ht.c-reply-ph');
         var row = document.createElement('div');
         row.className = 'd-flex justify-content-end align-items-center mt-2';
         var cancel = document.createElement('button');
         cancel.type = 'button';
         cancel.className = 'btn btn-sm btn-outline-secondary mr-2';
-        cancel.textContent = '取消';
+        cancel.textContent = T('ht.c-cancel');
         var submit = document.createElement('button');
         submit.type = 'submit';
         submit.className = 'btn btn-sm btn-primary';
-        submit.textContent = '回复';
+        submit.textContent = T('ht.c-reply');
         row.appendChild(cancel);
         row.appendChild(submit);
         replyForm.appendChild(ta);
@@ -979,7 +981,7 @@
         replyForm.addEventListener('submit', function (e) {
           e.preventDefault();
           var content = ta.value.trim();
-          if (!content) { if (toast) toast.warning('先写点什么再回复吧'); return; }
+          if (!content) { if (toast) toast.warning(T('ht.c-empty-reply')); return; }
           postComment({ content: content, reply_to: targetId }, submit, function (d) {
             replyForm.remove();
             appendReply(d.comment);
@@ -989,7 +991,7 @@
       function reportComment(id) {
         var doReport = function (reason) {
           reason = (reason || '').trim();
-          if (!reason) { if (toast) toast.warning('请填写举报理由'); return; }
+          if (!reason) { if (toast) toast.warning(T('ht.c-report-empty')); return; }
           fetch('/comments/' + id + '/report', {
             method: 'POST', credentials: 'same-origin',
             headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
@@ -997,21 +999,21 @@
           })
             .then(function (r) { return r.json(); })
             .then(function (d) {
-              if (d.code === 0) { if (toast) toast.success(d.message || '举报成功'); }
-              else { if (toast) toast.warning(d.message || '举报失败'); }
+              if (d.code === 0) { if (toast) toast.success(d.message || T('ht.c-report-done')); }
+              else { if (toast) toast.warning(d.message || T('ht.c-report-failed')); }
             })
-            .catch(function () { if (toast) toast.warning('网络错误'); });
+            .catch(function () { if (toast) toast.warning(T('ht.net-err')); });
         };
         var notify = window.blessing && blessing.notify;
         if (notify && typeof notify.showModal === 'function') {
           try {
-            notify.showModal({ mode: 'prompt', title: '举报评论', text: '请填写举报理由（进入后台「举报管理 · 评论举报」处理）' })
+            notify.showModal({ mode: 'prompt', title: T('ht.c-report-title'), text: T('ht.c-report-ph') })
               .then(function (res) { doReport(res && res.value); }, function () { /* 取消 */ });
           } catch (err) {
-            doReport(window.prompt('请填写举报理由：'));
+            doReport(window.prompt(T('ht.c-report-prompt')));
           }
         } else {
-          doReport(window.prompt('请填写举报理由：'));
+          doReport(window.prompt(T('ht.c-report-prompt')));
         }
       }
 
@@ -1026,7 +1028,7 @@
         var id = btn.dataset.id || item.getAttribute('data-id');
         if (btn.classList.contains('ht-c-del')) {
           var isTop = item.parentElement === list;
-          if (!window.confirm(isTop ? '确定删除这条评论？其下回复将一并删除。' : '确定删除这条回复？')) return;
+          if (!window.confirm(isTop ? T('ht.c-confirm-del-thread') : T('ht.c-confirm-del-reply'))) return;
           btn.disabled = true;
           fetch('/comments/' + id, {
             method: 'DELETE', credentials: 'same-origin',
@@ -1039,7 +1041,7 @@
                 if (isTop) setCount(-1); /* 计数只统计顶层评论 */
                 refreshEmpty();
               } else {
-                if (toast) toast.warning(d.message || '操作失败');
+                if (toast) toast.warning(d.message || T('ht.failed'));
                 btn.disabled = false;
               }
             })
@@ -1053,12 +1055,12 @@
             .then(function (r) { return r.json(); })
             .then(function (d) {
               if (d.code === 0) {
-                if (toast) toast.success(d.message || '已通过');
+                if (toast) toast.success(d.message || T('ht.c-approved'));
                 var badge = item.querySelector('.ht-c-pending-badge');
                 if (badge) badge.remove();
                 btn.remove();
               } else {
-                if (toast) toast.warning(d.message || '操作失败');
+                if (toast) toast.warning(d.message || T('ht.failed'));
                 btn.disabled = false;
               }
             })
@@ -1079,13 +1081,13 @@
           })
             .then(function (r) { return r.json(); })
             .then(function (d) {
-              if (d.code !== 0) throw new Error(d.message || '加载失败');
+              if (d.code !== 0) throw new Error(d.message || T('ht.c-load-fail'));
               page += 1;
               d.data.items.forEach(function (c) { list.appendChild(renderComment(c)); });
               refreshEmpty();
               moreBtn.hidden = !d.data.has_more;
             })
-            .catch(function (e) { if (toast) toast.warning(e.message || '网络错误'); })
+            .catch(function (e) { if (toast) toast.warning(e.message || T('ht.net-err')); })
             .finally(function () { moreBtn.disabled = false; });
         });
       }
@@ -1095,8 +1097,8 @@
         form.addEventListener('submit', function (e) {
           e.preventDefault();
           var content = input.value.trim();
-          if (!content) { if (toast) toast.warning('先写点什么再发表吧'); return; }
-          if (content.length > 500) { if (toast) toast.warning('评论最多 500 字'); return; }
+          if (!content) { if (toast) toast.warning(T('ht.c-empty-comment')); return; }
+          if (content.length > 500) { if (toast) toast.warning(T('ht.c-too-long')); return; }
           postComment({ content: content }, submitBtn, function (d) {
             list.insertBefore(renderComment(d.comment), list.firstChild);
             setCount(1);

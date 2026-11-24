@@ -271,3 +271,84 @@ vendor:
     search: 搜索
     prev: 上一页
     next: 下一页
+
+
+# 暖樱白主题扩展 UI(调色盘/移动端底栏/评论区/文档页), 由 hutaomu-theme.js 与相关视图使用
+ht:
+  tab-home: 首页
+  tab-skinlib: 皮肤库
+  tab-closet: 衣柜
+  tab-me: 我的
+  tab-about: 关于
+  tab-login: 登录
+  sw-title: 主题设置
+  sw-close: 关闭
+  sw-appearance: 外观
+  sw-mode-light: 亮色 · 暖樱白
+  sw-mode-dark: 暗色 · 暗夜樱
+  sw-showcase: 纯享展示（只看壁纸）
+  sw-acg: 二次元主题
+  sw-acg-desc: 随机壁纸 + 樱花
+  sw-refresh: 换一张
+  sw-fav: 收藏当前
+  sw-download: 下载壁纸
+  sw-auto: 自动切换
+  sw-iv-5: 5 分
+  sw-iv-15: 15 分
+  sw-iv-30: 30 分
+  sw-iv-60: 60 分
+  sw-favs: 我的收藏
+  sw-no-favs: 暂无收藏
+  sw-credits: 壁纸由 LoliAPI / Paugram 等公共图源提供
+  sources-down: "图源暂时都挂了，稍后再试"
+  click-apply: 点击应用
+  delete: 删除
+  fav-not-ready: 壁纸还没准备好，稍后再收藏
+  fav-failed: 收藏失败
+  fav-dup: 这张已经在收藏里了
+  fav-done: 已收藏当前壁纸
+  net-error: 网络错误，稍后再试
+  net-err: 网络错误
+  confirm-privacy: "确定将此材质设为「:type」？切换会按站点规则增减积分。"
+  privacy-public: 公开
+  privacy-private: 私密
+  failed: 操作失败
+  confirm-logout: 确定要退出登录吗？
+  desc-public: 公开 · 所有人可见
+  desc-private-owner: 私密 · 仅自己可见
+  desc-private-admin: "私密 · 仅上传者与管理员可见"
+  set-public: 设为公开
+  set-private: 设为私密
+  c-title: 评论
+  c-pending: 审核中
+  c-approve: 通过
+  c-delete: 删除
+  c-reply: 回复
+  c-report: 举报
+  c-empty: 还没有评论，来说点什么吧～
+  c-more: 加载更多
+  c-placeholder: "写下你的评论…（最多 500 字）"
+  c-submit: 发表评论
+  c-reply-prefix: "回复 @"
+  c-reply-ph: "回复…（最多 500 字）"
+  c-cancel: 取消
+  c-empty-reply: 先写点什么再回复吧
+  c-report-empty: 请填写举报理由
+  c-report-done: 举报成功
+  c-report-failed: 举报失败
+  c-report-title: 举报评论
+  c-report-ph: "请填写举报理由（进入后台「举报管理 · 评论举报」处理）"
+  c-report-prompt: "请填写举报理由："
+  c-confirm-del-thread: 确定删除这条评论？其下回复将一并删除。
+  c-confirm-del-reply: 确定删除这条回复？
+  c-approved: 已通过
+  c-posted: 发表成功
+  c-post-pending: 已提交，等待审核
+  c-empty-comment: 先写点什么再发表吧
+  c-too-long: 评论最多 500 字
+  c-load-fail: 加载失败
+  d-toc: 目录
+  d-unpublished: 未发布
+  d-unpublished-notice: 这篇文档当前是「未发布」状态，只有管理员能看到。到后台「文档管理」勾选发布后公开。
+  d-empty: "文档还在编写中，敬请期待～"
+  d-updated: 更新于

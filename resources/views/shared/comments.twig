@@ -11,7 +11,7 @@
          data-has-more="{{ comments['has_more'] ? '1' : '0' }}">
       <div class="card-header">
         <h3 class="card-title">
-          <i class="far fa-comments mr-1"></i>评论 <span class="ht-c-count">({{ comments['total'] }})</span>
+          <i class="far fa-comments mr-1"></i>{{ trans('front-end.ht.c-title') }} <span class="ht-c-count">({{ comments['total'] }})</span>
         </h3>
       </div>
       <div class="card-body">
@@ -22,16 +22,16 @@
               <div class="ht-c-main">
                 <div class="ht-c-meta">
                   <span class="ht-c-name">{{ c['name'] }}</span>
-                  {% if c['status'] == 0 %}<span class="badge badge-warning ht-c-pending-badge">审核中</span>{% endif %}
+                  {% if c['status'] == 0 %}<span class="badge badge-warning ht-c-pending-badge">{{ trans('front-end.ht.c-pending') }}</span>{% endif %}
                   <span class="ht-c-time" title="{{ c['time_full'] }}">{{ c['time_text'] }}</span>
                 </div>
                 <div class="ht-c-content">{{ c['content'] }}</div>
               </div>
               <div class="ht-c-actions">
-                {% if c['can_approve'] %}<button type="button" class="ht-c-mini-btn ht-c-approve" data-id="{{ c['id'] }}">通过</button>{% endif %}
-                {% if c['can_delete'] %}<button type="button" class="ht-c-mini-btn ht-c-del" data-id="{{ c['id'] }}">删除</button>{% endif %}
-                {% if c['can_reply'] %}<button type="button" class="ht-c-mini-btn ht-c-reply" data-id="{{ c['id'] }}">回复</button>{% endif %}
-                {% if c['can_report'] %}<button type="button" class="ht-c-mini-btn ht-c-report" data-id="{{ c['id'] }}">举报</button>{% endif %}
+                {% if c['can_approve'] %}<button type="button" class="ht-c-mini-btn ht-c-approve" data-id="{{ c['id'] }}">{{ trans('front-end.ht.c-approve') }}</button>{% endif %}
+                {% if c['can_delete'] %}<button type="button" class="ht-c-mini-btn ht-c-del" data-id="{{ c['id'] }}">{{ trans('front-end.ht.c-delete') }}</button>{% endif %}
+                {% if c['can_reply'] %}<button type="button" class="ht-c-mini-btn ht-c-reply" data-id="{{ c['id'] }}">{{ trans('front-end.ht.c-reply') }}</button>{% endif %}
+                {% if c['can_report'] %}<button type="button" class="ht-c-mini-btn ht-c-report" data-id="{{ c['id'] }}">{{ trans('front-end.ht.c-report') }}</button>{% endif %}
               </div>
               {% if c['replies'] %}
                 <div class="ht-c-replies">
@@ -41,16 +41,16 @@
                       <div class="ht-c-main">
                         <div class="ht-c-meta">
                           <span class="ht-c-name">{{ r['name'] }}</span>
-                          {% if r['reply_name'] %}<span class="ht-c-replyto">回复 @{{ r['reply_name'] }}</span>{% endif %}
-                          {% if r['status'] == 0 %}<span class="badge badge-warning ht-c-pending-badge">审核中</span>{% endif %}
+                          {% if r['reply_name'] %}<span class="ht-c-replyto">{{ trans('front-end.ht.c-reply-prefix') }}{{ r['reply_name'] }}</span>{% endif %}
+                          {% if r['status'] == 0 %}<span class="badge badge-warning ht-c-pending-badge">{{ trans('front-end.ht.c-pending') }}</span>{% endif %}
                           <span class="ht-c-time" title="{{ r['time_full'] }}">{{ r['time_text'] }}</span>
                         </div>
                         <div class="ht-c-content">{{ r['content'] }}</div>
                       </div>
                       <div class="ht-c-actions">
-                        {% if r['can_delete'] %}<button type="button" class="ht-c-mini-btn ht-c-del" data-id="{{ r['id'] }}">删除</button>{% endif %}
-                        {% if r['can_reply'] %}<button type="button" class="ht-c-mini-btn ht-c-reply" data-id="{{ r['id'] }}">回复</button>{% endif %}
-                        {% if r['can_report'] %}<button type="button" class="ht-c-mini-btn ht-c-report" data-id="{{ r['id'] }}">举报</button>{% endif %}
+                        {% if r['can_delete'] %}<button type="button" class="ht-c-mini-btn ht-c-del" data-id="{{ r['id'] }}">{{ trans('front-end.ht.c-delete') }}</button>{% endif %}
+                        {% if r['can_reply'] %}<button type="button" class="ht-c-mini-btn ht-c-reply" data-id="{{ r['id'] }}">{{ trans('front-end.ht.c-reply') }}</button>{% endif %}
+                        {% if r['can_report'] %}<button type="button" class="ht-c-mini-btn ht-c-report" data-id="{{ r['id'] }}">{{ trans('front-end.ht.c-report') }}</button>{% endif %}
                       </div>
                     </div>
                   {% endfor %}
@@ -58,21 +58,21 @@
               {% endif %}
             </div>
           {% else %}
-            <div class="ht-c-empty">还没有评论，来说点什么吧～</div>
+            <div class="ht-c-empty">{{ trans('front-end.ht.c-empty') }}</div>
           {% endfor %}
         </div>
         <div class="text-center mt-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary ht-c-more" {% if not comments['has_more'] %}hidden{% endif %}>加载更多</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary ht-c-more" {% if not comments['has_more'] %}hidden{% endif %}>{{ trans('front-end.ht.c-more') }}</button>
         </div>
         {% if auth_check() %}
           <form class="ht-c-form mt-3">
             <textarea class="form-control ht-c-input" rows="3" maxlength="500"
-                      placeholder="写下你的评论…（最多 500 字）"></textarea>
+                      placeholder="{{ trans('front-end.ht.c-placeholder') }}"></textarea>
             <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap">
               <span class="text-muted small">
                 <span class="ht-c-counter">0</span>/500{% if commentModeration %} · 发表后需审核通过才会公开展示{% endif %}
               </span>
-              <button type="submit" class="btn btn-primary btn-sm ht-c-submit">发表评论</button>
+              <button type="submit" class="btn btn-primary btn-sm ht-c-submit">{{ trans('front-end.ht.c-submit') }}</button>
             </div>
           </form>
         {% else %}

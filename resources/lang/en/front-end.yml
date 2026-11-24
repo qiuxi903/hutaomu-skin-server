@@ -279,3 +279,84 @@ vendor:
     search: Search
     prev: Prev
     next: Next
+
+
+# Warm Sakura theme extended UI (palette / mobile tabbar / comments / docs pages), used by hutaomu-theme.js and related views
+ht:
+  tab-home: Home
+  tab-skinlib: Library
+  tab-closet: Closet
+  tab-me: Me
+  tab-about: About
+  tab-login: Log in
+  sw-title: Theme Settings
+  sw-close: Close
+  sw-appearance: Appearance
+  sw-mode-light: Light · Warm Sakura
+  sw-mode-dark: Dark · Night Sakura
+  sw-showcase: Showcase (wallpaper only)
+  sw-acg: Anime Theme
+  sw-acg-desc: Random wallpaper + petals
+  sw-refresh: Shuffle
+  sw-fav: Save current
+  sw-download: Download wallpaper
+  sw-auto: Auto switch
+  sw-iv-5: 5 min
+  sw-iv-15: 15 min
+  sw-iv-30: 30 min
+  sw-iv-60: 60 min
+  sw-favs: My Favorites
+  sw-no-favs: Nothing saved yet
+  sw-credits: Wallpaper from LoliAPI / Paugram and other public sources
+  sources-down: "All wallpaper sources are down. Try again later."
+  click-apply: Click to apply
+  delete: Delete
+  fav-not-ready: Wallpaper is not ready yet. Try saving later.
+  fav-failed: Failed to save
+  fav-dup: Already in your favorites
+  fav-done: Current wallpaper saved
+  net-error: Network error. Try again later.
+  net-err: Network error
+  confirm-privacy: "Set this texture to \":type\"? Switching adjusts score by the site rules."
+  privacy-public: Public
+  privacy-private: Private
+  failed: Operation failed
+  confirm-logout: Log out?
+  desc-public: Public · visible to everyone
+  desc-private-owner: Private · visible to you only
+  desc-private-admin: "Private · visible to the uploader and admins"
+  set-public: Set public
+  set-private: Set private
+  c-title: Comments
+  c-pending: Under review
+  c-approve: Approve
+  c-delete: Delete
+  c-reply: Reply
+  c-report: Report
+  c-empty: No comments yet. Be the first to say something!
+  c-more: Load more
+  c-placeholder: "Write a comment… (max 500 characters)"
+  c-submit: Post comment
+  c-reply-prefix: "Reply @"
+  c-reply-ph: "Reply… (max 500 characters)"
+  c-cancel: Cancel
+  c-empty-reply: Write something before replying
+  c-report-empty: A report reason is required
+  c-report-done: Reported
+  c-report-failed: Report failed
+  c-report-title: Report comment
+  c-report-ph: "Give a reason (admins will handle it under Report Management · Comment Reports)"
+  c-report-prompt: "Give a report reason:"
+  c-confirm-del-thread: Delete this comment? Its replies will be removed too.
+  c-confirm-del-reply: Delete this reply?
+  c-approved: Approved
+  c-posted: Comment posted
+  c-post-pending: Submitted, waiting for review
+  c-empty-comment: Write something before posting
+  c-too-long: Comments are limited to 500 characters
+  c-load-fail: Failed to load
+  d-toc: Contents
+  d-unpublished: Unpublished
+  d-unpublished-notice: This article is unpublished and only visible to admins. Tick "Publish" in Docs Management to make it public.
+  d-empty: "More articles are on the way. Stay tuned!"
+  d-updated: Updated
