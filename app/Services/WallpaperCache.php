@@ -55,6 +55,14 @@ class WallpaperCache
         return is_file($bin) ? (time() - (int) filemtime($bin)) : null;
     }
 
+    /** 缓存版本号（bin 的 mtime）；无缓存返回 0。「换一张」轮询以此判断新图是否落盘 */
+    public static function mtime(bool $mobile): int
+    {
+        $bin = self::paths($mobile)['bin'];
+
+        return is_file($bin) ? (int) filemtime($bin) : 0;
+    }
+
     /** 图源挑选：与旧中继逻辑一致（逐行取配置，移动端无配置时回退桌面源） */
     public static function pickSources(bool $mobile): array
     {

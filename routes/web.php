@@ -82,6 +82,26 @@ Route::get('theme/wallpaper', function (\Illuminate\Http\Request $request) {
     abort(502, 'all wallpaper sources failed');
 })->name('theme.wallpaper');
 
+/* 「换一张」异步化：派发后台刷新进程（独立 PHP 进程，慢源下载零占主 worker）
+   并立即返回当前缓存版本号(mtime)。JS 轮询 status 直到版本变化(新图落盘)
+   再回源取图(此时为 HIT 瞬时)——手动换一张的等待期间页面切换完全不受影响。
+   throttle 防止进程派发被滥用。 */
+Route::get('theme/wallpaper/refresh', function (\Illuminate\Http\Request $request) {
+    $mobile = $request->boolean('mobile');
+    $from = WallpaperCache::mtime($mobile);
+    WallpaperCache::spawnRefresh($mobile);
+
+    return json(['code' => 0, 'from' => $from]);
+})->middleware('throttle:10,1');
+
+Route::get('theme/wallpaper/refresh/status', function (\Illuminate\Http\Request $request) {
+    $mobile = $request->boolean('mobile');
+    $from = (int) $request->query('from', '0');
+    $now = WallpaperCache::mtime($mobile);
+
+    return json(['code' => 0, 'ready' => $now > 0 && $now > $from, 'now' => $now]);
+});
+
 Route::prefix('auth')->name('auth.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('login', 'AuthController@login')->name('login');

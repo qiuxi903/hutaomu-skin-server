@@ -1,0 +1,9 @@
+title: 設定
+
+custom_intro:
+  title: カスタム Mod 紹介
+  description: Markdown が使えます。
+
+csl_first:
+  title: CSL リストの先頭サイト
+  self: 当サイト

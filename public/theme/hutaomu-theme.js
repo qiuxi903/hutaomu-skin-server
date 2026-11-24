@@ -297,19 +297,57 @@
       var btn = document.getElementById('ts-refresh');
       if (btn) btn.classList.add('busy');
       var toast = (window.blessing && blessing.notify && blessing.notify.toast) || null;
-      /* 直接走服务端中继(多源随机+可落盘), 通常 1~2 秒到手; fresh 同步抓真新图 */
-      fetchRandomWallpaper(true).then(function (b64) {
-        wpBusy = false;
-        if (btn) btn.classList.remove('busy');
-        setWallpaper(b64);
-        prefetchNextWallpaper();
-      }, function () {
-        /* 中继失败(全部源挂): 立即恢复按钮并提示, 不留死窗口 */
+      /* 异步化「换一张」: 派发后台刷新(独立进程) → 轮询缓存版本 → 新图落盘后
+         缓存 HIT 瞬时回源。慢源下载全程不占 php -S 主 worker, 等待期间切页零影响 */
+      var isMobileSwap = window.matchMedia('(max-width: 767.98px)').matches;
+      var swapQ = isMobileSwap ? '?mobile=1' : '';
+      var fail = function () {
+        /* 全部图源挂: 立即恢复按钮并提示, 不留死窗口 */
         wpBusy = false;
         if (btn) btn.classList.remove('busy');
         if (toast) toast.warning(T('ht.sources-down'));
         setTimeout(prefetchNextWallpaper, 3000);
-      });
+      };
+      fetch(WALLPAPER_API + '/refresh' + swapQ, { cache: 'no-store' })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.code !== 0) throw new Error('dispatch failed');
+          var from = d.from;
+          var tries = 0;
+          var poll = function () {
+            fetch(WALLPAPER_API + '/refresh/status' + swapQ + '&from=' + from, { cache: 'no-store' })
+              .then(function (r) { return r.json(); })
+              .then(function (s) {
+                if (s.ready) {
+                  /* 新图已落盘: 缓存 HIT 瞬时回源 */
+                  fetchRandomWallpaper(false).then(function (b64) {
+                    wpBusy = false;
+                    if (btn) btn.classList.remove('busy');
+                    setWallpaper(b64);
+                    prefetchNextWallpaper();
+                  }, fail);
+                } else if (++tries > 30) {
+                  /* 15 秒还没换到: 按全源挂处理 */
+                  throw new Error('timeout');
+                } else {
+                  setTimeout(poll, 500);
+                }
+              })
+              .catch(function (e3) { throw e3; });
+          };
+          poll();
+        })
+        .catch(function () {
+          /* 派发失败: 回退缓存直取(服务端仍是缓存/后台刷新语义, 瞬时) */
+          fetchRandomWallpaper(false).then(function (b64) {
+            wpBusy = false;
+            if (btn) btn.classList.remove('busy');
+            setWallpaper(b64);
+            prefetchNextWallpaper();
+          }, function () {
+            fail();
+          });
+        });
     }
 
     var autoTimer = null;

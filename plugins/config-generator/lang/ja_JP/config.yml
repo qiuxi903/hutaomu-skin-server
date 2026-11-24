@@ -1,0 +1,12 @@
+generate-config: 設定ファイル生成
+
+mod-requirement: Mod の要件
+mod-intro: '以下の API に対応しています:'
+legacy: 従来方式
+version: バージョン
+config-file: 設定ファイル
+
+extra-list-intro: |
+  ExtraList（CustomSkinLoader 14.4 以上が必要）は、カスタムスキンサーバーを手軽に追加するための機能です。<br>
+  下の ExtraList ファイルをダウンロードして <code>.minecraft/CustomSkinLoader/ExtraList</code> ディレクトリに入れ、Minecraft を再起動すれば完了です！
+extra-list-download: クリックして ExtraList をダウンロード
