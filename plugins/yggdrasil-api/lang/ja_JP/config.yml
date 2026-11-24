@@ -1,0 +1,51 @@
+title: Yggdrasil API 設定
+
+url:
+  label: 'Yggdrasil API アドレス:'
+  notice: authlib-injector を設定する前に、上の URL にアクセスできることを確認してください。
+
+common:
+  title: 一般設定
+  ygg_uuid_algorithm:
+    title: UUID 生成アルゴリズム
+    v3: 'Version 3: オフラインユーザーと同じ UUID（推奨）'
+    v4: 'Version 4: ランダム生成（オフラインログインとの互換性が必要な場合は選ばないでください）'
+    hint: オフラインサーバーとの互換性を最大限にするには Version 3 を選択してください。
+  ygg_token_expire_1:
+    title: トークン一時失効時間
+  ygg_token_expire_2:
+    title: トークン完全失効時間
+    description: Token の「一時無効」と「完全無効」の有効期限を秒単位で指定します。
+  ygg_tokens_limit:
+    title: トークン数の上限
+    description: ユーザーごとに保持できるトークンの最大数を制限します。
+  ygg_rate_limit:
+    title: ログイン/ログアウトの頻度制限
+    hint: 2 つの操作の間隔（ミリ秒）。
+  ygg_skin_domain:
+    title: 追加スキン許可ドメイン
+    description: ここに登録されたドメインのテクスチャのみ読み込まれます。カンマ (,) 区切りで入力してください。当サイトの URL と現在のアクセス URL はデフォルトで追加されています。
+  ygg_search_profile_max:
+    title: 一括クエリ可能なプレイヤー数の上限
+    hint: 1 リクエストで何件のプレイヤーを照会できますか？
+  ygg_show_config_section:
+    title: かんたん設定の表示
+    label: ユーザーセンターのホームに「ランチャーかんたん設定」を表示する。
+  ygg_enable_ali:
+    title: API アドレスインジケーター
+    label: 「API アドレスインジケーター (ALI)」機能を有効にする。
+
+keypair:
+  title: 秘密鍵設定
+  ygg_private_key:
+    title: OpenSSL 秘密鍵
+    hint: PEM 形式の秘密鍵を記入すればOKです。公開鍵は秘密鍵から自動生成されます。
+    generate: 秘密鍵を生成
+    submit: 秘密鍵を保存
+    message: 下のボタンで形式に合った秘密鍵を自動生成できます。
+    valid: 秘密鍵は有効です。
+    invalid: 無効な秘密鍵です。確認して再設定してください。
+
+rsa:
+  invalid: 無効な RSA 秘密鍵です。プラグイン設定ページで再設定してください。
+  length: RSA 秘密鍵の長さは 4096 以上である必要があります。プラグイン設定ページで再設定してください。
