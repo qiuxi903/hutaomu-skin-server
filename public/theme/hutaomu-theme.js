@@ -1160,23 +1160,15 @@
     (function () {
       var jq = window.jQuery || window.$;
       if (!jq || !jq.fn || !jq.fn.on) return;
-      /* 只搬「真的被玻璃祖先困住」的弹窗。无条件搬到 body 会拆散 React 弹窗
-         (blessing.notify.showModal 确认框等)——React 事件托管在渲染容器上,
-         搬出容器后确定按钮点击失联(取消按钮走 jQuery data-dismiss 不受影响) */
-      function trappedInGlass(el) {
-        var p = el.parentElement;
-        while (p && p !== document.body) {
-          var cs = getComputedStyle(p);
-          var bf = cs.backdropFilter || cs.webkitBackdropFilter;
-          if (bf && bf !== 'none') return true;
-          p = p.parentElement;
-        }
-        return false;
-      }
+      /* Bootstrap 弹窗语义上应与遮罩同为 body 直挂(backdrop 就是 body 直挂,
+         Bootstrap 官方也建议 modal 放 body 末尾)。旧的「只搬 backdrop-filter 被困」
+         判定不够: PJAX 重挂载后存在更隐蔽的层叠困死(实测遮罩盖住弹窗, 链上
+         无任何 bf/transform 特征)。现改为「非 body 直挂即搬」兜底所有场景。
+         React portal 弹窗(blessing.notify.showModal)不经 show.bs.modal, 不受影响 */
       jq(document).on('show.bs.modal', function (e) {
         var el = e.target;
         if (!el || el === document.body || !el.parentElement || el.parentElement === document.body) return;
-        if (trappedInGlass(el)) document.body.appendChild(el);
+        document.body.appendChild(el);
       });
     })();
 
@@ -1302,12 +1294,15 @@
         var href = a.getAttribute('href');
         if (!href || href.charAt(0) === '#' || a.target === '_blank' || a.hasAttribute('download')) return;
         var u = new URL(a.href, location.href);
-        if (u.origin !== location.origin || u.search || u.hash) return;
+        if (u.origin !== location.origin || u.hash) return;
         var path = u.pathname.replace(/\/$/, '');
-        if (path === location.pathname.replace(/\/$/, '')) return;
         var known = !!HT_PAGES[path] || HT_STATIC.indexOf(path) !== -1 ||
-          /^\/skinlib\/show\/\d+$/.test(path);
+          /^\/skinlib\/show\/\d+$/.test(path) || /^\/docs\/[a-z0-9-]+$/.test(path);
         if (!known) return; /* 只在已知的同布局页面间 PJAX, 其余原生跳转 */
+        /* 同路径无 query = 原地不动; 带 query 的同路径是筛选/分页切换(如皮肤库
+           ?filter= ?page=), 要 PJAX 刷新内容区——此前带 search 直接整页刷新的根因 */
+        var cur = location.pathname.replace(/\/$/, '');
+        if (path === cur && !u.search) return;
         e.preventDefault();
         htPjaxGo(u.href, true);
       }, true);

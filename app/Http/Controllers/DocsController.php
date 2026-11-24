@@ -36,6 +36,7 @@ class DocsController extends Controller
         }
     }
 
+    /* 目录数据: 按 sort/id 排, 带上分组供前台分组清单渲染 */
     public static function sidebarDocs(): array
     {
         $user = Auth::user();
@@ -44,7 +45,7 @@ class DocsController extends Controller
             $query->where('published', true);
         }
 
-        return $query->get(['id', 'slug', 'title', 'published'])->all();
+        return $query->get(['id', 'slug', 'title', 'group_name', 'published'])->all();
     }
 
     /* 摘要: 去掉 Markdown 标记取前 60 字 */
@@ -65,6 +66,7 @@ class DocsController extends Controller
         $list = $docs->map(fn (Doc $d) => [
             'slug' => $d->slug,
             'title' => $d->title,
+            'group' => (string) $d->group_name,
             'published' => $d->published,
             'excerpt' => $this->excerpt($d->content),
             'updated' => optional($d->updated_at)->format('Y-m-d'),
@@ -96,6 +98,7 @@ class DocsController extends Controller
             'id' => $d->id,
             'title' => $d->title,
             'slug' => $d->slug,
+            'group' => (string) $d->group_name,
             'published' => $d->published,
             'sort' => $d->sort,
             'updated' => optional($d->updated_at)->format('Y-m-d H:i'),
@@ -109,6 +112,7 @@ class DocsController extends Controller
         /* Twig 无 old() 函数(坑 #10 同族), 重定向回的旧输入由控制器显式传入 */
         return view('admin.docs-form')
             ->with('doc', null)
+            ->with('groups', self::existingGroups())
             ->with('old', (array) $request->old());
     }
 
@@ -116,6 +120,7 @@ class DocsController extends Controller
     {
         $data = $request->validate([
             'title' => 'required|string|max:100',
+            'group_name' => 'nullable|string|max:60',
             'slug' => ['required', 'regex:/^[a-z0-9-]{1,60}$/'],
             'content' => 'required|string|max:200000',
             'published' => 'nullable|in:1',
@@ -137,6 +142,7 @@ class DocsController extends Controller
         Doc::create([
             'slug' => $data['slug'],
             'title' => $data['title'],
+            'group_name' => trim((string) ($data['group_name'] ?? '')),
             'content' => $data['content'],
             'published' => isset($data['published']),
             'sort' => (int) ($data['sort'] ?? 0),
@@ -150,7 +156,14 @@ class DocsController extends Controller
     {
         return view('admin.docs-form')
             ->with('doc', $doc)
+            ->with('groups', self::existingGroups())
             ->with('old', (array) $request->old());
+    }
+
+    /* 已有分组名列表: 编辑表单 datalist 提示用 */
+    private static function existingGroups(): array
+    {
+        return Doc::where('group_name', '!=', '')->distinct()->orderBy('group_name')->pluck('group_name')->all();
     }
 
     public function update(Request $request, Doc $doc)
@@ -159,6 +172,7 @@ class DocsController extends Controller
         $doc->update([
             'slug' => $data['slug'],
             'title' => $data['title'],
+            'group_name' => trim((string) ($data['group_name'] ?? '')),
             'content' => $data['content'],
             'published' => isset($data['published']),
             'sort' => (int) ($data['sort'] ?? 0),

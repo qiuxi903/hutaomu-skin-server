@@ -266,6 +266,8 @@ panel:
     title-label: Title (max 100 characters)
     slug-label: slug (part of the URL; lowercase letters, digits and hyphens only)
     slug-placeholder: "e.g. getting-started"
+    group-label: Group
+    group-placeholder: Leave empty to keep ungrouped
     sort-label: Sort (smaller comes first)
     publish: Publish
     publish-hint: Visible to players when ticked

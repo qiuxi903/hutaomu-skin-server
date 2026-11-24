@@ -2639,6 +2639,43 @@ body.dark-mode #file-input .card-footer { border-top-color: rgba(240, 136, 168, 
   font-size: 0.8rem;
   padding: 4px 10px 8px;
 }
+
+/* 文档分组清单(2026-11-24): 大标题=分组名, 小标题=文章链接。
+   索引页与详情页目录同版式; 未分组文章无组头直接列出 */
+/* 分组清单的玻璃面板容器(卡片网格改清单后需要容器背景, 否则文字直压壁纸) */
+#docs-page .doc-groups {
+  background: rgba(255, 252, 253, 0.82);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(240, 184, 205, 0.5);
+  border-radius: 16px;
+  padding: 10px 16px 16px;
+}
+body.dark-mode #docs-page .doc-groups { background: rgba(40, 33, 48, 0.8); border-color: rgba(240, 136, 168, 0.3); }
+
+#docs-page .doc-group-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ht-pink-deep);
+  padding: 10px 10px 4px;
+  letter-spacing: 0.02em;
+}
+#docs-page .doc-group + .doc-group { margin-top: 6px; }
+#docs-page .doc-groups .doc-link {
+  display: block;
+  padding: 8px 14px;
+  border-radius: 10px;
+  color: var(--ht-text);
+  font-size: 0.92rem;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#docs-page .doc-groups .doc-link:hover {
+  background: var(--ht-pink-soft);
+  color: var(--ht-pink-deep);
+}
+body.dark-mode #docs-page .doc-groups .doc-link { color: #cfc4da; }
+body.dark-mode #docs-page .doc-groups .doc-link:hover { color: #ffb8cd; }
 #docs-page .doc-side-link {
   display: block;
   padding: 7px 10px;

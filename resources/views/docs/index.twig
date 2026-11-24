@@ -7,28 +7,38 @@
 
   <section class="content">
     <div class="container-fluid">
-      <div class="row">
+      {% if docs is empty %}
+        <div class="card">
+          <div class="card-body text-center text-muted py-4">
+            {{ trans('front-end.ht.d-empty') }}
+          </div>
+        </div>
+      {% else %}
+        {# 分组清单式(上游文档站版式): 大标题=分组, 小标题=文章。
+           未分组(group 为空)的文章不挂组头, 置顶直接列出 #}
+        {% set grouped = {} %}
+        {% set order = [] %}
         {% for d in docs %}
-          <div class="col-md-6 col-lg-4">
-            <a class="doc-card" href="{{ url('docs/' ~ d.slug) }}">
-              <div class="doc-card-title">
-                {{ d.title }}
-                {% if not d.published %}<span class="badge badge-warning">{{ trans('front-end.ht.d-unpublished') }}</span>{% endif %}
-              </div>
-              <div class="doc-card-excerpt">{{ d.excerpt }}</div>
-              <div class="doc-card-meta">{{ trans('front-end.ht.d-updated') }} {{ d.updated }}</div>
-            </a>
-          </div>
-        {% else %}
-          <div class="col-12">
-            <div class="card">
-              <div class="card-body text-center text-muted py-4">
-                {{ trans('front-end.ht.d-empty') }}
-              </div>
-            </div>
-          </div>
+          {% if d.group not in order %}{% set order = order|merge([d.group]) %}{% endif %}
+          {% set grouped = grouped|merge({(d.group): (grouped[d.group] ?? [])|merge([d])}) %}
         {% endfor %}
-      </div>
+
+        <div class="doc-groups">
+          {% for g in order %}
+            <div class="doc-group">
+              {% if g != '' %}
+                <div class="doc-group-title">{{ g }}</div>
+              {% endif %}
+              {% for d in grouped[g] %}
+                <a class="doc-link" href="{{ url('docs/' ~ d.slug) }}">
+                  {{ d.title }}
+                  {% if not d.published %}<span class="badge badge-warning">{{ trans('front-end.ht.d-unpublished') }}</span>{% endif %}
+                </a>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
     </div>
   </section>
 {% endblock %}

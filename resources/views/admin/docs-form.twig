@@ -29,18 +29,27 @@
         </div>
 
         <div class="form-row">
-          <div class="form-group col-md-6">
+          <div class="form-group col-md-5">
             <label>{{ trans('admin.panel.docs.slug-label') }}</label>
             <input type="text" name="slug" class="form-control" pattern="[a-z0-9-]{1,60}" required
                    placeholder="{{ trans('admin.panel.docs.slug-placeholder') }}"
                    value="{{ old.slug ?? (doc ? doc.slug : '') }}">
           </div>
           <div class="form-group col-md-3">
+            <label>{{ trans('admin.panel.docs.group-label') }}</label>
+            <input type="text" name="group_name" class="form-control" list="doc-groups"
+                   maxlength="60" placeholder="{{ trans('admin.panel.docs.group-placeholder') }}"
+                   value="{{ old.group_name ?? (doc ? doc.group_name : '') }}">
+            <datalist id="doc-groups">
+              {% for g in groups %}<option value="{{ g }}">{% endfor %}
+            </datalist>
+          </div>
+          <div class="form-group col-md-2">
             <label>{{ trans('admin.panel.docs.sort-label') }}</label>
             <input type="number" name="sort" class="form-control" min="0" max="9999"
                    value="{{ old.sort ?? (doc ? doc.sort : 0) }}">
           </div>
-          <div class="form-group col-md-3">
+          <div class="form-group col-md-2">
             <label>{{ trans('admin.panel.docs.publish') }}</label>
             <div class="custom-control custom-checkbox mt-1">
               <input type="checkbox" class="custom-control-input" id="d-published" name="published" value="1"

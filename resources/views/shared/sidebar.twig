@@ -13,14 +13,21 @@
 
         {% if scope == 'user' %}
 
-        {# 侧栏项由「个性化 → 侧边栏自定义」驱动, 组头跟随相邻项分组变化 #}
-        {% set lastGroup = none %}
+        {# 侧栏项由「个性化 → 侧边栏自定义」驱动, 组头跟随相邻项分组变化。
+           渲染前按组聚合(保序): 后加的默认项(如使用文档)会被追加逻辑放到自定义树
+           末尾, 相邻去重会裂出两个同名组头——按组聚合渲染后同组必连续, 根治 #}
+        {% set groupOrder = [] %}
+        {% set grouped = {} %}
         {% for item in items %}
-          {% if item.group != lastGroup %}
-            <li class="nav-header">{{ item.group }}</li>
-            {% set lastGroup = item.group %}
-          {% endif %}
-          {{ include('shared.side-menu-item', {item: item}) }}
+          {% set g = item.group %}
+          {% if g not in groupOrder %}{% set groupOrder = groupOrder|merge([g]) %}{% endif %}
+          {% set grouped = grouped|merge({(g): (grouped[g] ?? [])|merge([item])}) %}
+        {% endfor %}
+        {% for g in groupOrder %}
+          <li class="nav-header">{{ g }}</li>
+          {% for item in grouped[g] %}
+            {{ include('shared.side-menu-item', {item: item}) }}
+          {% endfor %}
         {% endfor %}
           {% if auth_user().admin %}
             <li class="nav-header">{{ trans('general.manage') }}</li>

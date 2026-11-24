@@ -14,11 +14,25 @@
           <div class="card doc-side">
             <div class="card-body p-2">
               <div class="doc-side-title">{{ trans('front-end.ht.d-toc') }}</div>
+              {# 与索引页同版式: 大标题=分组, 小标题=文章; 未分组无组头直接列出 #}
+              {% set sideGrouped = {} %}
+              {% set sideOrder = [] %}
               {% for s in side %}
-                <a class="doc-side-link {{ s.slug == doc.slug ? 'active' : '' }}" href="{{ url('docs/' ~ s.slug) }}">
-                  {{ s.title }}
-                  {% if not s.published %}<span class="badge badge-warning">{{ trans('front-end.ht.d-unpublished') }}</span>{% endif %}
-                </a>
+                {% if s.group_name not in sideOrder %}{% set sideOrder = sideOrder|merge([s.group_name]) %}{% endif %}
+                {% set sideGrouped = sideGrouped|merge({(s.group_name): (sideGrouped[s.group_name] ?? [])|merge([s])}) %}
+              {% endfor %}
+              {% for g in sideOrder %}
+                <div class="doc-group">
+                  {% if g != '' %}
+                    <div class="doc-group-title">{{ g }}</div>
+                  {% endif %}
+                  {% for s in sideGrouped[g] %}
+                    <a class="doc-side-link {{ s.slug == doc.slug ? 'active' : '' }}" href="{{ url('docs/' ~ s.slug) }}">
+                      {{ s.title }}
+                      {% if not s.published %}<span class="badge badge-warning">{{ trans('front-end.ht.d-unpublished') }}</span>{% endif %}
+                    </a>
+                  {% endfor %}
+                </div>
               {% endfor %}
             </div>
           </div>

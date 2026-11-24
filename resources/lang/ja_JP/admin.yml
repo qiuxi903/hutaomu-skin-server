@@ -249,6 +249,8 @@ panel:
     title-label: 題名（100 字以内）
     slug-label: slug（URL の一部。半角小文字・数字・ハイフンのみ）
     slug-placeholder: "例：getting-started"
+    group-label: グループ
+    group-placeholder: 空欄なら未分類
     sort-label: 並び順（小さいほど前）
     publish: 公開
     publish-hint: 印を付けるとユーザーに公開

@@ -249,6 +249,8 @@ panel:
     title-label: 標題（最長 100 字）
     slug-label: slug（URL 的一部分，僅小寫字母/數字/中劃線）
     slug-placeholder: "例如：getting-started"
+    group-label: 分組
+    group-placeholder: 留空歸入未分組
     sort-label: 排序（小的在前）
     publish: 發布
     publish-hint: 勾選後對玩家公開
