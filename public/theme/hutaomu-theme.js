@@ -1259,7 +1259,16 @@
           var newExtra = doc.querySelector('#blessing-extra');
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
-          oldCW.parentNode.replaceChild(document.importNode(newCW, true), oldCW);
+          /* 换页过渡: 新内容淡入上移(220ms)。起始态类挂载后第二帧移除,
+             保证 transition 有起始帧可播(单帧直接移除会跳过动画) */
+          var importNode = document.importNode(newCW, true);
+          importNode.classList.add('ht-pjax-enter');
+          oldCW.parentNode.replaceChild(importNode, oldCW);
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              importNode.classList.remove('ht-pjax-enter');
+            });
+          });
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);
@@ -1303,6 +1312,8 @@
            ?filter= ?page=), 要 PJAX 刷新内容区——此前带 search 直接整页刷新的根因 */
         var cur = location.pathname.replace(/\/$/, '');
         if (path === cur && !u.search) return;
+        /* 例外: lang= 是整页语言切换(侧栏/页眉/底部都要换), 必须原生跳转 */
+        if (u.search && u.search.indexOf('lang=') !== -1) return;
         e.preventDefault();
         htPjaxGo(u.href, true);
       }, true);

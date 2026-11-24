@@ -1786,6 +1786,22 @@ body.layout-fixed .main-sidebar::-webkit-scrollbar {
   pointer-events: none;
 }
 
+/* ---------- PJAX 换页过渡(2026-11-24) ---------- */
+/* 新内容区: 淡入+上移 220ms; 起始态由 JS 挂载时加, 第二帧移除让 transition 播放。
+   挂在 .content-wrapper 上, 只影响主内容区(页眉/侧栏不动) */
+.content-wrapper.ht-pjax-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.content-wrapper { transition: opacity 0.22s ease, transform 0.22s ease; }
+/* Bootstrap 标签页切换: tab-pane 从 display:none 变 block 时会重播 animation,
+   正好用作淡入 */
+.tab-pane { animation: ht-fadein 0.22s ease; }
+@keyframes ht-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
 /* ---------- 主题切换平滑过渡 ---------- */
 /* 明暗互换时关键表面颜色渐变; 壁纸图片本身不参与(由过渡层负责) */
 body,
