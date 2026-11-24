@@ -682,35 +682,29 @@ body.login-page .input-group:focus-within .input-group-text { border-color: var(
 .sidebar-collapse .main-sidebar:not(:hover) .user-panel .image::after { display: none !important; }
 .sidebar-collapse .main-sidebar:hover .user-panel .image::after { display: none !important; }
 
-/* ---------- 取消"悬停展开"(2026-11, 用户反馈: 侧栏像浮在网站前端) ----------
-   AdminLTE 原生的迷你轨道会在鼠标进入时把侧栏从 73.6px 弹到 250px, 且是
-   覆盖在内容之上(z-index 1038, 内容不动) —— 鼠标只要扫过左侧, 内容左侧
-   176px 就被盖住, 观感就是"侧栏一直浮在页面上".
-   这里把悬停行为固定成与静止态一致: 宽度不弹、文字不显、横线不隐、头像不位移,
-   整个折叠态就是一个静态图标轨道; 要完整菜单点汉堡展开(那条路径内容整体让位,
-   本来就不覆盖).
-   下面每条都要写成 :hover 版本 —— 悬停时主题原本的"展开态样式"会接管,
-   只锁宽度会在窄轨道里画出被裁的文字/半截徽章. */
+/* 悬停展开恢复(2026-11-24, 用户要求): 移除 11-18 的悬停锁死块——
+   恢复原生 hover 展开到 250px, 但同步推开内容区/页眉/页脚,
+   根治当时"盖在内容上"的痛点(推开而非覆盖)。
+   :has() 用于选中悬停态的 body(纯 CSS, 无 JS); 侧栏宽度动画与 margin 推移同拍 0.3s。
+   悬停态的文字/徽章/横线淡入节奏由既有的 hover 规则链接管(它们一直在, 只是被锁死块压住)。 */
 @media (min-width: 992px) {
+  .sidebar-mini.sidebar-collapse .main-sidebar { transition: width 0.3s ease-in-out; }
   .sidebar-mini.sidebar-collapse .main-sidebar:hover,
-  .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused,
-  .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand):hover,
-  .sidebar-mini.sidebar-collapse .main-sidebar:not(.sidebar-no-expand).sidebar-focused {
-    width: 4.6rem !important;
+  .sidebar-mini.sidebar-collapse .main-sidebar.sidebar-focused {
+    width: 250px !important;
   }
-  .sidebar-mini.sidebar-collapse.layout-fixed .main-sidebar:hover .brand-link { width: 4.6rem !important; }
+  .sidebar-mini.sidebar-collapse.layout-fixed .main-sidebar:hover .brand-link { width: 250px !important; }
 
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .brand-text,
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .sidebar .nav-link p,
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .info { opacity: 0 !important; }
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-header { color: transparent !important; }
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-sidebar .nav-header::after { opacity: 1 !important; }
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .image img { margin: 0 0 0 -15px !important; }
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .badge { opacity: 1 !important; margin: 0 !important; }
-  .sidebar-mini.sidebar-collapse .main-sidebar:hover .user-panel .d-flex.flex-wrap {
-    display: block !important;
-    margin: 16px -14px 0 !important;
-    text-align: center;
+  /* 内容区/页眉/页脚同步推开(侧栏兄弟用 ~, 页眉在侧栏之前用 body:has 兜) */
+  body.sidebar-mini.sidebar-collapse .content-wrapper,
+  body.sidebar-mini.sidebar-collapse .main-header,
+  body.sidebar-mini.sidebar-collapse .main-footer {
+    transition: margin-left 0.3s ease-in-out;
+  }
+  body.sidebar-mini.sidebar-collapse:has(.main-sidebar:hover) .content-wrapper,
+  body.sidebar-mini.sidebar-collapse:has(.main-sidebar:hover) .main-header,
+  body.sidebar-mini.sidebar-collapse:has(.main-sidebar:hover) .main-footer {
+    margin-left: 250px !important;
   }
 }
 
