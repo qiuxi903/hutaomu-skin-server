@@ -169,10 +169,12 @@
 
     /* 换新壁纸: 走本站中继随机取一个源的图(同源响应可转 dataURL 落盘)。
        重复图由服务端轮换 + 前端 htRecent 指纹双重规避; 一次请求即换一张 */
-    function fetchRandomWallpaper() {
-      /* 移动端宽度段带 mobile=1: 服务端改用「移动端图源」配置(管理面板可配) */
+    function fetchRandomWallpaper(fresh) {
+      /* 移动端宽度段带 mobile=1: 服务端改用「移动端图源」配置(管理面板可配);
+         fresh=1: 手动换一张要真新图(服务端同步抓新); 缺省走服务端缓存/后台刷新
+         —— 慢图源下载在独立进程完成, 预取不再阻塞 php -S 单线程的页面切换 */
       var isMobile = window.matchMedia('(max-width: 767.98px)').matches;
-      var bust = (WALLPAPER_API.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now() + (isMobile ? '&mobile=1' : '');
+      var bust = (WALLPAPER_API.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now() + (isMobile ? '&mobile=1' : '') + (fresh ? '&fresh=1' : '');
       return fetch(WALLPAPER_API + bust, { cache: 'no-store' })
         .then(function (r) {
           if (!r.ok) throw new Error('http ' + r.status);
@@ -183,7 +185,7 @@
           if (b64.indexOf('data:image/') !== 0) throw new Error('not an image');
           if (htRecent.indexOf(htHash(b64)) !== -1 && pfDup < 2) {
             pfDup++; /* 抽到最近看过的图: 再抽一次(服务端会换源), 最多 2 次 */
-            return fetchRandomWallpaper();
+            return fetchRandomWallpaper(fresh);
           }
           pfDup = 0;
           return b64;
@@ -264,7 +266,7 @@
     }
     function prefetchNextWallpaper() {
       if (wpPrefetch) return;
-      fetchRandomWallpaper().then(function (b64) { wpPrefetch = b64; })
+      fetchRandomWallpaper(false).then(function (b64) { wpPrefetch = b64; })
         .catch(function () { /* 中继失败: 3 秒后重试, 预取不断档 */
           setTimeout(prefetchNextWallpaper, 3000);
         });
@@ -295,8 +297,8 @@
       var btn = document.getElementById('ts-refresh');
       if (btn) btn.classList.add('busy');
       var toast = (window.blessing && blessing.notify && blessing.notify.toast) || null;
-      /* 直接走服务端中继(多源随机+可落盘), 通常 1~2 秒到手 */
-      fetchRandomWallpaper().then(function (b64) {
+      /* 直接走服务端中继(多源随机+可落盘), 通常 1~2 秒到手; fresh 同步抓真新图 */
+      fetchRandomWallpaper(true).then(function (b64) {
         wpBusy = false;
         if (btn) btn.classList.remove('busy');
         setWallpaper(b64);

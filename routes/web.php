@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware;
+use App\Services\WallpaperCache;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,51 +19,66 @@ Route::get('', 'HomeController@index');
 /* 暖樱白主题: 壁纸图源服务端中继。
    浏览器直连图源没有 CORS 头(图无法转 dataURL 保存/收藏), weserv 代理又
    只放行 paugram——由本站后端随机挑一个后台配置的源抓图, 同源返回。
-   逐源回退, 全挂时 502; 仅请求后台配置的固定源, 不是开放代理。 */
+   逐源回退, 全挂时 502; 仅请求后台配置的固定源, 不是开放代理。
+
+   2026-11-24 性能改造: php -S 在 Windows 上单线程, 旧版每次都同步直连图源,
+   慢源时一次请求堵 8 秒以上——期间全站请求(含页面切换)都在排队。
+   现改为磁盘缓存 + stale-while-revalidate(WallpaperCache):
+   - 缓存期内(TTL 240s)瞬时回图(X-Wallpaper-Cache: HIT);
+   - 过期先回旧图(STALE)并派发独立 PHP 进程后台刷新(wallpaper-worker.php),
+     慢图源下载完全不占用主 worker;
+   - fresh=1(手动「换一张」)同步抓新图并更新缓存;
+   - 同步抓新但全源挂时兜底回旧缓存(有的话), 没有才 502。 */
 Route::get('theme/wallpaper', function (\Illuminate\Http\Request $request) {
-    $pick = function (string $key) {
-        return array_values(array_filter(array_map('trim', preg_split(
-            '/\r\n|\r|\n/',
-            (string) option($key, '')
-        )), function ($line) {
-            return $line !== '';
-        }));
-    };
-    /* 移动端图源独立配置(?mobile=1, 管理面板「壁纸图源（移动端）」), 未配置时回退桌面源 */
-    $sources = $request->boolean('mobile') ? $pick('theme_mobile_wallpaper_sources') : $pick('theme_wallpaper_sources');
-    if (!$sources && $request->boolean('mobile')) {
-        $sources = $pick('theme_wallpaper_sources');
-    }
-    if (!$sources) {
-        $sources = ['https://api.paugram.com/wallpaper/'];
-    }
-    shuffle($sources);
-    foreach ($sources as $url) {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 3,
-            CURLOPT_TIMEOUT => 8,
-            CURLOPT_CONNECTTIMEOUT => 3,
-            CURLOPT_SSL_VERIFYPEER => false, // 自用站点, 个别图源证书链不全
-            /* 固定桌面 UA: loliapi 按 UA 跳「手机池」端点(当前 404), 桌面池才可用 */
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    $mobile = $request->boolean('mobile');
+    $fresh = $request->boolean('fresh');
+
+    $cachedResponse = function (string $state) use ($mobile) {
+        $meta = WallpaperCache::meta($mobile);
+        $bin = WallpaperCache::paths($mobile)['bin'];
+        if (!$meta || !is_file($bin)) {
+            abort(502, 'wallpaper cache missing');
+        }
+
+        return response(file_get_contents($bin), 200, [
+            'Content-Type' => $meta['type'] ?? 'image/jpeg',
+            'Cache-Control' => 'no-store',
+            'X-Wallpaper-Source' => $meta['source'] ?? '',
+            'X-Wallpaper-Cache' => $state,
         ]);
-        $body = curl_exec($ch);
-        $ctype = (string) curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        $code = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        $errno = curl_errno($ch);
-        curl_close($ch);
-        if (!$errno && $code >= 200 && $code < 300 && is_string($body)
-            && $ctype && stripos($ctype, 'image/') === 0 && strlen($body) > 20000) {
-            return response($body, 200, [
-                'Content-Type' => $ctype,
-                'Cache-Control' => 'no-store',
-                'X-Wallpaper-Source' => $url,
-            ]);
+    };
+
+    /* 缓存语义: 手动换一张(fresh)必抓新图; 自动预取走缓存/过期回旧图+后台刷新 */
+    if (!$fresh) {
+        $age = WallpaperCache::age($mobile);
+        if ($age !== null && $age <= WallpaperCache::TTL) {
+            return $cachedResponse('HIT');
+        }
+        if ($age !== null) {
+            WallpaperCache::spawnRefresh($mobile);
+
+            return $cachedResponse('STALE');
         }
     }
+
+    /* 同步抓新: 手动换一张, 或首次(尚无缓存) */
+    $result = WallpaperCache::fetchAndStore($mobile);
+    if ($result) {
+        $meta = $result['meta'];
+
+        return response(file_get_contents($result['bin']), 200, [
+            'Content-Type' => $meta['type'],
+            'Cache-Control' => 'no-store',
+            'X-Wallpaper-Source' => $meta['source'],
+            'X-Wallpaper-Cache' => 'FRESH',
+        ]);
+    }
+
+    /* 全部图源失败: 兜底回旧缓存(若有), 没有才 502 */
+    if (WallpaperCache::age($mobile) !== null) {
+        return $cachedResponse('STALE-FALLBACK');
+    }
+
     abort(502, 'all wallpaper sources failed');
 })->name('theme.wallpaper');
 
