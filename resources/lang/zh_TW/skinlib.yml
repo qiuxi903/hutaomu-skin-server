@@ -28,3 +28,26 @@ non-existent: 無此材質。
 report:
   duplicate: 您已成功舉報此材質。管理員將速即審閲。您可以同時在“用戶中心”追蹤舉報進展。
   success: 感謝您的舉報！管理員將速即審閲。
+
+# 皮膚庫列表頁篩選欄(2026-11-21 服務端渲染改版)
+filter:
+  total: "共 :total 個材質"
+  type: 類型
+  visibility: 可見
+  vis-all: 全部
+  vis-public: 僅公開
+  vis-private: 僅私密
+  vis-admin-hint: 管理員可查看全部私密內容
+  keyword-ph: "搜尋材質名…"
+  sort-time: 最新上載
+  sort-likes: 最多點讚
+  sort-size: 體積最大
+  apply: 應用
+  empty: 沒有符合篩選條件的材質
+  uploader: 上載者
+  likes: 點讚
+  badge-private: 私密
+  badge-mine: 我的
+  badge-other-private: 他人私密
+  set-private-hint: 設為私密（僅自己可見）
+  set-public-hint: 設為公開（所有人可見）

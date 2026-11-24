@@ -28,3 +28,26 @@ non-existent: そのようなテクスチャは存在しません。
 report:
   duplicate: このテクスチャはすでに報告済みです。管理者がすぐに確認します。報告の状況はユーザーセンターで追跡できます。
   success: 報告ありがとうございます！管理者がすぐに確認します。
+
+# スキンライブラリ一覧ページのフィルター欄（2026-11-21 サーバーレンダリング改訂）
+filter:
+  total: "テクスチャ合計 :total 件"
+  type: 種類
+  visibility: 表示
+  vis-all: すべて
+  vis-public: 公開のみ
+  vis-private: 非公開のみ
+  vis-admin-hint: 管理者はすべての非公開テクスチャを見られます
+  keyword-ph: "名前で検索…"
+  sort-time: 新しい順
+  sort-likes: いいね順
+  sort-size: 容量順
+  apply: 適用
+  empty: 条件に合うテクスチャはありません
+  uploader: 投稿者
+  likes: いいね
+  badge-private: 非公開
+  badge-mine: マイ
+  badge-other-private: 他人の非公開
+  set-private-hint: 非公開にする（自分だけ見える）
+  set-public-hint: 公開にする（全員に見える）

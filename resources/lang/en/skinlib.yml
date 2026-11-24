@@ -35,3 +35,26 @@ non-existent: No such texture.
 report:
   duplicate: You have already reported this texture. The administrators will review it as soon as possible. You can also track the status of your report at User Center.
   success: Thanks for reporting! The administrators will review it as soon as possible.
+
+# Skin library list page filter bar (server-rendered rebuild, 2026-11-21)
+filter:
+  total: "Total :total textures"
+  type: Type
+  visibility: Visible
+  vis-all: All
+  vis-public: Public only
+  vis-private: Private only
+  vis-admin-hint: Admins can view all private textures
+  keyword-ph: "Search by name…"
+  sort-time: Latest uploads
+  sort-likes: Most liked
+  sort-size: Largest size
+  apply: Apply
+  empty: No textures match the filters
+  uploader: Uploader
+  likes: Likes
+  badge-private: Private
+  badge-mine: Mine
+  badge-other-private: Others' private
+  set-private-hint: Set private (visible to you only)
+  set-public-hint: Set public (visible to everyone)
