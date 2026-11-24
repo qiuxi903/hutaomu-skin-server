@@ -80,21 +80,30 @@ class MarketController extends Controller
             ? app()->getLocale()
             : config('app.fallback_locale');
 
+        /* 多市场源逐一尝试, 单源失败(连不上/超时/非 200)跳过不拖垮整个市场——
+           曾因 .env 指向的重定向目标源死亡, 市场接口 500 且同步阻塞主 worker 21 秒
+           (php -S 单线程, 期间全站切页都在排队)。5 秒短超时保证最坏阻塞可控。 */
         $plugins = collect(explode(',', config('plugins.registry')))
-            ->map(function ($registry) use ($lang) {
+            ->map(fn ($registry) => trim($registry))
+            ->filter()
+            ->flatMap(function ($registry) use ($lang) {
                 $registry = str_replace('{lang}', $lang, $registry);
-                $response = Http::withOptions([
-                    'verify' => CaBundle::getSystemCaRootBundlePath(),
-                ])->get(trim($registry));
+                try {
+                    $response = Http::withOptions([
+                        'verify' => CaBundle::getSystemCaRootBundlePath(),
+                    ])->timeout(5)->get($registry);
 
-                if ($response->ok()) {
-                    return $response->json()['packages'];
-                } else {
-                    throw new Exception(trans('admin.plugins.market.connection-error', ['error' => $response->status()]));
+                    if ($response->ok()) {
+                        return collect($response->json()['packages'] ?? []);
+                    }
+                } catch (Exception $e) {
+                    /* 源失效: 跳过该源 */
                 }
-            })
-            ->flatten(1);
 
-        return $plugins;
+                return collect();
+            });
+
+        /* 多源合并去重(镜像源内容重复) */
+        return $plugins->unique('name')->values();
     }
 }
