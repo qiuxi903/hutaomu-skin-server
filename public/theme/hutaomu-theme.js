@@ -1279,6 +1279,13 @@
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
           parent.style.overflow = 'hidden'; /* 滑出部分裁掉 */
+          /* 中间态裸露修正: 旧内容的柔光背景跟随旧内容滑出、新内容的还没滑入,
+             滑动期间内容区顶部壁纸会裸露——把内容区背景临时复制到容器上
+             (背景留下不动, 内容滑动), 播完还原 */
+          var cwBg = getComputedStyle(oldCW).backgroundColor;
+          if (cwBg && cwBg !== 'transparent' && cwBg !== 'rgba(0, 0, 0, 0)') {
+            parent.style.background = cwBg;
+          }
           oldCW.classList.add('ht-pjax-exit-' + pjaxDir);
           var importNode = document.importNode(newCW, true);
           importNode.classList.add('ht-pjax-enter-' + pjaxDir);
@@ -1292,6 +1299,7 @@
             if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
             parent.style.position = '';
             parent.style.overflow = '';
+            parent.style.background = '';
           }, 420);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
