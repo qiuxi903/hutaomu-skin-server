@@ -1258,7 +1258,11 @@
           var doc = new DOMParser().parseFromString(html, 'text/html');
           var newCW = doc.querySelector('.content-wrapper');
           var oldCW = document.querySelector('.content-wrapper');
-          if (!doc.body.classList.contains('sidebar-mini') || !newCW || !oldCW) throw new Error('layout mismatch');
+          /* 布局校验放宽(2026-11-25): 只要求内容区存在——此前要求 body 必有
+             sidebar-mini(登录态面板布局类), 游客/顶栏布局(layout-top-nav, 如皮肤库
+             游客视角)直接校验失败回退整页刷新, 用户看到的"切换裸露壁纸"正是整页
+             跳转的白屏期 */
+          if (!newCW || !oldCW) throw new Error('layout mismatch');
           if (doc.body.classList.contains('dark-mode') !== body.classList.contains('dark-mode')) {
             body.classList.toggle('dark-mode', doc.body.classList.contains('dark-mode'));
           }
@@ -1289,7 +1293,9 @@
           oldCW.classList.add('ht-pjax-exit-' + pjaxDir);
           var importNode = document.importNode(newCW, true);
           importNode.classList.add('ht-pjax-enter-' + pjaxDir);
-          parent.appendChild(importNode); /* 并存叠层, 双向滑动 */
+          /* 插入到旧内容原位置(其后), 而非容器末尾——appendChild 会把新内容放到
+             页脚之后, 叠层期错位且完成后新内容永久错到页脚下方(顶部裸露 57px) */
+          parent.insertBefore(importNode, oldCW.nextSibling); /* 并存叠层, 双向滑动 */
           requestAnimationFrame(function () {
             requestAnimationFrame(function () {
               importNode.classList.remove('ht-pjax-enter-' + pjaxDir);
