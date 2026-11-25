@@ -1241,6 +1241,10 @@
     }
 
     var htPjaxBusy = false;
+    /* 动画代际: 连续快速切换时, 上一次动画的清理定时器不得清掉
+       这一次动画的容器样式(共享容器样式串扰会让 overlay 失去包含块、错位) */
+    var htPjaxGen = 0;
+
     /* 滑动方向判定: 被点项与当前 active 项在同组(筛选 chips/侧栏菜单/文档目录/
        分页/标签页)里的位置关系——被点项在当前项之后 → 向前(旧左滑出新右滑入);
        之前 → 向后(反向)。无同组 active 项时默认向前 */
@@ -1259,10 +1263,9 @@
       htPjaxBusy = true;
       var u = new URL(url, location.href);
       if (dir === undefined) dir = push ? 'left' : 'right';
-      /* 连贯起点: 点击瞬间旧内容就开始滑出(fetch 等待期不再静止),
-         数据到位后新内容紧接着滑入 */
-      var _exitCw = document.querySelector('.content-wrapper');
-      if (_exitCw) _exitCw.classList.add('ht-pjax-exit-' + dir);
+      /* 点击后到数据到位前页面完全不动: 旧内容若提前滑出会脱离文档流,
+         fetch 等待期(单线程下可达 0.5s+)整页塌陷——用户视频里的"顶栏消失/
+         撕裂"就是它。动画只在数据到位后开始。 */
       fetch(u.href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' }, redirect: 'follow' })
         .then(function (r) {
           if (!r.ok || !r.url || new URL(r.url).pathname !== u.pathname) throw new Error('bad response');
@@ -1316,9 +1319,12 @@
               var newSort = newFilter.querySelector('.sl-sort');
               if (oldSort && newSort) oldSort.value = newSort.value;
             }
-            var oldCount = oldCW.querySelector('.content-header .text-muted');
-            var newCount = newCW.querySelector('.content-header .text-muted');
-            if (oldCount && newCount) oldCount.textContent = newCount.textContent;
+            /* 计数文字在滑动时同步(放在预加载之后, 避免"标题已是新数、网格还是旧内容"的中间态) */
+            var syncCount = function () {
+              var oldCount = oldCW.querySelector('.content-header .text-muted');
+              var newCount = newCW.querySelector('.content-header .text-muted');
+              if (oldCount && newCount) oldCount.textContent = newCount.textContent;
+            };
             /* 分页区直接替换(不滑) */
             var oldPag = oldCW.querySelector('.sl-pagination');
             var newPag = newCW.querySelector('.sl-pagination');
@@ -1329,31 +1335,52 @@
             } else if (oldPag && !newPag) {
               oldPag.parentNode.removeChild(oldPag);
             }
-            /* 网格区滑动(同一套方向语义) */
-            var gp = oldGrid.parentNode;
-            gp.style.position = 'relative';
-            gp.style.overflow = 'hidden';
-            oldGrid.classList.add('ht-pjax-exit-' + dir);
-            var importGrid = document.importNode(newGrid, true);
-            importGrid.classList.add('ht-pjax-enter-' + dir);
-            gp.insertBefore(importGrid, oldGrid.nextSibling);
-            requestAnimationFrame(function () {
-              requestAnimationFrame(function () {
-                importGrid.classList.remove('ht-pjax-enter-' + dir);
-              });
+            /* 网格区滑动: 先预加载新网格图片(最多等 350ms)——否则滑入的是
+               一片空白卡片, 图片懒加载在动画后才慢慢填(用户观感的"切换后空一下");
+               预加载完成后: 旧网格保持占位滑出, 新网格 absolute 叠层滑入,
+               播完新网格转正常流、旧网格移除(页面高度全程稳定) */
+            var imgs = newGrid.querySelectorAll('img[src]');
+            var waiters = [];
+            for (var wi = 0; wi < imgs.length && wi < 36; wi++) {
+              (function (im) {
+                waiters.push(new Promise(function (res) {
+                  var probe = new Image();
+                  probe.onload = probe.onerror = res;
+                  probe.src = im.getAttribute('src');
+                }));
+              })(imgs[wi]);
+            }
+            var imgBarrier = new Promise(function (res) { setTimeout(res, 350); });
+            Promise.race([Promise.all(waiters), imgBarrier]).then(function () {
+              syncCount();
+              var gen = ++htPjaxGen;
+              var gp = oldGrid.parentNode;
+              gp.style.position = 'relative';
+              gp.style.overflow = 'hidden';
+              oldGrid.classList.add('ht-pjax-exit-' + dir);
+              var importGrid = document.importNode(newGrid, true);
+              importGrid.classList.add('ht-pjax-enter-' + dir);
+              importGrid.classList.add('ht-pjax-overlay');
+              gp.insertBefore(importGrid, oldGrid.nextSibling);
+              void importGrid.offsetWidth; /* 强制 reflow 固定起始态 */
+              importGrid.classList.remove('ht-pjax-enter-' + dir);
+              setTimeout(function () {
+                importGrid.classList.remove('ht-pjax-overlay');
+                if (oldGrid.parentNode) oldGrid.parentNode.removeChild(oldGrid);
+                if (gen !== htPjaxGen) return; /* 已有更新的动画接管, 容器样式归它管 */
+                gp.style.position = '';
+                gp.style.overflow = '';
+                htPjaxBusy = false; /* 动画结束才放行下一次切换 */
+              }, 420);
             });
-            setTimeout(function () {
-              if (oldGrid.parentNode) oldGrid.parentNode.removeChild(oldGrid);
-              gp.style.position = '';
-              gp.style.overflow = '';
-            }, 420);
             /* 非网格部分(侧栏高亮/标题/地址栏)照旧处理, 但不换 content-wrapper */
             if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
             if (push) history.pushState({ htPjax: true }, '', u.href);
             htMarkSidebar(u.pathname);
             document.body.classList.remove('sidebar-open');
             document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
-            htPjaxBusy = false;
+            /* busy 持有到动画彻底结束(在 barrier 的清理定时器里复位)——
+               fetch 完成就复位会让预加载/动画期间的连续点击叠加执行 */
             window.scrollTo(0, 0);
             return;
           }
@@ -1361,9 +1388,9 @@
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
           parent.style.overflow = 'hidden'; /* 滑出部分裁掉 */
-          /* 中间态裸露修正: 旧内容的柔光背景跟随旧内容滑出、新内容的还没滑入,
-             滑动期间内容区顶部壁纸会裸露——把内容区背景临时复制到容器上
-             (背景留下不动, 内容滑动), 播完还原 */
+          /* 页面高度稳定机制: 旧内容保持文档流占位(只做 transform/opacity),
+             不 absolute——否则整页瞬间塌陷; 新内容 absolute 叠在同一位置滑入,
+             动画播完后新内容转回正常流、旧内容移除 */
           var cwBg = getComputedStyle(oldCW).backgroundColor;
           if (cwBg && cwBg !== 'transparent' && cwBg !== 'rgba(0, 0, 0, 0)') {
             parent.style.background = cwBg;
@@ -1371,19 +1398,22 @@
           oldCW.classList.add('ht-pjax-exit-' + pjaxDir);
           var importNode = document.importNode(newCW, true);
           importNode.classList.add('ht-pjax-enter-' + pjaxDir);
-          /* 插入到旧内容原位置(其后), 而非容器末尾——appendChild 会把新内容放到
-             页脚之后, 叠层期错位且完成后新内容永久错到页脚下方(顶部裸露 57px) */
-          parent.insertBefore(importNode, oldCW.nextSibling); /* 并存叠层, 双向滑动 */
-          requestAnimationFrame(function () {
-            requestAnimationFrame(function () {
-              importNode.classList.remove('ht-pjax-enter-' + pjaxDir);
-            });
-          });
+          importNode.classList.add('ht-pjax-overlay'); /* absolute 叠层 */
+          parent.insertBefore(importNode, oldCW.nextSibling);
+          /* 强制 reflow 固定起始态(translateX 屏外)后立即改类触发 transition——
+             rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播,
+             新内容会瞬移到位(中间帧空白断档的根因) */
+          void importNode.offsetWidth;
+          importNode.classList.remove('ht-pjax-enter-' + pjaxDir);
+          var gen = ++htPjaxGen;
           setTimeout(function () {
+            importNode.classList.remove('ht-pjax-overlay'); /* 新内容回到正常流 */
             if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
+            if (gen !== htPjaxGen) return; /* 已有更新的动画接管, 容器样式归它管 */
             parent.style.position = '';
             parent.style.overflow = '';
             parent.style.background = '';
+            htPjaxBusy = false; /* 动画结束才放行下一次切换 */
           }, 420);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
@@ -1393,7 +1423,7 @@
           document.body.classList.remove('sidebar-open');
           /* 通知页面级增量模块(评论区等)按新内容重新初始化 */
           document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
-          htPjaxBusy = false;
+          /* busy 在动画清理定时器里复位(见上), 这里不再提前放行 */
           var page = HT_PAGES[u.pathname.replace(/\/$/, '')] || HT_PAGES[u.pathname];
           /* 皮肤详情页: 路径带 tid(正则路由), 挂载表用动态条目——
              漏了它会导致 PJAX 进入详情页时 #previewer/#side 空壳(需手动刷新) */
