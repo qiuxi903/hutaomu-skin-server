@@ -1241,14 +1241,28 @@
     }
 
     var htPjaxBusy = false;
-    function htPjaxGo(url, push) {
+    /* 滑动方向判定: 被点项与当前 active 项在同组(筛选 chips/侧栏菜单/文档目录/
+       分页/标签页)里的位置关系——被点项在当前项之后 → 向前(旧左滑出新右滑入);
+       之前 → 向后(反向)。无同组 active 项时默认向前 */
+    function htPjaxDirFor(a) {
+      var scope = a.closest('.sl-chip-group, .nav-sidebar, .doc-side, .pagination, .nav-tabs, .ap-nav');
+      if (!scope) return 'left';
+      var curEl = scope.querySelector('.active, .is-active');
+      if (!curEl || curEl === a || !curEl.closest) return 'left';
+      /* compareDocumentPosition: curEl 在 a 之后(FOLLOWING) = a 在前 = 向后 */
+      /* compareDocumentPosition: curEl 在 a 之后(FOLLOWING) = 被点项在当前项之前 = 向后滑 */
+      return (a.compareDocumentPosition(curEl) & Node.DOCUMENT_POSITION_FOLLOWING) ? 'right' : 'left';
+    }
+
+    function htPjaxGo(url, push, dir) {
       if (htPjaxBusy) return;
       htPjaxBusy = true;
       var u = new URL(url, location.href);
+      if (dir === undefined) dir = push ? 'left' : 'right';
       /* 连贯起点: 点击瞬间旧内容就开始滑出(fetch 等待期不再静止),
          数据到位后新内容紧接着滑入 */
       var _exitCw = document.querySelector('.content-wrapper');
-      if (_exitCw) _exitCw.classList.add('ht-pjax-exit-' + (push ? 'left' : 'right'));
+      if (_exitCw) _exitCw.classList.add('ht-pjax-exit-' + dir);
       fetch(u.href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' }, redirect: 'follow' })
         .then(function (r) {
           if (!r.ok || !r.url || new URL(r.url).pathname !== u.pathname) throw new Error('bad response');
@@ -1279,7 +1293,7 @@
              后退(popstate)反向。旧内容 absolute 不占高度(容器高=新内容高),
              位移拉满容器宽度(100%)保证新旧完全不重叠; 播完移除旧节点还原样式。
              起始态类挂载后第二帧移除, 保证 transition 有起始帧可播 */
-          var pjaxDir = push ? 'left' : 'right';
+          var pjaxDir = dir;
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
           parent.style.overflow = 'hidden'; /* 滑出部分裁掉 */
@@ -1353,7 +1367,7 @@
         /* 例外: lang= 是整页语言切换(侧栏/页眉/底部都要换), 必须原生跳转 */
         if (u.search && u.search.indexOf('lang=') !== -1) return;
         e.preventDefault();
-        htPjaxGo(u.href, true);
+        htPjaxGo(u.href, true, htPjaxDirFor(a));
       }, true);
       window.addEventListener('popstate', function (e) {
         if (document.querySelector('.content-wrapper')) htPjaxGo(location.href, false);
