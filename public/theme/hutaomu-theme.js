@@ -1293,6 +1293,70 @@
              后退(popstate)反向。旧内容 absolute 不占高度(容器高=新内容高),
              位移拉满容器宽度(100%)保证新旧完全不重叠; 播完移除旧节点还原样式。
              起始态类挂载后第二帧移除, 保证 transition 有起始帧可播 */
+          /* 局部化: 皮肤库筛选/分页(新旧内容都是材质网格页)只滑网格区,
+             标题与筛选栏保持不动——它们内容没变, 跟着滑既多余又打断。
+             筛选栏 chips 的 active 态用类名同步(渐变由 transition 完成),
+             计数文字直接替换文本 */
+          var newGrid = newCW.querySelector('.sl-grid');
+          var oldGrid = oldCW.querySelector('.sl-grid');
+          if (newGrid && oldGrid) {
+            /* 复位连贯起点挂在整区上的 exit 类: 局部路径只滑网格,
+               整区(content-wrapper)保持不动 */
+            oldCW.classList.remove('ht-pjax-exit-' + dir);
+            var newFilter = newCW.querySelector('.sl-filter-card');
+            var oldFilter = oldCW.querySelector('.sl-filter-card');
+            if (newFilter && oldFilter) {
+              var newChips = newFilter.querySelectorAll('.sl-chip');
+              var oldChips = oldFilter.querySelectorAll('.sl-chip');
+              newChips.forEach(function (nc, i) {
+                var oc = oldChips[i];
+                if (oc) oc.className = nc.className;
+              });
+              var oldSort = oldFilter.querySelector('.sl-sort');
+              var newSort = newFilter.querySelector('.sl-sort');
+              if (oldSort && newSort) oldSort.value = newSort.value;
+            }
+            var oldCount = oldCW.querySelector('.content-header .text-muted');
+            var newCount = newCW.querySelector('.content-header .text-muted');
+            if (oldCount && newCount) oldCount.textContent = newCount.textContent;
+            /* 分页区直接替换(不滑) */
+            var oldPag = oldCW.querySelector('.sl-pagination');
+            var newPag = newCW.querySelector('.sl-pagination');
+            if (oldPag && newPag) oldPag.parentNode.replaceChild(newPag, oldPag);
+            else if (!oldPag && newPag) {
+              /* 从无分页变有分页: 插到网格后 */
+              oldGrid.parentNode.insertBefore(newPag, oldGrid.nextSibling);
+            } else if (oldPag && !newPag) {
+              oldPag.parentNode.removeChild(oldPag);
+            }
+            /* 网格区滑动(同一套方向语义) */
+            var gp = oldGrid.parentNode;
+            gp.style.position = 'relative';
+            gp.style.overflow = 'hidden';
+            oldGrid.classList.add('ht-pjax-exit-' + dir);
+            var importGrid = document.importNode(newGrid, true);
+            importGrid.classList.add('ht-pjax-enter-' + dir);
+            gp.insertBefore(importGrid, oldGrid.nextSibling);
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                importGrid.classList.remove('ht-pjax-enter-' + dir);
+              });
+            });
+            setTimeout(function () {
+              if (oldGrid.parentNode) oldGrid.parentNode.removeChild(oldGrid);
+              gp.style.position = '';
+              gp.style.overflow = '';
+            }, 420);
+            /* 非网格部分(侧栏高亮/标题/地址栏)照旧处理, 但不换 content-wrapper */
+            if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
+            if (push) history.pushState({ htPjax: true }, '', u.href);
+            htMarkSidebar(u.pathname);
+            document.body.classList.remove('sidebar-open');
+            document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
+            htPjaxBusy = false;
+            window.scrollTo(0, 0);
+            return;
+          }
           var pjaxDir = dir;
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
@@ -1347,7 +1411,9 @@
         });
     }
 
-    if (authed && document.querySelector('.main-sidebar')) {
+    /* PJAX 启用条件放宽(2026-11-25): 有内容区(.content-wrapper)即可——皮肤库/文档
+       等顶栏布局(layout-top-nav)没有侧栏, 此前被挡在 PJAX 外导致筛选/分页整页刷新 */
+    if (document.querySelector('.content-wrapper')) {
       document.addEventListener('click', function (e) {
         if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         var a = e.target && e.target.closest ? e.target.closest('a') : null;
