@@ -1245,6 +1245,10 @@
       if (htPjaxBusy) return;
       htPjaxBusy = true;
       var u = new URL(url, location.href);
+      /* 连贯起点: 点击瞬间旧内容就开始滑出(fetch 等待期不再静止),
+         数据到位后新内容紧接着滑入 */
+      var _exitCw = document.querySelector('.content-wrapper');
+      if (_exitCw) _exitCw.classList.add('ht-pjax-exit-' + (push ? 'left' : 'right'));
       fetch(u.href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'fetch' }, redirect: 'follow' })
         .then(function (r) {
           if (!r.ok || !r.url || new URL(r.url).pathname !== u.pathname) throw new Error('bad response');
@@ -1268,8 +1272,8 @@
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
           /* 换页过渡: 方向性滑动——前进: 旧内容左滑出, 新内容从右滑入;
-             后退(popstate)反向。新旧内容叠层并行滑动(旧 absolute 不占高度,
-             新内容正常流入), 无空白期; 动画播完移除旧节点并还原容器样式。
+             后退(popstate)反向。旧内容 absolute 不占高度(容器高=新内容高),
+             位移拉满容器宽度(100%)保证新旧完全不重叠; 播完移除旧节点还原样式。
              起始态类挂载后第二帧移除, 保证 transition 有起始帧可播 */
           var pjaxDir = push ? 'left' : 'right';
           var parent = oldCW.parentNode;

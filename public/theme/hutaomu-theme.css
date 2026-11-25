@@ -1793,10 +1793,10 @@ body.layout-fixed .main-sidebar::-webkit-scrollbar {
   top: 0;
   transition: opacity 0.18s ease-in, transform 0.18s ease-in;
 }
-.content-wrapper.ht-pjax-exit-left { opacity: 0; transform: translateX(-46px); }
-.content-wrapper.ht-pjax-exit-right { opacity: 0; transform: translateX(46px); }
-.content-wrapper.ht-pjax-enter-left { opacity: 0; transform: translateX(46px); }
-.content-wrapper.ht-pjax-enter-right { opacity: 0; transform: translateX(-46px); }
+.content-wrapper.ht-pjax-exit-left { opacity: 0; transform: translateX(-100%); }
+.content-wrapper.ht-pjax-exit-right { opacity: 0; transform: translateX(100%); }
+.content-wrapper.ht-pjax-enter-left { opacity: 0; transform: translateX(100%); }
+.content-wrapper.ht-pjax-enter-right { opacity: 0; transform: translateX(-100%); }
 /* Bootstrap 标签页切换: tab-pane 从 display:none 变 block 时会重播 animation,
    正好用作淡入 */
 .tab-pane { animation: ht-fadein 0.22s ease; }
