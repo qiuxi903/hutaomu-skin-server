@@ -1152,6 +1152,14 @@
     document.addEventListener('ht:pjax:navigated', htInitComments);
     htInitComments();
 
+    /* 皮肤库预览图加载淡入: img load 事件不冒泡但捕获阶段能收到;
+       PJAX 换页后新图未 load 时淡入, 缓存图立即显示 */
+    document.addEventListener('load', function (e) {
+      if (e.target && e.target.classList && e.target.classList.contains('sl-preview')) {
+        e.target.classList.add('loaded');
+      }
+    }, true);
+
     /* ---------- Bootstrap 弹窗层级修复 ---------- */
     /* 玻璃卡的 backdrop-filter 会成为 fixed 弹窗的包含块+层叠上下文,
        弹窗的 z1050 被困在卡片内部, 画不过 body 级 z1040 的遮罩 →
@@ -1259,16 +1267,20 @@
           var newExtra = doc.querySelector('#blessing-extra');
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
-          /* 换页过渡: 新内容淡入上移(220ms)。起始态类挂载后第二帧移除,
-             保证 transition 有起始帧可播(单帧直接移除会跳过动画) */
-          var importNode = document.importNode(newCW, true);
-          importNode.classList.add('ht-pjax-enter');
-          oldCW.parentNode.replaceChild(importNode, oldCW);
-          requestAnimationFrame(function () {
+          /* 换页过渡: 交叉淡化——旧内容快淡出 120ms 叠新内容柔淡入 220ms,
+             消除"瞬间替换"的空白闪烁(此前无淡出, 新内容硬入场显突兀)。
+             起始态类挂载后第二帧移除, 保证 transition 有起始帧可播 */
+          oldCW.classList.add('ht-pjax-leave');
+          setTimeout(function () {
+            var importNode = document.importNode(newCW, true);
+            importNode.classList.add('ht-pjax-enter');
+            oldCW.parentNode.replaceChild(importNode, oldCW);
             requestAnimationFrame(function () {
-              importNode.classList.remove('ht-pjax-enter');
+              requestAnimationFrame(function () {
+                importNode.classList.remove('ht-pjax-enter');
+              });
             });
-          });
+          }, 120);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);

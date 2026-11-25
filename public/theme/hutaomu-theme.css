@@ -1785,7 +1785,13 @@ body.layout-fixed .main-sidebar::-webkit-scrollbar {
    挂在 .content-wrapper 上, 只影响主内容区(页眉/侧栏不动) */
 .content-wrapper.ht-pjax-enter {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(4px);
+}
+/* 旧内容快淡出 120ms(与新淡入重叠, 交叉淡化无空白闪烁) */
+.content-wrapper.ht-pjax-leave {
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.12s ease-in, transform 0.12s ease-in;
 }
 .content-wrapper { transition: opacity 0.22s ease, transform 0.22s ease; }
 /* Bootstrap 标签页切换: tab-pane 从 display:none 变 block 时会重播 animation,
@@ -1795,6 +1801,13 @@ body.layout-fixed .main-sidebar::-webkit-scrollbar {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: none; }
 }
+
+/* 皮肤库预览图: 加载完成前透明, load 后淡入(JS 捕获委托加 .loaded) */
+.sl-preview { opacity: 0; transition: opacity 0.3s ease; }
+.sl-preview.loaded { opacity: 1; }
+
+/* 全局下拉菜单淡入(用户菜单/语言菜单/通知等 Bootstrap dropdown) */
+.dropdown-menu { animation: ht-fadein 0.15s ease; }
 
 /* ---------- 主题切换平滑过渡 ---------- */
 /* 明暗互换时关键表面颜色渐变; 壁纸图片本身不参与(由过渡层负责) */
