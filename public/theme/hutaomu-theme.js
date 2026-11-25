@@ -1267,20 +1267,28 @@
           var newExtra = doc.querySelector('#blessing-extra');
           var oldExtra = document.querySelector('#blessing-extra');
           if (newExtra && oldExtra) oldExtra.textContent = newExtra.textContent;
-          /* 换页过渡: 交叉淡化——旧内容快淡出 120ms 叠新内容柔淡入 220ms,
-             消除"瞬间替换"的空白闪烁(此前无淡出, 新内容硬入场显突兀)。
+          /* 换页过渡: 方向性滑动——前进: 旧内容左滑出, 新内容从右滑入;
+             后退(popstate)反向。新旧内容叠层并行滑动(旧 absolute 不占高度,
+             新内容正常流入), 无空白期; 动画播完移除旧节点并还原容器样式。
              起始态类挂载后第二帧移除, 保证 transition 有起始帧可播 */
-          oldCW.classList.add('ht-pjax-leave');
-          setTimeout(function () {
-            var importNode = document.importNode(newCW, true);
-            importNode.classList.add('ht-pjax-enter');
-            oldCW.parentNode.replaceChild(importNode, oldCW);
+          var pjaxDir = push ? 'left' : 'right';
+          var parent = oldCW.parentNode;
+          parent.style.position = 'relative';
+          parent.style.overflow = 'hidden'; /* 滑出部分裁掉 */
+          oldCW.classList.add('ht-pjax-exit-' + pjaxDir);
+          var importNode = document.importNode(newCW, true);
+          importNode.classList.add('ht-pjax-enter-' + pjaxDir);
+          parent.appendChild(importNode); /* 并存叠层, 双向滑动 */
+          requestAnimationFrame(function () {
             requestAnimationFrame(function () {
-              requestAnimationFrame(function () {
-                importNode.classList.remove('ht-pjax-enter');
-              });
+              importNode.classList.remove('ht-pjax-enter-' + pjaxDir);
             });
-          }, 120);
+          });
+          setTimeout(function () {
+            if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
+            parent.style.position = '';
+            parent.style.overflow = '';
+          }, 420);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);

@@ -1780,20 +1780,23 @@ body.layout-fixed .main-sidebar::-webkit-scrollbar {
   pointer-events: none;
 }
 
-/* ---------- PJAX 换页过渡(2026-11-24) ---------- */
-/* 新内容区: 淡入+上移 220ms; 起始态由 JS 挂载时加, 第二帧移除让 transition 播放。
-   挂在 .content-wrapper 上, 只影响主内容区(页眉/侧栏不动) */
-.content-wrapper.ht-pjax-enter {
-  opacity: 0;
-  transform: translateY(4px);
+/* ---------- PJAX 换页过渡(2026-11-24 滑动版) ---------- */
+/* 方向性滑动: 前进=旧左滑出+新右滑入, 后退反向; 叠层并行(旧 absolute 不占高度)。
+   挂在 .content-wrapper 上, 只影响主内容区(页眉/侧栏不动)。
+   起始态由 JS 挂载时加, 第二帧移除让 transition 播放 */
+.content-wrapper { transition: opacity 0.24s ease-out, transform 0.24s ease-out; }
+.content-wrapper.ht-pjax-exit-left,
+.content-wrapper.ht-pjax-exit-right {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  transition: opacity 0.18s ease-in, transform 0.18s ease-in;
 }
-/* 旧内容快淡出 120ms(与新淡入重叠, 交叉淡化无空白闪烁) */
-.content-wrapper.ht-pjax-leave {
-  opacity: 0;
-  transform: translateY(3px);
-  transition: opacity 0.12s ease-in, transform 0.12s ease-in;
-}
-.content-wrapper { transition: opacity 0.22s ease, transform 0.22s ease; }
+.content-wrapper.ht-pjax-exit-left { opacity: 0; transform: translateX(-46px); }
+.content-wrapper.ht-pjax-exit-right { opacity: 0; transform: translateX(46px); }
+.content-wrapper.ht-pjax-enter-left { opacity: 0; transform: translateX(46px); }
+.content-wrapper.ht-pjax-enter-right { opacity: 0; transform: translateX(-46px); }
 /* Bootstrap 标签页切换: tab-pane 从 display:none 变 block 时会重播 animation,
    正好用作淡入 */
 .tab-pane { animation: ht-fadein 0.22s ease; }
