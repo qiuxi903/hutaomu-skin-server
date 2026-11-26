@@ -1361,6 +1361,11 @@
               var importGrid = document.importNode(newGrid, true);
               importGrid.classList.add('ht-pjax-enter-' + dir);
               importGrid.classList.add('ht-pjax-overlay');
+              /* overlay 必须落在旧网格的实际位置: 网格在容器里位于标题+筛选栏之后,
+                 absolute 默认 top:0 会跑到容器顶部与标题文字重叠, 动画完再"掉下来" */
+              var gpRect = gp.getBoundingClientRect();
+              var gridRect = oldGrid.getBoundingClientRect();
+              importGrid.style.top = Math.round(gridRect.top - gpRect.top + gp.scrollTop) + 'px';
               gp.insertBefore(importGrid, oldGrid.nextSibling);
               void importGrid.offsetWidth; /* 强制 reflow 固定起始态 */
               importGrid.classList.remove('ht-pjax-enter-' + dir);
@@ -1370,6 +1375,7 @@
                 if (gen !== htPjaxGen) return; /* 已有更新的动画接管, 容器样式归它管 */
                 gp.style.position = '';
                 gp.style.overflow = '';
+                importGrid.style.top = '';
                 htPjaxBusy = false; /* 动画结束才放行下一次切换 */
               }, 420);
             });
