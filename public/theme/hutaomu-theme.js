@@ -1245,6 +1245,22 @@
        这一次动画的容器样式(共享容器样式串扰会让 overlay 失去包含块、错位) */
     var htPjaxGen = 0;
 
+    /* 克隆子树冻结入场动画: .content .card 挂着 ht-rise(translateY(14px)→0, 0.45s),
+       克隆节点一插入 DOM 就重播——CSS 动画优先级高于普通声明, 会压掉 PJAX
+       enter 类的 translateX(新卡纵向"掉下来"而非横向滑入), 还叠加出多余纵移。
+       只冻结卡片/页脚/标题这几个带入场动画的元素本身, 不动子树其它元素
+       (下拉菜单等后续交互动画不受影响)。必须保持内联 animation:none 直到卸载——
+       改回非 none 会让动画在那一刻重新开播 */
+    function htPjaxFreezeAnim(root) {
+      if (!root || !root.style) return;
+      var sel = '.card, .main-footer, .content-header h1';
+      /* .content-wrapper 自身的 ht-fade 是 opacity 动画(fill both 锁死终值),
+         整区路径克隆时必须连同冻结, 否则 enter/exit 的淡入淡出全被锁成 1 */
+      if (root.matches(sel) || root.classList.contains('content-wrapper')) root.style.animation = 'none';
+      var els = root.querySelectorAll(sel);
+      for (var i = 0; i < els.length; i++) els[i].style.animation = 'none';
+    }
+
     /* 滑动方向判定: 被点项与当前 active 项在同组(筛选 chips/侧栏菜单/文档目录/
        分页/标签页)里的位置关系——被点项在当前项之后 → 向前(旧左滑出新右滑入);
        之前 → 向后(反向)。无同组 active 项时默认向前 */
@@ -1359,13 +1375,19 @@
               gp.style.overflow = 'hidden';
               oldGrid.classList.add('ht-pjax-exit-' + dir);
               var importGrid = document.importNode(newGrid, true);
+              htPjaxFreezeAnim(importGrid);
               importGrid.classList.add('ht-pjax-enter-' + dir);
               importGrid.classList.add('ht-pjax-overlay');
               /* overlay 必须落在旧网格的实际位置: 网格在容器里位于标题+筛选栏之后,
-                 absolute 默认 top:0 会跑到容器顶部与标题文字重叠, 动画完再"掉下来" */
+                 absolute 默认 top:0 会跑到容器顶部与标题文字重叠, 动画完再"掉下来"。
+                 水平方向也取旧网格的实际几何——父容器有 padding 时 left:0/right:0
+                 会比旧网格宽出两侧 padding, 动画结束会横跳 */
               var gpRect = gp.getBoundingClientRect();
               var gridRect = oldGrid.getBoundingClientRect();
               importGrid.style.top = Math.round(gridRect.top - gpRect.top + gp.scrollTop) + 'px';
+              importGrid.style.left = Math.round(gridRect.left - gpRect.left + gp.scrollLeft) + 'px';
+              importGrid.style.width = Math.round(gridRect.width) + 'px';
+              importGrid.style.right = 'auto';
               gp.insertBefore(importGrid, oldGrid.nextSibling);
               void importGrid.offsetWidth; /* 强制 reflow 固定起始态 */
               importGrid.classList.remove('ht-pjax-enter-' + dir);
@@ -1376,6 +1398,9 @@
                 gp.style.position = '';
                 gp.style.overflow = '';
                 importGrid.style.top = '';
+                importGrid.style.left = '';
+                importGrid.style.width = '';
+                importGrid.style.right = '';
                 htPjaxBusy = false; /* 动画结束才放行下一次切换 */
               }, 420);
             });
@@ -1387,6 +1412,69 @@
             document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
             /* busy 持有到动画彻底结束(在 barrier 的清理定时器里复位)——
                fetch 完成就复位会让预加载/动画期间的连续点击叠加执行 */
+            window.scrollTo(0, 0);
+            return;
+          }
+          /* 文档详情→详情局部化(2026-11-26): 目录与标题不动, 只滑正文卡——
+             与皮肤库同一理念(不变的部分不参与动画)。索引→详情结构变化,
+             仍走整区路径 */
+          var newArticle = newCW.querySelector('.col-md-9 > .card');
+          var oldArticle = oldCW.querySelector('.col-md-9 > .card');
+          if (newArticle && oldArticle) {
+            oldCW.classList.remove('ht-pjax-exit-' + dir);
+            /* 目录: 类名同步(active 高亮渐变), 目录内容本身不变 */
+            var newSide = newCW.querySelector('.doc-side');
+            var oldSide = oldCW.querySelector('.doc-side');
+            if (newSide && oldSide) {
+              var naLinks = newSide.querySelectorAll('.doc-side-link');
+              var oaLinks = oldSide.querySelectorAll('.doc-side-link');
+              naLinks.forEach(function (na, i) {
+                var oa = oaLinks[i];
+                if (oa) oa.className = na.className;
+              });
+            }
+            /* 标题原地换文本 */
+            var oldH1 = oldCW.querySelector('.content-header h1');
+            var newH1 = newCW.querySelector('.content-header h1');
+            if (oldH1 && newH1) oldH1.innerHTML = newH1.innerHTML;
+            /* 正文卡滑动(overlay 按旧卡片实际偏移定位) */
+            var ap = oldArticle.parentNode;
+            ap.style.position = 'relative';
+            ap.style.overflow = 'hidden';
+            oldArticle.classList.add('ht-pjax-exit-' + dir);
+            var importArticle = document.importNode(newArticle, true);
+            htPjaxFreezeAnim(importArticle);
+            importArticle.classList.add('ht-pjax-enter-' + dir);
+            importArticle.classList.add('ht-pjax-overlay');
+            var apRect = ap.getBoundingClientRect();
+            var artRect = oldArticle.getBoundingClientRect();
+            importArticle.style.top = Math.round(artRect.top - apRect.top + ap.scrollTop) + 'px';
+            /* 水平同样取旧卡几何: .col-md-9 有 15px padding, left:0/right:0
+               会让卡片比旧卡宽出两侧 padding, 动画结束横跳 */
+            importArticle.style.left = Math.round(artRect.left - apRect.left + ap.scrollLeft) + 'px';
+            importArticle.style.width = Math.round(artRect.width) + 'px';
+            importArticle.style.right = 'auto';
+            ap.insertBefore(importArticle, oldArticle.nextSibling);
+            void importArticle.offsetWidth;
+            importArticle.classList.remove('ht-pjax-enter-' + dir);
+            var artGen = ++htPjaxGen;
+            setTimeout(function () {
+              importArticle.classList.remove('ht-pjax-overlay');
+              if (oldArticle.parentNode) oldArticle.parentNode.removeChild(oldArticle);
+              if (artGen !== htPjaxGen) return;
+              ap.style.position = '';
+              ap.style.overflow = '';
+              importArticle.style.top = '';
+              importArticle.style.left = '';
+              importArticle.style.width = '';
+              importArticle.style.right = '';
+              htPjaxBusy = false;
+            }, 420);
+            if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
+            if (push) history.pushState({ htPjax: true }, '', u.href);
+            htMarkSidebar(u.pathname);
+            document.body.classList.remove('sidebar-open');
+            document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
             window.scrollTo(0, 0);
             return;
           }
@@ -1403,8 +1491,18 @@
           }
           oldCW.classList.add('ht-pjax-exit-' + pjaxDir);
           var importNode = document.importNode(newCW, true);
+          htPjaxFreezeAnim(importNode);
           importNode.classList.add('ht-pjax-enter-' + pjaxDir);
           importNode.classList.add('ht-pjax-overlay'); /* absolute 叠层 */
+          /* overlay 按旧内容实际偏移定位: top:0 相对 .wrapper 顶部, 会在动画期
+             跑到页面最顶(与顶栏/标题错位), 播完才落回原位; 水平同理——
+             有侧栏时 .content-wrapper 带 margin-left, left:0/right:0 会铺到侧栏底下 */
+          var parentRect = parent.getBoundingClientRect();
+          var oldRect = oldCW.getBoundingClientRect();
+          importNode.style.top = Math.round(oldRect.top - parentRect.top + parent.scrollTop) + 'px';
+          importNode.style.left = Math.round(oldRect.left - parentRect.left + parent.scrollLeft) + 'px';
+          importNode.style.width = Math.round(oldRect.width) + 'px';
+          importNode.style.right = 'auto';
           parent.insertBefore(importNode, oldCW.nextSibling);
           /* 强制 reflow 固定起始态(translateX 屏外)后立即改类触发 transition——
              rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播,
@@ -1419,6 +1517,10 @@
             parent.style.position = '';
             parent.style.overflow = '';
             parent.style.background = '';
+            importNode.style.top = '';
+            importNode.style.left = '';
+            importNode.style.width = '';
+            importNode.style.right = '';
             htPjaxBusy = false; /* 动画结束才放行下一次切换 */
           }, 420);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }

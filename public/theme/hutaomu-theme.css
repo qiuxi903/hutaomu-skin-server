@@ -1790,25 +1790,29 @@ body.layout-fixed .main-sidebar::-webkit-scrollbar {
    第一版尝试过的 100% 轮播位移在宽屏(1900px)下 260ms 走完一屏, 中间帧像故障 */
 .content-wrapper,
 .sl-grid { transition: transform 0.24s ease-out, opacity 0.24s ease-out; }
-.content-wrapper.ht-pjax-exit-left,
-.content-wrapper.ht-pjax-exit-right,
-.sl-grid.ht-pjax-exit-left,
-.sl-grid.ht-pjax-exit-right {
-  transition: transform 0.16s ease-in, opacity 0.16s ease-in;
+/* 通用化(2026-11-26): 文档详情只滑正文卡(.card), 类若限定 .content-wrapper/.sl-grid
+   则卡片的 exit/enter/overlay 全部落空——新卡插进正常流把整页内容顶开。
+   这些类只由 PJAX JS 挂载, 不限定载体即安全。 */
+.ht-pjax-exit-left,
+.ht-pjax-exit-right {
+  /* 压过 .content .card 自带的 transition(只有 transform/box-shadow, 无 opacity),
+     否则卡片的淡出会瞬间跳变 */
+  transition: transform 0.16s ease-in, opacity 0.16s ease-in !important;
   opacity: 0;
 }
-.content-wrapper.ht-pjax-exit-left, .sl-grid.ht-pjax-exit-left { transform: translateX(-72px); }
-.content-wrapper.ht-pjax-exit-right, .sl-grid.ht-pjax-exit-right { transform: translateX(72px); }
+.ht-pjax-exit-left { transform: translateX(-72px); }
+.ht-pjax-exit-right { transform: translateX(72px); }
 /* 新内容起始态: 从滑入方向一侧 72px 处淡入 */
-.content-wrapper.ht-pjax-enter-left, .sl-grid.ht-pjax-enter-left { opacity: 0; transform: translateX(72px); }
-.content-wrapper.ht-pjax-enter-right, .sl-grid.ht-pjax-enter-right { opacity: 0; transform: translateX(-72px); }
+.ht-pjax-enter-left { opacity: 0; transform: translateX(72px); }
+.ht-pjax-enter-right { opacity: 0; transform: translateX(-72px); }
 /* 叠层: 新内容绝对定位盖在旧内容同位置, 播完由 JS 移除该类转回正常流 */
-.content-wrapper.ht-pjax-overlay,
-.sl-grid.ht-pjax-overlay {
+.ht-pjax-overlay {
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
+  /* 移除 enter 类后的淡入由 overlay 自身接管——卡片默认没有 opacity 过渡 */
+  transition: transform 0.24s ease-out, opacity 0.24s ease-out !important;
 }
 /* Bootstrap 标签页切换: tab-pane 从 display:none 变 block 时会重播 animation,
    正好用作淡入 */
