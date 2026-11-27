@@ -1493,13 +1493,11 @@
           var pjaxDir = dir;
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
-          parent.style.overflow = 'hidden'; /* 滑出部分裁掉 */
-          /* 页面高度稳定机制: 旧内容保持文档流原地不动(底版), 新内容以近实心底
-             整幅推入盖住它; 旧内容全程占位, 页面高度不塌陷 */
-          var cwBg = getComputedStyle(oldCW).backgroundColor;
-          if (cwBg && cwBg !== 'transparent' && cwBg !== 'rgba(0, 0, 0, 0)') {
-            parent.style.background = cwBg;
-          }
+          parent.style.overflow = 'hidden'; /* 裁住越界部分 */
+          /* 注意: 不能给 .wrapper 复制旧页底色做"保险垫"——wrapper 铺满整页,
+             那层半透明柔光会垫到毛玻璃侧栏/页眉背后, 它们会先变浅再变深
+             (清理撤掉时)。推入面板自带实心底+壁纸, 旧页原地不动占位,
+             中间不再需要任何垫底。 */
           var importNode = document.importNode(newCW, true);
           htPjaxFreezeAnim(importNode);
           importNode.classList.add('ht-pjax-overlay'); /* absolute 叠层 */
@@ -1571,7 +1569,6 @@
             if (gen !== htPjaxGen) return; /* 已有更新的动画接管, 容器样式归它管 */
             parent.style.position = '';
             parent.style.overflow = '';
-            parent.style.background = '';
             importNode.style.top = '';
             importNode.style.left = '';
             importNode.style.width = '';
