@@ -1503,14 +1503,32 @@
           var importNode = document.importNode(newCW, true);
           htPjaxFreezeAnim(importNode);
           importNode.classList.add('ht-pjax-overlay'); /* absolute 叠层 */
-          /* 动画期间把柔光底提到近实心: 半透明底会让旧页面透过新页显形(双影)。
+          /* 动画期间把柔光底提到不透明: 半透明底会让旧页面透过新页显形(双影)。
              颜色从已挂载的旧元素读(detached 克隆 getComputedStyle 拿不到样式),
              且必须 inline !important——body.ht-panel .content-wrapper 的
-             background 是 !important 声明, 普通 inline 压不过它。
-             落地后移除, 由 .content-wrapper 自带的 background-color 过渡(0.3s)
-             平滑回落到正常半透明 */
+             background 是 !important 声明, 普通 inline 压不过它 */
           var bgM = getComputedStyle(oldCW).backgroundColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
-          if (bgM) importNode.style.setProperty('background-color', 'rgba(' + bgM[1] + ',' + bgM[2] + ',' + bgM[3] + ',0.97)', 'important');
+          var dimA = bgM && bgM[4] !== undefined ? parseFloat(bgM[4]) : 0.5;
+          /* 旧页底色全透明(dimA=0, 如皮肤详情页)时不刷底色, 否则会变成黑板 */
+          if (bgM && dimA > 0) importNode.style.setProperty('background-color', 'rgba(' + bgM[1] + ',' + bgM[2] + ',' + bgM[3] + ',1)', 'important');
+          /* 给推入的页面铺上"和落地后一模一样"的壁纸底: 纯色板上叠一层壁纸纹理,
+             透明度取柔光浓度的补数——纯色 C 上叠壁纸×o 视觉上等于壁纸上加 C×dimA
+             的柔光(C*dimA + img*(1-dimA) == C*(1-o) + img*o, 取 o=1-dimA)。
+             壁纸图从固定层 .ht-wp-layer 读(可能是 base64 data URL)。
+             没开壁纸功能时就没有这层, 面板为纯色底 */
+          var wpSrc = null;
+          var wpLayers = document.querySelectorAll('.ht-wp-layer');
+          for (var wi = 0; wi < wpLayers.length; wi++) {
+            var bi = getComputedStyle(wpLayers[wi]).backgroundImage;
+            if (bi && bi !== 'none') { wpSrc = bi; break; }
+          }
+          var wpDiv = null;
+          if (wpSrc) {
+            wpDiv = document.createElement('div');
+            wpDiv.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;' +
+              'background-repeat:no-repeat;background-size:cover;background-position:center center;' +
+              'background-image:' + wpSrc + ';opacity:' + Math.min(0.9, Math.max(0, 1 - dimA)).toFixed(3) + ';';
+          }
           /* overlay 按旧内容实际偏移定位: top:0 相对 .wrapper 顶部, 会在动画期
              跑到页面最顶(与顶栏/标题错位), 播完才落回原位; 水平同理——
              有侧栏时 .content-wrapper 带 margin-left, left:0/right:0 会铺到侧栏底下。
@@ -1519,16 +1537,18 @@
           var oldRect = oldCW.getBoundingClientRect();
           htPjaxSpot(importNode, oldRect, parentRect, parent.scrollLeft, parent.scrollTop, oldRect.width, oldCW);
           /* 高度至少盖满旧内容: 新页更矮时, 下方露出的旧页残条不用淡出,
-             直接由近实心底盖住(避免 oldCW 上的 opacity 内联被既有 transition
+             直接由实心底盖住(避免 oldCW 上的 opacity 内联被既有 transition
              的级联优先级拖住不生效) */
           importNode.style.minHeight = Math.round(oldRect.height) + 'px';
           /* 整幅推入起点: 前进从右侧屏外、后退从左侧屏外(% 是自身宽, 恰好全出屏) */
           importNode.style.transform = 'translateX(' + (pjaxDir === 'left' ? '100%' : '-100%') + ')';
+          if (wpDiv) importNode.insertBefore(wpDiv, importNode.firstChild);
           parent.insertBefore(importNode, oldCW.nextSibling);
-          /* 强制 reflow 固定起始态(整幅屏外)后清掉内联 transform 触发 transition——
-             rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播 */
+          /* 强制 reflow 固定起始态(整幅屏外)后落到 translateX(0) 触发 transition——
+             保留 translateX(0) 而非清空: transform 在, 叠层才有 stacking context,
+             z:-1 的壁纸层才能保持在面板底色之上、内容之下 */
           void importNode.offsetWidth;
-          importNode.style.transform = '';
+          importNode.style.transform = 'translateX(0)';
           var gen = ++htPjaxGen;
           setTimeout(function () {
             importNode.classList.remove('ht-pjax-overlay'); /* 新内容回到正常流 */
@@ -1542,6 +1562,8 @@
             importNode.style.width = '';
             importNode.style.right = '';
             importNode.style.minHeight = '';
+            importNode.style.transform = ''; /* 叠层语境结束, 壁纸层一并移除 */
+            if (wpDiv && wpDiv.parentNode) wpDiv.parentNode.removeChild(wpDiv);
             importNode.style.removeProperty('background-color'); /* 触发背景回落过渡 */
             htPjaxBusy = false; /* 动画结束才放行下一次切换 */
           }, 560);
