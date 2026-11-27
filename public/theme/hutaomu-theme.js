@@ -1514,11 +1514,15 @@
           var oldRect = oldCW.getBoundingClientRect();
           htPjaxSpot(importNode, oldRect, parentRect, parent.scrollLeft, parent.scrollTop, oldRect.width, oldCW);
           parent.insertBefore(importNode, oldCW.nextSibling);
-          /* 强制 reflow 固定起始态(translateX 屏外)后立即改类触发 transition——
+          /* 强制 reflow 固定起始态(translateX 屏外)后延迟改类触发 transition——
              rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播,
-             新内容会瞬移到位(中间帧空白断档的根因) */
+             新内容会瞬移到位(中间帧空白断档的根因)。
+             整区切换是两套完全不同的版式, 交叉淡化会让新旧两页同时半透明可见,
+             观感像"没删干净的重叠"——改为顺序淡化: 旧内容先退场(160ms),
+             新内容延迟 90ms 再进场(240ms), 旧内容淡出尾声即接上新内容 */
           void importNode.offsetWidth;
-          importNode.classList.remove('ht-pjax-enter-' + pjaxDir);
+          var enterCls = 'ht-pjax-enter-' + pjaxDir;
+          setTimeout(function () { importNode.classList.remove(enterCls); }, 90);
           var gen = ++htPjaxGen;
           setTimeout(function () {
             importNode.classList.remove('ht-pjax-overlay'); /* 新内容回到正常流 */
@@ -1532,7 +1536,7 @@
             importNode.style.width = '';
             importNode.style.right = '';
             htPjaxBusy = false; /* 动画结束才放行下一次切换 */
-          }, 420);
+          }, 620);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);
