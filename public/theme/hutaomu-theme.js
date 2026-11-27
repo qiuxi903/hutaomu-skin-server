@@ -1261,6 +1261,24 @@
       for (var i = 0; i < els.length; i++) els[i].style.animation = 'none';
     }
 
+    /* 把绝对定位的叠层落到目标元素(旧内容)的 border-box 位置。
+       关键: 扣掉叠层自身的 margin——登录后侧栏布局 .content-wrapper 自带
+       margin-left:250px(折叠 4.6rem !important)+ 固定顶栏 margin-top:calc(3.5rem+1px),
+       绝对定位时 margin 仍会叠加在 left/top 上, 不抵扣就是整页双倍偏移
+       (右移 250、下移 57)。不能改为把 margin 清零: 还原时 margin 变化会触发
+       AdminLTE 的 margin-left 过渡, 清理瞬间再跳一次。
+       margin 必须从「已挂载的旧元素」读: 叠层是 detached 克隆, 还没插入文档时
+       getComputedStyle 拿不到样式表里的 margin(返回空串)。 */
+    function htPjaxSpot(el, rect, box, scrollX, scrollY, width, marginSource) {
+      var cs = getComputedStyle(marginSource || el);
+      var ml = parseFloat(cs.marginLeft) || 0;
+      var mt = parseFloat(cs.marginTop) || 0;
+      el.style.left = Math.round(rect.left - box.left + (scrollX || 0) - ml) + 'px';
+      el.style.top = Math.round(rect.top - box.top + (scrollY || 0) - mt) + 'px';
+      if (width != null) el.style.width = Math.round(width) + 'px';
+      el.style.right = 'auto';
+    }
+
     /* 滑动方向判定: 被点项与当前 active 项在同组(筛选 chips/侧栏菜单/文档目录/
        分页/标签页)里的位置关系——被点项在当前项之后 → 向前(旧左滑出新右滑入);
        之前 → 向后(反向)。无同组 active 项时默认向前 */
@@ -1384,10 +1402,7 @@
                  会比旧网格宽出两侧 padding, 动画结束会横跳 */
               var gpRect = gp.getBoundingClientRect();
               var gridRect = oldGrid.getBoundingClientRect();
-              importGrid.style.top = Math.round(gridRect.top - gpRect.top + gp.scrollTop) + 'px';
-              importGrid.style.left = Math.round(gridRect.left - gpRect.left + gp.scrollLeft) + 'px';
-              importGrid.style.width = Math.round(gridRect.width) + 'px';
-              importGrid.style.right = 'auto';
+              htPjaxSpot(importGrid, gridRect, gpRect, gp.scrollLeft, gp.scrollTop, gridRect.width, oldGrid);
               gp.insertBefore(importGrid, oldGrid.nextSibling);
               void importGrid.offsetWidth; /* 强制 reflow 固定起始态 */
               importGrid.classList.remove('ht-pjax-enter-' + dir);
@@ -1448,12 +1463,9 @@
             importArticle.classList.add('ht-pjax-overlay');
             var apRect = ap.getBoundingClientRect();
             var artRect = oldArticle.getBoundingClientRect();
-            importArticle.style.top = Math.round(artRect.top - apRect.top + ap.scrollTop) + 'px';
             /* 水平同样取旧卡几何: .col-md-9 有 15px padding, left:0/right:0
                会让卡片比旧卡宽出两侧 padding, 动画结束横跳 */
-            importArticle.style.left = Math.round(artRect.left - apRect.left + ap.scrollLeft) + 'px';
-            importArticle.style.width = Math.round(artRect.width) + 'px';
-            importArticle.style.right = 'auto';
+            htPjaxSpot(importArticle, artRect, apRect, ap.scrollLeft, ap.scrollTop, artRect.width, oldArticle);
             ap.insertBefore(importArticle, oldArticle.nextSibling);
             void importArticle.offsetWidth;
             importArticle.classList.remove('ht-pjax-enter-' + dir);
@@ -1496,13 +1508,11 @@
           importNode.classList.add('ht-pjax-overlay'); /* absolute 叠层 */
           /* overlay 按旧内容实际偏移定位: top:0 相对 .wrapper 顶部, 会在动画期
              跑到页面最顶(与顶栏/标题错位), 播完才落回原位; 水平同理——
-             有侧栏时 .content-wrapper 带 margin-left, left:0/right:0 会铺到侧栏底下 */
+             有侧栏时 .content-wrapper 带 margin-left, left:0/right:0 会铺到侧栏底下。
+             htPjaxSpot 内部还会抵扣克隆体自带的布局 margin(见函数注释) */
           var parentRect = parent.getBoundingClientRect();
           var oldRect = oldCW.getBoundingClientRect();
-          importNode.style.top = Math.round(oldRect.top - parentRect.top + parent.scrollTop) + 'px';
-          importNode.style.left = Math.round(oldRect.left - parentRect.left + parent.scrollLeft) + 'px';
-          importNode.style.width = Math.round(oldRect.width) + 'px';
-          importNode.style.right = 'auto';
+          htPjaxSpot(importNode, oldRect, parentRect, parent.scrollLeft, parent.scrollTop, oldRect.width, oldCW);
           parent.insertBefore(importNode, oldCW.nextSibling);
           /* 强制 reflow 固定起始态(translateX 屏外)后立即改类触发 transition——
              rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播,
