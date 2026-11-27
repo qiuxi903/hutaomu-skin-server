@@ -1490,6 +1490,121 @@
             window.scrollTo(0, 0);
             return;
           }
+          /* 文档索引↔文章: 目录面板 FLIP 形变(2026-11-28, 用户点名转场)——
+             索引页的目录框平移缩小到文章页左侧目录位, 右侧正文卡流畅淡入;
+             反向(文章→索引)目录框放大回索引面板位, 正文卡淡出。
+             不走整幅推入: 背景静止(壁纸层视口对齐+不位移), 只有面板与内容动 */
+          var oldIdxPanel = oldCW.querySelector('.doc-groups');
+          var oldSide = oldCW.querySelector('.doc-side');
+          var newIdxPanel = newCW.querySelector('.doc-groups');
+          var newSide = newCW.querySelector('.doc-side');
+          if ((oldIdxPanel && newSide) || (oldSide && newIdxPanel)) {
+            var mImport = document.importNode(newCW, true);
+            htPjaxFreezeAnim(mImport);
+            mImport.classList.add('ht-pjax-overlay');
+            /* 面板底色与壁纸层: 与整幅推入同款(实心底+视口对齐壁纸), 但不位移 */
+            var mBg = getComputedStyle(oldCW).backgroundColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
+            var mDim = mBg && mBg[4] !== undefined ? parseFloat(mBg[4]) : 0.5;
+            if (mBg && mDim > 0) mImport.style.setProperty('background-color', 'rgba(' + mBg[1] + ',' + mBg[2] + ',' + mBg[3] + ',1)', 'important');
+            var mWp = null;
+            var mLayers = document.querySelectorAll('.ht-wp-layer');
+            for (var mi = 0; mi < mLayers.length; mi++) {
+              var mBi = getComputedStyle(mLayers[mi]).backgroundImage;
+              if (mBi && mBi !== 'none') { mWp = mBi; break; }
+            }
+            var mParent = oldCW.parentNode;
+            mParent.style.position = 'relative';
+            mParent.style.overflow = 'hidden';
+            var mParentRect = mParent.getBoundingClientRect();
+            var mOldRect = oldCW.getBoundingClientRect();
+            htPjaxSpot(mImport, mOldRect, mParentRect, mParent.scrollLeft, mParent.scrollTop, mOldRect.width, oldCW);
+            mImport.style.minHeight = Math.round(mOldRect.height) + 'px';
+            mImport.style.overflow = 'hidden';
+            mImport.style.transform = 'translateX(0)'; /* 维持叠层语境(z:-1 壁纸层依赖) */
+            if (mWp) {
+              var mWpDiv = document.createElement('div');
+              mWpDiv.style.cssText = 'position:absolute;left:' + Math.round(-mOldRect.left) + 'px;top:' + Math.round(-mOldRect.top) + 'px;' +
+                'width:' + Math.round(window.innerWidth) + 'px;height:' + Math.round(window.innerHeight) + 'px;' +
+                'z-index:-1;pointer-events:none;background-repeat:no-repeat;background-size:cover;' +
+                'background-position:center center;background-image:' + mWp + ';opacity:' + Math.min(0.9, Math.max(0, 1 - mDim)).toFixed(3) + ';';
+              mImport.insertBefore(mWpDiv, mImport.firstChild);
+            }
+            /* 新页对应面板藏起来(ghost 顶替), 新标题走 ht-fade 淡入(解冻它) */
+            var mTarget = mImport.querySelector(newSide ? '.doc-side' : '.doc-groups');
+            if (mTarget) mTarget.style.visibility = 'hidden';
+            var mH1 = mImport.querySelector('.content-header h1');
+            if (mH1) mH1.style.animation = '';
+            /* 右侧正文卡: 索引→文章 淡入+右移归位; 文章→索引 由旧卡 ghost 淡出 */
+            var mContent = mImport.querySelector('.col-md-9 > .card');
+            if (newSide && mContent) {
+              mContent.style.opacity = '0';
+              mContent.style.transform = 'translateX(36px)';
+              mContent.style.transition = 'opacity .3s ease .1s, transform .3s ease .1s';
+            }
+            mParent.insertBefore(mImport, oldCW.nextSibling);
+            void mImport.offsetWidth;
+            if (newSide && mContent) { mContent.style.opacity = '1'; mContent.style.transform = 'none'; }
+            /* ghost: 旧面板克隆, fixed 在旧位置, FLIP 到新面板位置(translate+scale,
+               transform-origin 左上)。面板内容两侧几乎一致, 形变读作"目录框挪过去缩小" */
+            var mFrom = oldIdxPanel || oldSide;
+            var mFromRect = mFrom.getBoundingClientRect();
+            var mToRect = mTarget.getBoundingClientRect();
+            var mGhost = mFrom.cloneNode(true);
+            mGhost.style.cssText = 'position:fixed;left:' + mToRect.left + 'px;top:' + mToRect.top + 'px;' +
+              'width:' + mToRect.width + 'px;height:' + mToRect.height + 'px;margin:0;overflow:hidden;' +
+              'z-index:3000;pointer-events:none;transform-origin:top left;' +
+              'transform:translate(' + (mFromRect.left - mToRect.left) + 'px,' + (mFromRect.top - mToRect.top) + 'px) scale(' +
+              (mFromRect.width / mToRect.width) + ',' + (mFromRect.height / mToRect.height) + ');' +
+              'transition:transform .38s cubic-bezier(.4,0,.2,1)';
+            document.body.appendChild(mGhost);
+            void mGhost.offsetWidth;
+            mGhost.style.transform = 'translate(0,0) scale(1,1)';
+            /* 文章→索引: 旧正文卡克隆淡出(新页没有正文卡, 直接消失会跳) */
+            var mOldContent = oldCW.querySelector('.col-md-9 > .card');
+            if (!newSide && mOldContent) {
+              var ocR = mOldContent.getBoundingClientRect();
+              var mOcGhost = mOldContent.cloneNode(true);
+              mOcGhost.style.cssText = 'position:fixed;left:' + ocR.left + 'px;top:' + ocR.top + 'px;width:' +
+                ocR.width + 'px;height:' + ocR.height + 'px;margin:0;overflow:hidden;z-index:2999;' +
+                'pointer-events:none;transition:opacity .24s ease';
+              document.body.appendChild(mOcGhost);
+              void mOcGhost.offsetWidth;
+              mOcGhost.style.opacity = '0';
+              setTimeout(function () { if (mOcGhost.parentNode) mOcGhost.parentNode.removeChild(mOcGhost); }, 300);
+            }
+            var mGen = ++htPjaxGen;
+            setTimeout(function () {
+              if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost);
+              if (mTarget) mTarget.style.visibility = '';
+              mImport.classList.remove('ht-pjax-overlay');
+              if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
+              if (mGen !== htPjaxGen) return;
+              mParent.style.position = '';
+              mParent.style.overflow = '';
+              mImport.style.top = '';
+              mImport.style.left = '';
+              mImport.style.width = '';
+              mImport.style.right = '';
+              mImport.style.minHeight = '';
+              mImport.style.overflow = '';
+              mImport.style.transform = '';
+              if (mWpDiv && mWpDiv.parentNode) mWpDiv.parentNode.removeChild(mWpDiv);
+              mImport.style.setProperty('transition', 'none', 'important');
+              if (mBg && mDim > 0) mImport.style.setProperty('background-color', 'rgba(' + mBg[1] + ',' + mBg[2] + ',' + mBg[3] + ',' + mDim + ')', 'important');
+              htPjaxBusy = false;
+              setTimeout(function () {
+                mImport.style.removeProperty('transition');
+                mImport.style.removeProperty('background-color');
+              }, 60);
+            }, 560);
+            if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
+            if (push) history.pushState({ htPjax: true }, '', u.href);
+            htMarkSidebar(u.pathname);
+            document.body.classList.remove('sidebar-open');
+            document.dispatchEvent(new CustomEvent('ht:pjax:navigated'));
+            window.scrollTo(0, 0);
+            return;
+          }
           var pjaxDir = dir;
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
