@@ -1522,13 +1522,6 @@
             var bi = getComputedStyle(wpLayers[wi]).backgroundImage;
             if (bi && bi !== 'none') { wpSrc = bi; break; }
           }
-          var wpDiv = null;
-          if (wpSrc) {
-            wpDiv = document.createElement('div');
-            wpDiv.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;z-index:-1;pointer-events:none;' +
-              'background-repeat:no-repeat;background-size:cover;background-position:center center;' +
-              'background-image:' + wpSrc + ';opacity:' + Math.min(0.9, Math.max(0, 1 - dimA)).toFixed(3) + ';';
-          }
           /* overlay 按旧内容实际偏移定位: top:0 相对 .wrapper 顶部, 会在动画期
              跑到页面最顶(与顶栏/标题错位), 播完才落回原位; 水平同理——
              有侧栏时 .content-wrapper 带 margin-left, left:0/right:0 会铺到侧栏底下。
@@ -1540,15 +1533,37 @@
              直接由实心底盖住(避免 oldCW 上的 opacity 内联被既有 transition
              的级联优先级拖住不生效) */
           importNode.style.minHeight = Math.round(oldRect.height) + 'px';
-          /* 整幅推入起点: 前进从右侧屏外、后退从左侧屏外(% 是自身宽, 恰好全出屏) */
-          importNode.style.transform = 'translateX(' + (pjaxDir === 'left' ? '100%' : '-100%') + ')';
+          /* 整幅推入: 位移用像素(壁纸层要反向抵消, % 各自参照不同宽度会对不齐)。
+             前进(pjaxDir=left)从右侧屏外推入, 后退从左侧 */
+          var sweep = Math.round(oldRect.width);
+          var sweepSign = pjaxDir === 'left' ? 1 : -1;
+          importNode.style.transform = 'translateX(' + (sweepSign * sweep) + 'px)';
+          /* 壁纸层(视口对齐): 尺寸=视口、在叠层坐标系里偏移到视口原点。
+             关键是反向位移与推入同曲线同步抵消——壁纸在滑动全程与 body 壁纸
+             逐像素对齐, 面板边界两侧壁纸无缝(元素对齐裁切与视口裁切不一致
+             会造成重影/错位/落地闪变)。面板底色不透明, 旧内容被盖住不显形 */
+          var wpDiv = null;
+          if (wpSrc) {
+            wpDiv = document.createElement('div');
+            wpDiv.style.cssText = 'position:absolute;' +
+              'left:' + Math.round(-oldRect.left) + 'px;top:' + Math.round(-oldRect.top) + 'px;' +
+              'width:' + Math.round(window.innerWidth) + 'px;height:' + Math.round(window.innerHeight) + 'px;' +
+              'z-index:-1;pointer-events:none;' +
+              'background-repeat:no-repeat;background-size:cover;background-position:center center;' +
+              'background-image:' + wpSrc + ';opacity:' + Math.min(0.9, Math.max(0, 1 - dimA)).toFixed(3) + ';' +
+              'transition:transform 0.24s ease-out;' +
+              'transform:translateX(' + (-sweepSign * sweep) + 'px)';
+          }
           if (wpDiv) importNode.insertBefore(wpDiv, importNode.firstChild);
+          /* 裁住伸出叠层框外的壁纸层(只露与面板框相交的部分) */
+          importNode.style.overflow = 'hidden';
           parent.insertBefore(importNode, oldCW.nextSibling);
-          /* 强制 reflow 固定起始态(整幅屏外)后落到 translateX(0) 触发 transition——
-             保留 translateX(0) 而非清空: transform 在, 叠层才有 stacking context,
-             z:-1 的壁纸层才能保持在面板底色之上、内容之下 */
+          /* 强制 reflow 固定起始态(整幅屏外)后双双落到 0 触发 transition——
+             同一任务、同一曲线, 反向位移严格抵消; 保留 translateX(0) 维持
+             stacking context(z:-1 壁纸层依赖它) */
           void importNode.offsetWidth;
           importNode.style.transform = 'translateX(0)';
+          if (wpDiv) wpDiv.style.transform = 'translateX(0)';
           var gen = ++htPjaxGen;
           setTimeout(function () {
             importNode.classList.remove('ht-pjax-overlay'); /* 新内容回到正常流 */
@@ -1562,10 +1577,19 @@
             importNode.style.width = '';
             importNode.style.right = '';
             importNode.style.minHeight = '';
+            importNode.style.overflow = '';
             importNode.style.transform = ''; /* 叠层语境结束, 壁纸层一并移除 */
             if (wpDiv && wpDiv.parentNode) wpDiv.parentNode.removeChild(wpDiv);
-            importNode.style.removeProperty('background-color'); /* 触发背景回落过渡 */
+            /* 落地即落定: 面板壁纸(视口对齐)与 body 壁纸逐像素相同, 移除壁纸层
+               前后观感不变——但要从不透明底瞬时切回半透明, 若走 background-color
+               过渡, 过渡期底色偏亮会闪。冻结过渡直接跳到落定值, 下一拍解除冻结 */
+            importNode.style.setProperty('transition', 'none', 'important');
+            if (bgM && dimA > 0) importNode.style.setProperty('background-color', 'rgba(' + bgM[1] + ',' + bgM[2] + ',' + bgM[3] + ',' + dimA + ')', 'important');
             htPjaxBusy = false; /* 动画结束才放行下一次切换 */
+            setTimeout(function () {
+              importNode.style.removeProperty('transition');
+              importNode.style.removeProperty('background-color');
+            }, 60);
           }, 560);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);

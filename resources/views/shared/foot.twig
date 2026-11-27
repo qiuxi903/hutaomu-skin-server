@@ -4,5 +4,5 @@
   <script{% for attribute, value in script %} {{ attribute }}="{{ value }}"{% endfor %}></script>
 {% endfor %}
 {# 暖樱白主题动效: 源码资产直连(取代数据库 custom_js 注入); 改 JS 后 bump v 参数防浏览器缓存 #}
-<script src="{{ asset('theme/hutaomu-theme.js?v=20261126n') }}"></script>
+<script src="{{ asset('theme/hutaomu-theme.js?v=20261126o') }}"></script>
 {{ extra_foot|join('\n')|raw }}
