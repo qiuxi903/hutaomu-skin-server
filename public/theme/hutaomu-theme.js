@@ -1452,23 +1452,31 @@
             var oldH1 = oldCW.querySelector('.content-header h1');
             var newH1 = newCW.querySelector('.content-header h1');
             if (oldH1 && newH1) oldH1.innerHTML = newH1.innerHTML;
-            /* 正文卡滑动(overlay 按旧卡片实际偏移定位) */
+            /* 正文卡: 卡片级推入(同页 wipe 的缩小版)——旧卡原地占位, 新卡带
+               近实心底从侧面整幅滑入盖住。不滑+交叉淡化会让两套正文文字
+               叠在一起(用户录屏点名), 推入则新旧内容永远不相叠 */
             var ap = oldArticle.parentNode;
             ap.style.position = 'relative';
-            ap.style.overflow = 'hidden';
-            oldArticle.classList.add('ht-pjax-exit-' + dir);
+            ap.style.overflow = 'hidden'; /* 裁住列外部分(滑入起点在列缘外) */
             var importArticle = document.importNode(newArticle, true);
             htPjaxFreezeAnim(importArticle);
-            importArticle.classList.add('ht-pjax-enter-' + dir);
             importArticle.classList.add('ht-pjax-overlay');
+            /* 新卡底色提到不透明(颜色从旧卡读——detached 克隆拿不到样式),
+               落地后短过渡回落半透明玻璃 */
+            var cBgM = getComputedStyle(oldArticle).backgroundColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
+            var cDim = cBgM && cBgM[4] !== undefined ? parseFloat(cBgM[4]) : 0.75;
+            if (cBgM && cDim > 0) importArticle.style.setProperty('background-color', 'rgba(' + cBgM[1] + ',' + cBgM[2] + ',' + cBgM[3] + ',0.97)', 'important');
             var apRect = ap.getBoundingClientRect();
             var artRect = oldArticle.getBoundingClientRect();
             /* 水平同样取旧卡几何: .col-md-9 有 15px padding, left:0/right:0
                会让卡片比旧卡宽出两侧 padding, 动画结束横跳 */
             htPjaxSpot(importArticle, artRect, apRect, ap.scrollLeft, ap.scrollTop, artRect.width, oldArticle);
+            /* 滑入距离=列宽: 从列缘外整幅推入, 旧卡不被露出残条 */
+            var cSweep = Math.round(apRect.width);
+            importArticle.style.transform = 'translateX(' + (dir === 'left' ? cSweep : -cSweep) + 'px)';
             ap.insertBefore(importArticle, oldArticle.nextSibling);
             void importArticle.offsetWidth;
-            importArticle.classList.remove('ht-pjax-enter-' + dir);
+            importArticle.style.transform = 'translateX(0)';
             var artGen = ++htPjaxGen;
             setTimeout(function () {
               importArticle.classList.remove('ht-pjax-overlay');
@@ -1480,8 +1488,16 @@
               importArticle.style.left = '';
               importArticle.style.width = '';
               importArticle.style.right = '';
+              /* 底色回落: 卡片没有自带 background-color 过渡, 冻结其余过渡后
+                 补一个短过渡落到原玻璃值, 下一拍解除冻结 */
+              importArticle.style.setProperty('transition', 'background-color .25s ease', 'important');
+              if (cBgM && cDim > 0) importArticle.style.setProperty('background-color', 'rgba(' + cBgM[1] + ',' + cBgM[2] + ',' + cBgM[3] + ',' + cDim + ')', 'important');
               htPjaxBusy = false;
-            }, 420);
+              setTimeout(function () {
+                importArticle.style.removeProperty('transition');
+                importArticle.style.removeProperty('background-color');
+              }, 300);
+            }, 460);
             if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
             if (push) history.pushState({ htPjax: true }, '', u.href);
             htMarkSidebar(u.pathname);
@@ -1550,24 +1566,32 @@
             var mFromRect = mFrom.getBoundingClientRect();
             var mToRect = mTarget.getBoundingClientRect();
             var mGhost = mFrom.cloneNode(true);
-            mGhost.style.cssText = 'position:fixed;left:' + mToRect.left + 'px;top:' + mToRect.top + 'px;' +
+            /* ghost 必须挂进叠层的 #docs-page: 面板样式(#docs-page .doc-groups /
+               .doc-side)是作用域限定的, 挂到 body 会丢样式(链接变默认蓝色、
+               玻璃底消失)。ghost 的 absolute 包含块=叠层, 坐标用叠层相对值 */
+            var mDocsPage = mImport.querySelector('#docs-page') || mImport;
+            var mOvRect = mImport.getBoundingClientRect();
+            var mRel = function (r) { return { x: r.left - mOvRect.left, y: r.top - mOvRect.top }; };
+            var oRel = mRel(mFromRect), tRel = mRel(mToRect);
+            mGhost.style.cssText = 'position:absolute;left:' + tRel.x + 'px;top:' + tRel.y + 'px;' +
               'width:' + mToRect.width + 'px;height:' + mToRect.height + 'px;margin:0;overflow:hidden;' +
               'z-index:3000;pointer-events:none;transform-origin:top left;' +
-              'transform:translate(' + (mFromRect.left - mToRect.left) + 'px,' + (mFromRect.top - mToRect.top) + 'px) scale(' +
+              'transform:translate(' + (oRel.x - tRel.x) + 'px,' + (oRel.y - tRel.y) + 'px) scale(' +
               (mFromRect.width / mToRect.width) + ',' + (mFromRect.height / mToRect.height) + ');' +
               'transition:transform .38s cubic-bezier(.4,0,.2,1)';
-            document.body.appendChild(mGhost);
+            mDocsPage.appendChild(mGhost);
             void mGhost.offsetWidth;
             mGhost.style.transform = 'translate(0,0) scale(1,1)';
             /* 文章→索引: 旧正文卡克隆淡出(新页没有正文卡, 直接消失会跳) */
             var mOldContent = oldCW.querySelector('.col-md-9 > .card');
             if (!newSide && mOldContent) {
               var ocR = mOldContent.getBoundingClientRect();
+              var ocRel = mRel(ocR);
               var mOcGhost = mOldContent.cloneNode(true);
-              mOcGhost.style.cssText = 'position:fixed;left:' + ocR.left + 'px;top:' + ocR.top + 'px;width:' +
-                ocR.width + 'px;height:' + ocR.height + 'px;margin:0;overflow:hidden;z-index:2999;' +
+              mOcGhost.style.cssText = 'position:absolute;left:' + ocRel.x + 'px;top:' + ocRel.y + 'px;width:' +
+                Math.round(ocR.width) + 'px;height:' + Math.round(ocR.height) + 'px;margin:0;overflow:hidden;z-index:2999;' +
                 'pointer-events:none;transition:opacity .24s ease';
-              document.body.appendChild(mOcGhost);
+              mDocsPage.appendChild(mOcGhost);
               void mOcGhost.offsetWidth;
               mOcGhost.style.opacity = '0';
               setTimeout(function () { if (mOcGhost.parentNode) mOcGhost.parentNode.removeChild(mOcGhost); }, 300);
