@@ -1494,18 +1494,23 @@
           var parent = oldCW.parentNode;
           parent.style.position = 'relative';
           parent.style.overflow = 'hidden'; /* 滑出部分裁掉 */
-          /* 页面高度稳定机制: 旧内容保持文档流占位(只做 transform/opacity),
-             不 absolute——否则整页瞬间塌陷; 新内容 absolute 叠在同一位置滑入,
-             动画播完后新内容转回正常流、旧内容移除 */
+          /* 页面高度稳定机制: 旧内容保持文档流原地不动(底版), 新内容以近实心底
+             整幅推入盖住它; 旧内容全程占位, 页面高度不塌陷 */
           var cwBg = getComputedStyle(oldCW).backgroundColor;
           if (cwBg && cwBg !== 'transparent' && cwBg !== 'rgba(0, 0, 0, 0)') {
             parent.style.background = cwBg;
           }
-          oldCW.classList.add('ht-pjax-exit-' + pjaxDir);
           var importNode = document.importNode(newCW, true);
           htPjaxFreezeAnim(importNode);
-          importNode.classList.add('ht-pjax-enter-' + pjaxDir);
           importNode.classList.add('ht-pjax-overlay'); /* absolute 叠层 */
+          /* 动画期间把柔光底提到近实心: 半透明底会让旧页面透过新页显形(双影)。
+             颜色从已挂载的旧元素读(detached 克隆 getComputedStyle 拿不到样式),
+             且必须 inline !important——body.ht-panel .content-wrapper 的
+             background 是 !important 声明, 普通 inline 压不过它。
+             落地后移除, 由 .content-wrapper 自带的 background-color 过渡(0.3s)
+             平滑回落到正常半透明 */
+          var bgM = getComputedStyle(oldCW).backgroundColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
+          if (bgM) importNode.style.setProperty('background-color', 'rgba(' + bgM[1] + ',' + bgM[2] + ',' + bgM[3] + ',0.97)', 'important');
           /* overlay 按旧内容实际偏移定位: top:0 相对 .wrapper 顶部, 会在动画期
              跑到页面最顶(与顶栏/标题错位), 播完才落回原位; 水平同理——
              有侧栏时 .content-wrapper 带 margin-left, left:0/right:0 会铺到侧栏底下。
@@ -1513,16 +1518,17 @@
           var parentRect = parent.getBoundingClientRect();
           var oldRect = oldCW.getBoundingClientRect();
           htPjaxSpot(importNode, oldRect, parentRect, parent.scrollLeft, parent.scrollTop, oldRect.width, oldCW);
+          /* 高度至少盖满旧内容: 新页更矮时, 下方露出的旧页残条不用淡出,
+             直接由近实心底盖住(避免 oldCW 上的 opacity 内联被既有 transition
+             的级联优先级拖住不生效) */
+          importNode.style.minHeight = Math.round(oldRect.height) + 'px';
+          /* 整幅推入起点: 前进从右侧屏外、后退从左侧屏外(% 是自身宽, 恰好全出屏) */
+          importNode.style.transform = 'translateX(' + (pjaxDir === 'left' ? '100%' : '-100%') + ')';
           parent.insertBefore(importNode, oldCW.nextSibling);
-          /* 强制 reflow 固定起始态(translateX 屏外)后延迟改类触发 transition——
-             rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播,
-             新内容会瞬移到位(中间帧空白断档的根因)。
-             整区切换是两套完全不同的版式, 交叉淡化会让新旧两页同时半透明可见,
-             观感像"没删干净的重叠"——改为顺序淡化: 旧内容先退场(160ms),
-             新内容延迟 90ms 再进场(240ms), 旧内容淡出尾声即接上新内容 */
+          /* 强制 reflow 固定起始态(整幅屏外)后清掉内联 transform 触发 transition——
+             rAF 双帧在批量样式下不可靠, 起始态没被 paint 时 transition 不播 */
           void importNode.offsetWidth;
-          var enterCls = 'ht-pjax-enter-' + pjaxDir;
-          setTimeout(function () { importNode.classList.remove(enterCls); }, 90);
+          importNode.style.transform = '';
           var gen = ++htPjaxGen;
           setTimeout(function () {
             importNode.classList.remove('ht-pjax-overlay'); /* 新内容回到正常流 */
@@ -1535,8 +1541,10 @@
             importNode.style.left = '';
             importNode.style.width = '';
             importNode.style.right = '';
+            importNode.style.minHeight = '';
+            importNode.style.removeProperty('background-color'); /* 触发背景回落过渡 */
             htPjaxBusy = false; /* 动画结束才放行下一次切换 */
-          }, 620);
+          }, 560);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
           if (push) history.pushState({ htPjax: true }, '', u.href);
