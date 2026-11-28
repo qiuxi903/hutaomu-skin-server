@@ -1610,27 +1610,18 @@
             mGhost.style.cssText = 'position:absolute;left:' + oRel.x + 'px;top:' + oRel.y + 'px;' +
               'width:' + Math.round(mFromRect.width) + 'px;height:' + Math.round(mFromRect.height) + 'px;margin:0;overflow:hidden;' +
               'z-index:3000;pointer-events:none;' +
-              'transition:left .38s cubic-bezier(.4,0,.2,1) .12s, top .38s cubic-bezier(.4,0,.2,1) .12s, ' +
-              'width .38s cubic-bezier(.4,0,.2,1) .12s, height .38s cubic-bezier(.4,0,.2,1) .12s';
-            /* 内容交叉淡化: 新面板克隆 absolute 铺满 ghost、随形变淡入——
-               ghost 旧内容与新内容差异(目录标题/active 高亮)在形变中溶解,
-               落地时 ghost 与真面板逐像素相同, 揭示零跳变(此前揭示瞬换被
-               用户录屏点名"凭空多东西")。
-               注意: mTarget 此前被设了 visibility:hidden, 克隆会带过去——
-               cssText 全量重写并显式 visible, 否则新内容层全程隐身。
-               时序: 内容交叉淡化(.16s)先在原尺寸完成, 面板位移/收窄延迟
-               .12s 再启动——边缩边混会让两套列表在窄面板里糊成一团(录屏) */
-            var mGhostNew = mTarget.cloneNode(true);
-            mGhostNew.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;margin:0;visibility:visible;' +
-              'transition:opacity .16s ease;opacity:0;';
+              'transition:left .38s cubic-bezier(.4,0,.2,1), top .38s cubic-bezier(.4,0,.2,1), ' +
+              'width .38s cubic-bezier(.4,0,.2,1), height .38s cubic-bezier(.4,0,.2,1)';
+            /* 内容不随形变更换: ghost 全程携带旧内容滑动(几何与内容分离=无文字糊),
+               落地后在最终尺寸上交叉淡化溶解差异(目录标题/active 渐现渐隐)——
+               此前内容淡化与形变同时进行, 反向放大的最剧烈段撞上叠层半透明期,
+               用户读作"瞬间变大"(录屏点名) */
             mDocsPage.appendChild(mGhost);
-            mGhost.appendChild(mGhostNew);
             void mGhost.offsetWidth;
             mGhost.style.left = tRel.x + 'px';
             mGhost.style.top = tRel.y + 'px';
             mGhost.style.width = Math.round(mToRect.width) + 'px';
             mGhost.style.height = Math.round(mToRect.height) + 'px';
-            mGhostNew.style.opacity = '1';
             /* 文章→索引: 旧正文卡克隆淡出(新页没有正文卡, 直接消失会跳) */
             var mOldContent = oldCW.querySelector('.col-md-9 > .card');
             if (!newSide && mOldContent) {
@@ -1647,10 +1638,25 @@
             }
             var mGen = ++htPjaxGen;
             setTimeout(function () {
-              /* 揭示: ghost 内容已交叉淡化成真面板内容(逐像素相同), 直接换
-                 节点零跳变——不再需要任何过渡(此前瞬换被用户录屏点名) */
-              if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost);
-              if (mTarget) mTarget.style.visibility = '';
+              /* 揭示交叉淡化: ghost(旧内容)淡出与真面板淡入同时进行——
+                 内容差异(目录标题/active)在最终尺寸上溶解, 不再凭空消失/出现。
+                 叠层同时转正常流, 高度/底色经 htPjaxSettleHeight 平滑回落 */
+              if (mTarget) {
+                mTarget.style.visibility = 'visible';
+                mTarget.style.opacity = '0';
+                mTarget.style.transition = 'opacity .25s ease';
+                void mTarget.offsetWidth;
+                mTarget.style.opacity = '1';
+                setTimeout(function () {
+                  mTarget.style.removeProperty('transition');
+                  mTarget.style.removeProperty('opacity');
+                }, 300);
+              }
+              if (mGhost.parentNode) {
+                mGhost.style.transition = 'opacity .25s ease';
+                mGhost.style.opacity = '0';
+                setTimeout(function () { if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost); }, 280);
+              }
               mImport.classList.remove('ht-pjax-overlay');
               if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
               if (mGen !== htPjaxGen) return;
@@ -1667,7 +1673,7 @@
               var mBgCss = (mBg && mDim > 0) ? 'rgba(' + mBg[1] + ',' + mBg[2] + ',' + mBg[3] + ',' + mDim + ')' : null;
               htPjaxSettleHeight(mImport, mBgCss);
               htPjaxBusy = false;
-            }, 560);
+            }, 460);
             if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
             if (push) history.pushState({ htPjax: true }, '', u.href);
             htMarkSidebar(u.pathname);
