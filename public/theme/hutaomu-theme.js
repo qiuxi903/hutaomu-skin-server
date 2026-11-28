@@ -1471,6 +1471,10 @@
             /* 水平同样取旧卡几何: .col-md-9 有 15px padding, left:0/right:0
                会让卡片比旧卡宽出两侧 padding, 动画结束横跳 */
             htPjaxSpot(importArticle, artRect, apRect, ap.scrollLeft, ap.scrollTop, artRect.width, oldArticle);
+            /* 高度至少盖满旧卡: 新章内容更短时(如长文→FAQ), 旧卡下半截会在
+               新卡下方露到动画结束才消失(用户录屏点名"两个重叠")——
+               minHeight 撑到旧卡高度, 清理时随旧卡一起移除 */
+            importArticle.style.minHeight = Math.round(artRect.height) + 'px';
             /* 滑入距离=列宽: 从列缘外整幅推入, 旧卡不被露出残条 */
             var cSweep = Math.round(apRect.width);
             importArticle.style.transform = 'translateX(' + (dir === 'left' ? cSweep : -cSweep) + 'px)';
@@ -1488,6 +1492,7 @@
               importArticle.style.left = '';
               importArticle.style.width = '';
               importArticle.style.right = '';
+              importArticle.style.minHeight = ''; /* 高度回落到新章自然高度 */
               /* 底色回落: 卡片没有自带 background-color 过渡, 冻结其余过渡后
                  补一个短过渡落到原玻璃值, 下一拍解除冻结 */
               importArticle.style.setProperty('transition', 'background-color .25s ease', 'important');
