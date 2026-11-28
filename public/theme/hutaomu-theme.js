@@ -1480,38 +1480,37 @@
             var oldH1 = oldCW.querySelector('.content-header h1');
             var newH1 = newCW.querySelector('.content-header h1');
             if (oldH1 && newH1) oldH1.innerHTML = newH1.innerHTML;
-            /* 正文卡: 卡片级推入(同页 wipe 的缩小版)——旧卡原地占位, 新卡带
-               近实心底从侧面整幅滑入盖住。不滑+交叉淡化会让两套正文文字
-               叠在一起(用户录屏点名), 推入则新旧内容永远不相叠 */
+            /* 正文卡: 卡片轮播——旧卡与新卡拼接成一条带子同步滑动(旧卡滑出
+               列外, 新卡携正文从另一侧进入原位), 全程无空白、无叠字。
+               此前的"新卡带实心底从列缘外推入"会露出新卡自身的右侧空白区,
+               读作"一张空白卡滑过来盖字"(用户录屏 18:22 点名) */
             var ap = oldArticle.parentNode;
             ap.style.position = 'relative';
-            ap.style.overflow = 'hidden'; /* 裁住列外部分(滑入起点在列缘外) */
+            ap.style.overflow = 'hidden'; /* 裁住滑出列外的旧卡 */
             var importArticle = document.importNode(newArticle, true);
             htPjaxFreezeAnim(importArticle);
-            importArticle.classList.add('ht-pjax-overlay');
-            /* 新卡底色提到不透明(颜色从旧卡读——detached 克隆拿不到样式),
-               落地后短过渡回落半透明玻璃 */
-            var cBgM = getComputedStyle(oldArticle).backgroundColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?\)/);
-            var cDim = cBgM && cBgM[4] !== undefined ? parseFloat(cBgM[4]) : 0.75;
-            if (cBgM && cDim > 0) importArticle.style.setProperty('background-color', 'rgba(' + cBgM[1] + ',' + cBgM[2] + ',' + cBgM[3] + ',0.97)', 'important');
             var apRect = ap.getBoundingClientRect();
             var artRect = oldArticle.getBoundingClientRect();
             /* 水平同样取旧卡几何: .col-md-9 有 15px padding, left:0/right:0
                会让卡片比旧卡宽出两侧 padding, 动画结束横跳 */
             htPjaxSpot(importArticle, artRect, apRect, ap.scrollLeft, ap.scrollTop, artRect.width, oldArticle);
-            /* 高度至少盖满旧卡: 新章内容更短时(如长文→FAQ), 旧卡下半截会在
-               新卡下方露到动画结束才消失(用户录屏点名"两个重叠")——
-               minHeight 撑到旧卡高度, 清理时随旧卡一起移除 */
+            /* minHeight 撑到旧卡高度: 新章更矮时卡片下方不留空洞,
+               清理后经 htPjaxSettleHeight 平滑回落到新章高度 */
             importArticle.style.minHeight = Math.round(artRect.height) + 'px';
-            /* 滑入距离=列宽: 从列缘外整幅推入, 旧卡不被露出残条 */
-            var cSweep = Math.round(apRect.width);
+            /* 轮播位移=卡片自身宽度: 两卡同曲线互为反向, 始终相邻拼接 */
+            var cSweep = Math.round(artRect.width);
+            var cEase = 'transform .32s cubic-bezier(.4,0,.2,1)';
+            importArticle.style.position = 'absolute';
+            importArticle.style.zIndex = '5';
+            importArticle.style.transition = cEase;
             importArticle.style.transform = 'translateX(' + (dir === 'left' ? cSweep : -cSweep) + 'px)';
+            oldArticle.style.transition = cEase;
             ap.insertBefore(importArticle, oldArticle.nextSibling);
             void importArticle.offsetWidth;
             importArticle.style.transform = 'translateX(0)';
+            oldArticle.style.transform = 'translateX(' + (dir === 'left' ? -cSweep : cSweep) + 'px)';
             var artGen = ++htPjaxGen;
             setTimeout(function () {
-              importArticle.classList.remove('ht-pjax-overlay');
               if (oldArticle.parentNode) oldArticle.parentNode.removeChild(oldArticle);
               if (artGen !== htPjaxGen) return;
               ap.style.position = '';
@@ -1520,9 +1519,10 @@
               importArticle.style.left = '';
               importArticle.style.width = '';
               importArticle.style.right = '';
-              /* 高度回落(旧卡高→新章高) + 底色回落(实心底→玻璃), 平滑无瞬跳 */
-              var cBgCss = (cBgM && cDim > 0) ? 'rgba(' + cBgM[1] + ',' + cBgM[2] + ',' + cBgM[3] + ',' + cDim + ')' : null;
-              htPjaxSettleHeight(importArticle, cBgCss);
+              importArticle.style.zIndex = '';
+              /* 高度回落(旧卡高→新章高), 平滑无瞬跳——minHeight 交给
+                 htPjaxSettleHeight 处理(它先测当前高再动画回落) */
+              htPjaxSettleHeight(importArticle, null);
               htPjaxBusy = false;
             }, 460);
             if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
