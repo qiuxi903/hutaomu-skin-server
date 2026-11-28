@@ -1585,12 +1585,23 @@
               'z-index:3000;pointer-events:none;' +
               'transition:left .38s cubic-bezier(.4,0,.2,1), top .38s cubic-bezier(.4,0,.2,1), ' +
               'width .38s cubic-bezier(.4,0,.2,1), height .38s cubic-bezier(.4,0,.2,1)';
+            /* 内容交叉淡化: 新面板克隆 absolute 铺满 ghost、随形变淡入——
+               ghost 旧内容与新内容差异(目录标题/active 高亮)在形变中溶解,
+               落地时 ghost 与真面板逐像素相同, 揭示零跳变(此前揭示瞬换被
+               用户录屏点名"凭空多东西")。
+               注意: mTarget 此前被设了 visibility:hidden, 克隆会带过去——
+               cssText 全量重写并显式 visible, 否则新内容层全程隐身 */
+            var mGhostNew = mTarget.cloneNode(true);
+            mGhostNew.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;margin:0;visibility:visible;' +
+              'transition:opacity .38s cubic-bezier(.4,0,.2,1);opacity:0;';
             mDocsPage.appendChild(mGhost);
+            mGhost.appendChild(mGhostNew);
             void mGhost.offsetWidth;
             mGhost.style.left = tRel.x + 'px';
             mGhost.style.top = tRel.y + 'px';
             mGhost.style.width = Math.round(mToRect.width) + 'px';
             mGhost.style.height = Math.round(mToRect.height) + 'px';
+            mGhostNew.style.opacity = '1';
             /* 文章→索引: 旧正文卡克隆淡出(新页没有正文卡, 直接消失会跳) */
             var mOldContent = oldCW.querySelector('.col-md-9 > .card');
             if (!newSide && mOldContent) {
@@ -1607,25 +1618,10 @@
             }
             var mGen = ++htPjaxGen;
             setTimeout(function () {
-              /* 揭示改交叉淡化: 真面板淡入、ghost 淡出后移除——两者内容有差异
-                 (目录标题/active 高亮), 瞬时切换会"凭空多东西"(用户录屏点名)。
-                 busy 在交叉淡化结束后才放行 */
-              if (mTarget) {
-                mTarget.style.visibility = 'visible';
-                mTarget.style.transition = 'opacity .2s ease';
-                mTarget.style.opacity = '0';
-                void mTarget.offsetWidth;
-                mTarget.style.opacity = '1';
-                setTimeout(function () {
-                  mTarget.style.removeProperty('transition');
-                  mTarget.style.removeProperty('opacity');
-                }, 240);
-              }
-              if (mGhost.parentNode) {
-                mGhost.style.transition = 'opacity .2s ease';
-                mGhost.style.opacity = '0';
-                setTimeout(function () { if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost); }, 230);
-              }
+              /* 揭示: ghost 内容已交叉淡化成真面板内容(逐像素相同), 直接换
+                 节点零跳变——不再需要任何过渡(此前瞬换被用户录屏点名) */
+              if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost);
+              if (mTarget) mTarget.style.visibility = '';
               mImport.classList.remove('ht-pjax-overlay');
               if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
               if (mGen !== htPjaxGen) return;
