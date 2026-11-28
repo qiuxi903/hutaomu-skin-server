@@ -1279,6 +1279,34 @@
       el.style.right = 'auto';
     }
 
+    /* 高度平滑回落: 元素当前高度(minHeight 撑着的旧高) → 自然高度, .3s。
+       推入类动画落地时直接清 minHeight 会让页面高度瞬跳(页脚/下方内容瞬移,
+       用户录屏点名"瞬间刷新")。bgCss 传入时同时把底色瞬时切到该值
+       (transition 列表只含 height, 底色切换不经过过渡=无闪)。
+       返回动画时长; 高度无变化时为 0 */
+    function htPjaxSettleHeight(el, bgCss) {
+      var h1 = el.offsetHeight;
+      el.style.minHeight = '';
+      el.style.height = 'auto';
+      var h0 = el.offsetHeight;
+      if (Math.abs(h0 - h1) < 2) {
+        if (bgCss) el.style.setProperty('background-color', bgCss, 'important');
+        el.style.height = '';
+        return 0;
+      }
+      el.style.height = h1 + 'px';
+      void el.offsetWidth;
+      el.style.transition = 'height .3s ease, background-color .28s ease';
+      if (bgCss) el.style.setProperty('background-color', bgCss, 'important');
+      el.style.height = h0 + 'px';
+      setTimeout(function () {
+        el.style.removeProperty('transition');
+        el.style.removeProperty('background-color');
+        el.style.height = '';
+      }, 330);
+      return 300;
+    }
+
     /* 滑动方向判定: 被点项与当前 active 项在同组(筛选 chips/侧栏菜单/文档目录/
        分页/标签页)里的位置关系——被点项在当前项之后 → 向前(旧左滑出新右滑入);
        之前 → 向后(反向)。无同组 active 项时默认向前 */
@@ -1492,16 +1520,10 @@
               importArticle.style.left = '';
               importArticle.style.width = '';
               importArticle.style.right = '';
-              importArticle.style.minHeight = ''; /* 高度回落到新章自然高度 */
-              /* 底色回落: 卡片没有自带 background-color 过渡, 冻结其余过渡后
-                 补一个短过渡落到原玻璃值, 下一拍解除冻结 */
-              importArticle.style.setProperty('transition', 'background-color .25s ease', 'important');
-              if (cBgM && cDim > 0) importArticle.style.setProperty('background-color', 'rgba(' + cBgM[1] + ',' + cBgM[2] + ',' + cBgM[3] + ',' + cDim + ')', 'important');
+              /* 高度回落(旧卡高→新章高) + 底色回落(实心底→玻璃), 平滑无瞬跳 */
+              var cBgCss = (cBgM && cDim > 0) ? 'rgba(' + cBgM[1] + ',' + cBgM[2] + ',' + cBgM[3] + ',' + cDim + ')' : null;
+              htPjaxSettleHeight(importArticle, cBgCss);
               htPjaxBusy = false;
-              setTimeout(function () {
-                importArticle.style.removeProperty('transition');
-                importArticle.style.removeProperty('background-color');
-              }, 300);
             }, 460);
             if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
             if (push) history.pushState({ htPjax: true }, '', u.href);
@@ -1638,17 +1660,13 @@
               mImport.style.left = '';
               mImport.style.width = '';
               mImport.style.right = '';
-              mImport.style.minHeight = '';
               mImport.style.overflow = '';
               mImport.style.transform = '';
               if (mWpDiv && mWpDiv.parentNode) mWpDiv.parentNode.removeChild(mWpDiv);
-              mImport.style.setProperty('transition', 'none', 'important');
-              if (mBg && mDim > 0) mImport.style.setProperty('background-color', 'rgba(' + mBg[1] + ',' + mBg[2] + ',' + mBg[3] + ',' + mDim + ')', 'important');
+              /* 高度平滑回落(旧页高→新页高) + 底色回落(柔光淡入), 不再瞬跳 */
+              var mBgCss = (mBg && mDim > 0) ? 'rgba(' + mBg[1] + ',' + mBg[2] + ',' + mBg[3] + ',' + mDim + ')' : null;
+              htPjaxSettleHeight(mImport, mBgCss);
               htPjaxBusy = false;
-              setTimeout(function () {
-                mImport.style.removeProperty('transition');
-                mImport.style.removeProperty('background-color');
-              }, 60);
             }, 560);
             if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
             if (push) history.pushState({ htPjax: true }, '', u.href);
@@ -1741,20 +1759,15 @@
             importNode.style.left = '';
             importNode.style.width = '';
             importNode.style.right = '';
-            importNode.style.minHeight = '';
             importNode.style.overflow = '';
             importNode.style.transform = ''; /* 叠层语境结束, 壁纸层一并移除 */
             if (wpDiv && wpDiv.parentNode) wpDiv.parentNode.removeChild(wpDiv);
-            /* 落地即落定: 面板壁纸(视口对齐)与 body 壁纸逐像素相同, 移除壁纸层
-               前后观感不变——但要从不透明底瞬时切回半透明, 若走 background-color
-               过渡, 过渡期底色偏亮会闪。冻结过渡直接跳到落定值, 下一拍解除冻结 */
-            importNode.style.setProperty('transition', 'none', 'important');
-            if (bgM && dimA > 0) importNode.style.setProperty('background-color', 'rgba(' + bgM[1] + ',' + bgM[2] + ',' + bgM[3] + ',' + dimA + ')', 'important');
+            /* 高度平滑回落(旧页高→新页高) + 底色回落(柔光淡入), 不再瞬跳——
+               直接清 minHeight 会让页脚/下方内容瞬移(用户录屏点名"瞬间刷新")。
+               壁纸层(视口对齐)与 body 壁纸逐像素相同, 移除前后观感不变 */
+            var bgCss = (bgM && dimA > 0) ? 'rgba(' + bgM[1] + ',' + bgM[2] + ',' + bgM[3] + ',' + dimA + ')' : null;
+            htPjaxSettleHeight(importNode, bgCss);
             htPjaxBusy = false; /* 动画结束才放行下一次切换 */
-            setTimeout(function () {
-              importNode.style.removeProperty('transition');
-              importNode.style.removeProperty('background-color');
-            }, 60);
           }, 560);
           if (window.blessing) { blessing.route = u.pathname.replace(/^\//, ''); }
           window.scrollTo(0, 0);
