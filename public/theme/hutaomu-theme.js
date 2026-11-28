@@ -1583,17 +1583,19 @@
             mGhost.style.cssText = 'position:absolute;left:' + oRel.x + 'px;top:' + oRel.y + 'px;' +
               'width:' + Math.round(mFromRect.width) + 'px;height:' + Math.round(mFromRect.height) + 'px;margin:0;overflow:hidden;' +
               'z-index:3000;pointer-events:none;' +
-              'transition:left .38s cubic-bezier(.4,0,.2,1), top .38s cubic-bezier(.4,0,.2,1), ' +
-              'width .38s cubic-bezier(.4,0,.2,1), height .38s cubic-bezier(.4,0,.2,1)';
+              'transition:left .38s cubic-bezier(.4,0,.2,1) .12s, top .38s cubic-bezier(.4,0,.2,1) .12s, ' +
+              'width .38s cubic-bezier(.4,0,.2,1) .12s, height .38s cubic-bezier(.4,0,.2,1) .12s';
             /* 内容交叉淡化: 新面板克隆 absolute 铺满 ghost、随形变淡入——
                ghost 旧内容与新内容差异(目录标题/active 高亮)在形变中溶解,
                落地时 ghost 与真面板逐像素相同, 揭示零跳变(此前揭示瞬换被
                用户录屏点名"凭空多东西")。
                注意: mTarget 此前被设了 visibility:hidden, 克隆会带过去——
-               cssText 全量重写并显式 visible, 否则新内容层全程隐身 */
+               cssText 全量重写并显式 visible, 否则新内容层全程隐身。
+               时序: 内容交叉淡化(.16s)先在原尺寸完成, 面板位移/收窄延迟
+               .12s 再启动——边缩边混会让两套列表在窄面板里糊成一团(录屏) */
             var mGhostNew = mTarget.cloneNode(true);
             mGhostNew.style.cssText = 'position:absolute;left:0;top:0;right:0;bottom:0;margin:0;visibility:visible;' +
-              'transition:opacity .38s cubic-bezier(.4,0,.2,1);opacity:0;';
+              'transition:opacity .16s ease;opacity:0;';
             mDocsPage.appendChild(mGhost);
             mGhost.appendChild(mGhostNew);
             void mGhost.offsetWidth;
