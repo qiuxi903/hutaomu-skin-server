@@ -1557,8 +1557,13 @@
               mContent.style.transform = 'translateX(36px)';
               mContent.style.transition = 'opacity .3s ease .1s, transform .3s ease .1s';
             }
+            /* 叠层自身淡入: 直接一帧盖上去是硬切(用户录屏"瞬时割裂")。
+               壁纸层视口对齐=淡入前后壁纸逐像素相同, ghost 又恰好垫住旧面板——
+               淡入过程无任何内容跳变 */
+            mImport.style.opacity = '0';
             mParent.insertBefore(mImport, oldCW.nextSibling);
             void mImport.offsetWidth;
+            mImport.style.opacity = '1';
             if (newSide && mContent) { mContent.style.opacity = '1'; mContent.style.transform = 'none'; }
             /* ghost: 旧面板克隆, fixed 在旧位置, FLIP 到新面板位置(translate+scale,
                transform-origin 左上)。面板内容两侧几乎一致, 形变读作"目录框挪过去缩小" */
@@ -1602,8 +1607,25 @@
             }
             var mGen = ++htPjaxGen;
             setTimeout(function () {
-              if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost);
-              if (mTarget) mTarget.style.visibility = '';
+              /* 揭示改交叉淡化: 真面板淡入、ghost 淡出后移除——两者内容有差异
+                 (目录标题/active 高亮), 瞬时切换会"凭空多东西"(用户录屏点名)。
+                 busy 在交叉淡化结束后才放行 */
+              if (mTarget) {
+                mTarget.style.visibility = 'visible';
+                mTarget.style.transition = 'opacity .2s ease';
+                mTarget.style.opacity = '0';
+                void mTarget.offsetWidth;
+                mTarget.style.opacity = '1';
+                setTimeout(function () {
+                  mTarget.style.removeProperty('transition');
+                  mTarget.style.removeProperty('opacity');
+                }, 240);
+              }
+              if (mGhost.parentNode) {
+                mGhost.style.transition = 'opacity .2s ease';
+                mGhost.style.opacity = '0';
+                setTimeout(function () { if (mGhost.parentNode) mGhost.parentNode.removeChild(mGhost); }, 230);
+              }
               mImport.classList.remove('ht-pjax-overlay');
               if (oldCW.parentNode) oldCW.parentNode.removeChild(oldCW);
               if (mGen !== htPjaxGen) return;
