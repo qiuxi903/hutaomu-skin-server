@@ -1568,20 +1568,24 @@
             var mGhost = mFrom.cloneNode(true);
             /* ghost 必须挂进叠层的 #docs-page: 面板样式(#docs-page .doc-groups /
                .doc-side)是作用域限定的, 挂到 body 会丢样式(链接变默认蓝色、
-               玻璃底消失)。ghost 的 absolute 包含块=叠层, 坐标用叠层相对值 */
+               玻璃底消失)。ghost 的 absolute 包含块=叠层, 坐标用叠层相对值。
+               形变直接过渡 left/top/width/height——不能用 scale FLIP: 盒子按
+               目标窄宽排版再放大数倍, 文字会变巨字并乱折行(#34 录屏) */
             var mDocsPage = mImport.querySelector('#docs-page') || mImport;
             var mOvRect = mImport.getBoundingClientRect();
             var mRel = function (r) { return { x: r.left - mOvRect.left, y: r.top - mOvRect.top }; };
             var oRel = mRel(mFromRect), tRel = mRel(mToRect);
-            mGhost.style.cssText = 'position:absolute;left:' + tRel.x + 'px;top:' + tRel.y + 'px;' +
-              'width:' + mToRect.width + 'px;height:' + mToRect.height + 'px;margin:0;overflow:hidden;' +
-              'z-index:3000;pointer-events:none;transform-origin:top left;' +
-              'transform:translate(' + (oRel.x - tRel.x) + 'px,' + (oRel.y - tRel.y) + 'px) scale(' +
-              (mFromRect.width / mToRect.width) + ',' + (mFromRect.height / mToRect.height) + ');' +
-              'transition:transform .38s cubic-bezier(.4,0,.2,1)';
+            mGhost.style.cssText = 'position:absolute;left:' + oRel.x + 'px;top:' + oRel.y + 'px;' +
+              'width:' + Math.round(mFromRect.width) + 'px;height:' + Math.round(mFromRect.height) + 'px;margin:0;overflow:hidden;' +
+              'z-index:3000;pointer-events:none;' +
+              'transition:left .38s cubic-bezier(.4,0,.2,1), top .38s cubic-bezier(.4,0,.2,1), ' +
+              'width .38s cubic-bezier(.4,0,.2,1), height .38s cubic-bezier(.4,0,.2,1)';
             mDocsPage.appendChild(mGhost);
             void mGhost.offsetWidth;
-            mGhost.style.transform = 'translate(0,0) scale(1,1)';
+            mGhost.style.left = tRel.x + 'px';
+            mGhost.style.top = tRel.y + 'px';
+            mGhost.style.width = Math.round(mToRect.width) + 'px';
+            mGhost.style.height = Math.round(mToRect.height) + 'px';
             /* 文章→索引: 旧正文卡克隆淡出(新页没有正文卡, 直接消失会跳) */
             var mOldContent = oldCW.querySelector('.col-md-9 > .card');
             if (!newSide && mOldContent) {
